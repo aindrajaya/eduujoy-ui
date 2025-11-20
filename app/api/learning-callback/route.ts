@@ -10,39 +10,99 @@ import { NextRequest, NextResponse } from 'next/server';
 // In-memory storage for learning data (replace with database in production)
 const learningDataCache: Map<string, { data: any; timestamp: number }> = new Map();
 
-// Cache expiration time (10 minutes)
-const CACHE_EXPIRATION = 10 * 60 * 1000;
+// Cache expiration time (30 minutes)
+const CACHE_EXPIRATION = 30 * 60 * 1000;
+
+/**
+ * Transform n8n response format to app format
+ */
+function transformN8nData(n8nData: any) {
+  const data = Array.isArray(n8nData) ? n8nData[0] : n8nData;
+  
+  if (!data || !data.learningData) {
+    throw new Error('Invalid data structure from n8n');
+  }
+
+  const learningData = data.learningData;
+
+  // Transform learning_path to match app format
+  const learning_path = (learningData.learning_path || []).map((module: any, index: number) => ({
+    module_number: index + 1,
+    module_title: module.title || '',
+    duration: module.duration || '',
+    objective: module.objective || '',
+    resources: (module.resources || []).map((resource: any) => ({
+      type: resource.type || '',
+      name: resource.title || resource.name || '',
+      link: resource.link || '#',
+      duration_estimate: resource.duration || resource.duration_estimate || '',
+      rationale: resource.description || ''
+    }))
+  }));
+
+  // Transform action_plan
+  const action_plan = {
+    quick_start: learningData.action_plan?.steps?.[0]?.description || 'Begin with Module 1 this week.',
+    daily_routine: learningData.action_plan?.steps?.[1]?.description || 'Dedicate time each day to learning.',
+    progress_tracking: learningData.action_plan?.steps?.[2]?.description || 'Keep track of your progress.'
+  };
+
+  // Transform pro_tips
+  const pro_tips = (learningData.pro_tips || []).map((tip: any) => {
+    if (typeof tip === 'string') {
+      return tip;
+    }
+    return `<strong>${tip.title}:</strong> ${tip.description}`;
+  });
+
+  return {
+    email: data.email,
+    profile_summary: learningData.profile_summary,
+    learning_path,
+    action_plan,
+    pro_tips,
+    expected_timeline: learningData.expected_timeline
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
     // Parse the learning data from n8n
-    const learningData = await request.json();
+    const n8nData = await request.json();
+
+    console.log('📥 Webhook received from n8n');
+
+    // Transform and validate the data
+    const learningData = transformN8nData(n8nData);
 
     // Validate that we have required fields
-    if (!learningData || !learningData.learning_path) {
+    if (!learningData || !learningData.learning_path || learningData.learning_path.length === 0) {
+      console.error('❌ Invalid learning data structure');
       return NextResponse.json(
         { error: 'Invalid learning data structure' },
         { status: 400 }
       );
     }
 
-    // Generate a unique ID for this learning plan (use email as key if available)
+    // Use email as key if available, otherwise generate ID
     const dataId = learningData.email || `learning-${Date.now()}`;
 
-    // Store the data with timestamp
+    // Store the transformed data with timestamp
     learningDataCache.set(dataId, {
       data: learningData,
       timestamp: Date.now(),
     });
 
-    console.log(`✅ Received learning data for: ${dataId}`);
+    console.log(`✅ Learning data stored for: ${dataId}`);
+    console.log(`📊 Modules received: ${learningData.learning_path.length}`);
 
     return NextResponse.json(
       { 
         success: true, 
         message: 'Learning plan received successfully',
         dataId: dataId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        modulesCount: learningData.learning_path.length
       },
       { status: 200 }
     );
@@ -57,7 +117,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET: Retrieve stored learning data
- * Frontend can poll this endpoint to get the generated learning plan
+ * Frontend can call this endpoint to get the generated learning plan
  */
 export async function GET(request: NextRequest) {
   try {
@@ -90,7 +150,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Return the learning data
+    console.log(`✅ Retrieved learning data for: ${dataId}`);
     return NextResponse.json(cached.data, { status: 200 });
   } catch (error) {
     console.error('❌ GET error:', error);
@@ -116,6 +176,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     learningDataCache.delete(dataId);
+    console.log(`🗑️  Learning data cleared for: ${dataId}`);
 
     return NextResponse.json(
       { success: true, message: 'Learning data cleared' },

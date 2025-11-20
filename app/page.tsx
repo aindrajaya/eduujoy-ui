@@ -104,7 +104,7 @@ export default function Page() {
   /**
    * Poll for learning data from callback webhook
    */
-  const pollForLearningData = async (id: string, maxAttempts: number = 60) => {
+  const pollForLearningData = async (id: string, maxAttempts: number = 120) => {
     let attempts = 0;
 
     const poll = async (): Promise<boolean> => {
@@ -115,9 +115,9 @@ export default function Page() {
 
         if (response.ok) {
           const data = await response.json();
-          if (data && data.learning_path) {
+          if (data && data.learning_path && data.learning_path.length > 0) {
             setLearningData(data);
-            console.log('✅ Learning data received from n8n callback');
+            console.log(`✅ Learning data received! Modules: ${data.learning_path.length}`);
             return true;
           }
         } else if (response.status === 404) {
@@ -132,7 +132,7 @@ export default function Page() {
 
       // If we haven't reached max attempts, wait and try again
       if (attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before next poll
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before next poll
         return poll();
       }
 
@@ -165,7 +165,8 @@ export default function Page() {
       const dataReceived = await pollForLearningData(id);
 
       if (dataReceived) {
-        // Data received from n8n callback
+        // Data received from n8n callback - go directly to dashboard
+        console.log('🎉 Going to dashboard with received data!');
         setScreen('dashboard');
       } else {
         // Timeout - use default data
