@@ -142,7 +142,8 @@ async function searchYouTube(query, maxResults = 10, filters = {}) {
           likeCount: stats.likeCount || 0,
           duration: stats.duration,
           durationMinutes: durationMinutes,
-          engagementRate: parseFloat(engagementRate.toFixed(2))
+          engagementRate: parseFloat(engagementRate.toFixed(2)),
+          url: `https://www.youtube.com/watch?v=${item.id.videoId}`
         };
       })
       .filter(video => {
