@@ -44,6 +44,15 @@ export default function VideoPlayerWithSummary({ videoId, title }) {
   const playerRef = useRef(null);
   const [isUserInitialized, setIsUserInitialized] = useState(false);
 
+  // Safety check for invalid video ID
+  if (!videoId) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-800 text-sm">Invalid YouTube video link</p>
+      </div>
+    );
+  }
+
   const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
   const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
 
