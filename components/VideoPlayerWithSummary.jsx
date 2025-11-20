@@ -28,7 +28,7 @@ export default function VideoPlayerWithSummary({ videoId, title }) {
   const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
   /**
-   * Fetch transcript and generate summary
+   * Fetch transcript/metadata and generate summary
    */
   const handleGenerateSummary = async () => {
     setError(null);
@@ -36,28 +36,42 @@ export default function VideoPlayerWithSummary({ videoId, title }) {
     setTranscriptLoading(true);
 
     try {
-      // Step 1: Fetch transcript
+      // Step 1: Fetch transcript or metadata
       const transcriptRes = await axios.get('/api/transcript', {
         params: { videoId },
       });
 
-      if (!transcriptRes.data.transcript) {
-        setError(transcriptRes.data.error || 'No transcript available');
+      setTranscriptLoading(false);
+
+      // Check if we have transcript or metadata
+      const hasTranscript = transcriptRes.data.available && transcriptRes.data.transcript;
+      const hasMetadata = transcriptRes.data.metadata;
+
+      if (!hasTranscript && !hasMetadata) {
+        setError(transcriptRes.data.error || 'No transcript or video information available');
         setLoading(false);
-        setTranscriptLoading(false);
         return;
       }
 
-      setTranscript(transcriptRes.data.transcript);
-      setTranscriptLoading(false);
+      // Store transcript if available
+      if (hasTranscript) {
+        setTranscript(transcriptRes.data.transcript);
+      }
 
       // Step 2: Generate summary with Gemini
-      const summaryRes = await axios.post('/api/summarize', {
+      const summaryPayload = {
         videoId,
-        transcript: transcriptRes.data.transcript,
         title,
         videoUrl,
-      });
+      };
+
+      if (hasTranscript) {
+        summaryPayload.transcript = transcriptRes.data.transcript;
+      } else if (hasMetadata) {
+        summaryPayload.metadata = transcriptRes.data.metadata;
+      }
+
+      const summaryRes = await axios.post('/api/summarize', summaryPayload);
 
       setSummary(summaryRes.data);
       setIsTruncated(summaryRes.data.isTruncated || false);
@@ -200,9 +214,12 @@ export default function VideoPlayerWithSummary({ videoId, title }) {
 
           {/* Footer */}
           <div className="border-t border-gray-200 px-4 py-3 bg-gray-50 flex items-center justify-between">
-            <span className="text-xs text-gray-600">
-              {summary.cached && '📦 Cached result'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600">
+                {summary.cached && '📦 Cached result'}
+                {summary.contentType === 'metadata' && '🤖 AI-generated from video info'}
+              </span>
+            </div>
             <button
               onClick={() => {
                 setSummary(null);

@@ -65,19 +65,39 @@ function truncateTranscript(transcript, maxChars = MAX_TRANSCRIPT_CHARS) {
 /**
  * Build system and user prompts for Gemini
  */
-function buildPrompt(title, transcript, videoUrl) {
-  const systemPrompt = `You are an expert learning assistant. Analyze the provided video transcript and return a JSON object with these exact keys:
+function buildPrompt(title, content, videoUrl, contentType = 'transcript') {
+  let systemPrompt = '';
+  let userPrompt = '';
+
+  if (contentType === 'transcript') {
+    systemPrompt = `You are an expert learning assistant. Analyze the provided video transcript and return a JSON object with these exact keys:
 - summary: A 3-4 sentence summary of the main concepts
 - takeaways: An array of 5 key takeaways (bullet points)
 - actions: An array of 2-3 suggested action items for the learner
 
 Respond with ONLY a valid JSON object, no additional text or markdown.`;
 
-  const userPrompt = `Video Title: "${title}"
+    userPrompt = `Video Title: "${title}"
 URL: ${videoUrl}
 
 Transcript:
-${transcript}`;
+${content}`;
+  } else if (contentType === 'metadata') {
+    systemPrompt = `You are an expert learning assistant. Based on the video title and description provided, create an educational summary as if you were analyzing the actual video content. Return a JSON object with these exact keys:
+- summary: A 3-4 sentence summary of what this video likely covers based on the title and description
+- takeaways: An array of 5 key takeaways you would expect from this type of educational content
+- actions: An array of 2-3 suggested action items for the learner
+
+Since you don't have the actual transcript, use your knowledge of educational content and the title/description to provide valuable learning insights. Respond with ONLY a valid JSON object, no additional text or markdown.`;
+
+    userPrompt = `Video Title: "${title}"
+URL: ${videoUrl}
+
+Video Information:
+${content}
+
+Note: This video doesn't have available captions/transcript. Please provide an educational summary based on the title and description above.`;
+  }
 
   return { systemPrompt, userPrompt };
 }
@@ -250,19 +270,25 @@ export default async function handler(req, res) {
     });
   }
 
-  const { videoId, transcript, title, videoUrl } = req.body;
+  const { videoId, transcript, title, videoUrl, metadata } = req.body;
 
-  // Validate input
-  if (!transcript || typeof transcript !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid transcript' });
-  }
-
+  // Validate input - transcript is optional if metadata is provided
   if (!title || typeof title !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid title' });
   }
 
   if (!videoUrl || typeof videoUrl !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid videoUrl' });
+  }
+
+  // Check if we have either transcript or metadata
+  const hasTranscript = transcript && typeof transcript === 'string' && transcript.trim().length > 0;
+  const hasMetadata = metadata && typeof metadata === 'object';
+
+  if (!hasTranscript && !hasMetadata) {
+    return res.status(400).json({
+      error: 'Either transcript or metadata must be provided for summarization'
+    });
   }
 
   try {
@@ -275,11 +301,25 @@ export default async function handler(req, res) {
       }
     }
 
-    // Truncate transcript
-    const { transcript: truncatedTranscript, isTruncated } = truncateTranscript(transcript);
+    // Process content based on availability
+    let content = '';
+    let contentType = '';
+    let isTruncated = false;
 
-    // Build prompts
-    const { systemPrompt, userPrompt } = buildPrompt(title, truncatedTranscript, videoUrl);
+    if (hasTranscript) {
+      // Use transcript
+      const truncateResult = truncateTranscript(transcript);
+      content = truncateResult.transcript;
+      isTruncated = truncateResult.isTruncated;
+      contentType = 'transcript';
+    } else if (hasMetadata) {
+      // Use metadata for AI-powered summarization
+      content = `Title: ${metadata.title}\nDescription: ${metadata.description}\nVideo URL: ${metadata.url}`;
+      contentType = 'metadata';
+    }
+
+    // Build prompts based on content type
+    const { systemPrompt, userPrompt } = buildPrompt(title, content, videoUrl, contentType);
 
     // Call Gemini API
     const apiResponse = await callGeminiAPI(systemPrompt, userPrompt);
@@ -299,6 +339,7 @@ export default async function handler(req, res) {
       takeaways: parseResult.data.takeaways,
       actions: parseResult.data.actions,
       isTruncated,
+      contentType,
       rawModelOutput: process.env.NODE_ENV === 'development' ? parseResult.rawText : undefined,
     };
 
