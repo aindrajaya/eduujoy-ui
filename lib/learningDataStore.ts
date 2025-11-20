@@ -62,6 +62,7 @@ export async function storeLearningData(dataId: string, data: any, userId?: stri
     const result = await prisma.learningData.upsert({
       where: { email: dataId },
       update: {
+        userId: userId,
         profileSummary: serializedData.profile_summary,
         learningPath: serializedData.learning_path,
         actionPlan: serializedData.action_plan,
@@ -85,6 +86,8 @@ export async function storeLearningData(dataId: string, data: any, userId?: stri
     console.log(`✅ Learning data stored in Neon DB for: ${dataId}`);
     console.log(`📊 Modules: ${serializedData.learning_path?.length || 0}`);
     console.log(`🆔 Record ID: ${result.id}`);
+    console.log(`📧 Email saved: ${result.email}`);
+    console.log(`👤 UserId saved: ${result.userId}`);
   } catch (error) {
     console.error('❌ Failed to store data in Neon DB:', error);
     console.error('❌ Error details:', error instanceof Error ? error.message : error);
