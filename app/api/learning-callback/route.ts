@@ -2,16 +2,11 @@
  * Webhook Callback: Receive Generated Learning Plan from n8n
  * 
  * n8n will POST the generated learning data to this endpoint
- * This endpoint stores the data temporarily and makes it available to the frontend
+ * This endpoint stores the data persistently and makes it available to the frontend
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
-// In-memory storage for learning data (replace with database in production)
-const learningDataCache: Map<string, { data: any; timestamp: number }> = new Map();
-
-// Cache expiration time (30 minutes)
-const CACHE_EXPIRATION = 30 * 60 * 1000;
+import { storeDataWithFallback, getDataWithFallback, deleteDataWithFallback } from '@/lib/learningDataStore';
 
 /**
  * Transform n8n response format to app format
@@ -97,15 +92,11 @@ export async function POST(request: NextRequest) {
     // Use email as key if available, otherwise generate ID
     const dataId = learningData.email || `learning-${Date.now()}`;
 
-    // Store the transformed data with timestamp
-    learningDataCache.set(dataId, {
-      data: learningData,
-      timestamp: Date.now(),
-    });
+    // Store the transformed data (with disk + memory fallback)
+    await storeDataWithFallback(dataId, learningData);
 
     console.log(`✅ Learning data stored for: ${dataId}`);
     console.log(`📊 Modules received: ${learningData.learning_path.length}`);
-    console.log(`💾 Cache size: ${learningDataCache.size} items`);
 
     return NextResponse.json(
       { 
@@ -113,8 +104,7 @@ export async function POST(request: NextRequest) {
         message: 'Learning plan received successfully',
         dataId: dataId,
         timestamp: new Date().toISOString(),
-        modulesCount: learningData.learning_path.length,
-        cacheSize: learningDataCache.size
+        modulesCount: learningData.learning_path.length
       },
       { status: 200 }
     );
@@ -151,26 +141,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if data exists and is not expired
-    const cached = learningDataCache.get(dataId);
+    const data = await getDataWithFallback(dataId);
 
-    if (!cached) {
+    if (!data) {
       return NextResponse.json(
         { error: 'Learning data not found. Please wait for n8n to process your request.' },
         { status: 404 }
       );
     }
 
-    // Check if data has expired
-    if (Date.now() - cached.timestamp > CACHE_EXPIRATION) {
-      learningDataCache.delete(dataId);
-      return NextResponse.json(
-        { error: 'Learning data has expired' },
-        { status: 410 }
-      );
-    }
-
     console.log(`✅ Retrieved learning data for: ${dataId}`);
-    return NextResponse.json(cached.data, { status: 200 });
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error('❌ GET error:', error);
     return NextResponse.json(
@@ -194,8 +175,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    learningDataCache.delete(dataId);
-    console.log(`🗑️  Learning data cleared for: ${dataId}`);
+    await deleteDataWithFallback(dataId);
 
     return NextResponse.json(
       { success: true, message: 'Learning data cleared' },
