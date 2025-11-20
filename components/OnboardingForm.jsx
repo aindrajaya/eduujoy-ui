@@ -24,6 +24,7 @@ export default function OnboardingForm({
   formData,
   handleInputChange,
   handleSubmit,
+  onRequestIdGenerated,
 }) {
   const [showSplash, setShowSplash] = useState(true);
   const [splashAnimation, setSplashAnimation] = useState('enter');
@@ -216,6 +217,15 @@ export default function OnboardingForm({
 
     setIsSubmitting(true);
     try {
+      // Generate unique request ID for this submission (email + timestamp)
+      const newRequestId = `${currentFormData.email}_${Date.now()}`;
+      console.log('🆔 Generated requestId:', newRequestId);
+
+      // Notify parent about the requestId
+      if (onRequestIdGenerated) {
+        onRequestIdGenerated(newRequestId);
+      }
+
       // Prepare form data for webhook (only non-disabled fields)
       const webhookData = {};
       [...formFields, ...selectFields].forEach(field => {
@@ -223,6 +233,10 @@ export default function OnboardingForm({
           webhookData[field.name] = currentFormData[field.name];
         }
       });
+
+      // Add requestId to webhook data so n8n can use it when calling back
+      webhookData.requestId = newRequestId;
+      console.log('📤 Sending data to n8n with requestId:', newRequestId);
 
       // Send POST request to n8n webhook
       const response = await fetch(
@@ -239,6 +253,8 @@ export default function OnboardingForm({
       if (!response.ok) {
         throw new Error(`Webhook request failed with status ${response.status}`);
       }
+
+      console.log('✅ Successfully sent to n8n');
 
       // Call original handleSubmit if provided
       if (handleSubmit) {

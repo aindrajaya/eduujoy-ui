@@ -38,6 +38,7 @@ export default function Page() {
   const [learningData, setLearningData] = useState(defaultLearningData);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataId, setDataId] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -163,25 +164,24 @@ export default function Page() {
 
   /**
    * Handle form submission - Form goes to n8n, we wait for callback
+   * Note: requestId is generated in OnboardingForm before calling this
    */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Use the requestId that was already set
+    const id = requestId || `${formData.email}_${Date.now()}`;
+    setDataId(id);
+
+    console.log('📤 Form submitted to n8n');
+    console.log(`🆔 Request ID: ${id}`);
+    console.log('⏳ Waiting for n8n to process and send data back...');
+
     setScreen('loading');
     setIsLoadingData(true);
 
     try {
-      // Generate a unique ID for this request (use email)
-      const id = formData.email;
-      setDataId(id);
-
-      console.log('📤 Form submitted to n8n');
-      console.log(`📧 Data ID (email): ${id}`);
-      console.log('⏳ Waiting for n8n to process and send data back...');
-
-      // Show loading screen and start polling for data
-      setScreen('loading');
-
-      // Poll for learning data (will be sent by n8n callback)
+      // Poll for learning data (will be sent by n8n callback with this specific requestId)
       const receivedData = await pollForLearningData(id);
 
       if (receivedData) {
@@ -225,6 +225,7 @@ export default function Page() {
             formData={formData}
             handleInputChange={handleInputChange}
             handleSubmit={handleSubmit}
+            onRequestIdGenerated={setRequestId}
           />
         );
       case 'loading':
@@ -248,6 +249,7 @@ export default function Page() {
             formData={formData}
             handleInputChange={handleInputChange}
             handleSubmit={handleSubmit}
+            onRequestIdGenerated={setRequestId}
           />
         );
     }

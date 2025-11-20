@@ -226,29 +226,10 @@ export default async function handler(req, res) {
     const searchQuery = query.trim();
     const filterKey = JSON.stringify(filters);
     
-    // Check cache first (include filters in cache key)
-    const cacheKey = generateCacheKey('youtube-search', `${searchQuery}_${filterKey}`);
-    const cachedResult = cache.get(cacheKey);
-
-    if (cachedResult) {
-      console.log(`✅ Cache hit for search: "${searchQuery}" with filters`);
-      return res.status(200).json({
-        ...cachedResult,
-        cached: true,
-        cacheKey: cacheKey
-      });
-    }
-
     console.log(`🔍 Searching YouTube for: "${searchQuery}"`, filters);
 
     // Search YouTube with filters
     const searchResult = await searchYouTube(searchQuery, maxResults, filters);
-
-    // Cache successful results
-    if (!searchResult.error && searchResult.results.length > 0) {
-      cache.set(cacheKey, searchResult, CACHE_TTL_SEC);
-      console.log(`✅ Search results cached for ${CACHE_TTL_SEC} seconds`);
-    }
 
     // Return based on whether there's an error
     if (searchResult.error) {
@@ -263,9 +244,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ...searchResult,
-      cached: false,
-      timestamp: new Date().toISOString(),
-      tip: 'Results are cached for 24 hours. Filter combinations are cached separately.'
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('❌ API error:', error);

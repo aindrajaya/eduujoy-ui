@@ -9,6 +9,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { storeDataWithFallback, getDataWithFallback, deleteDataWithFallback } from '@/lib/learningDataStore';
 
 /**
+ * Extract email from requestId format (email_timestamp)
+ * Example: jane.doe@example.com_1763626902639 -> jane.doe@example.com
+ */
+function extractEmailFromRequestId(requestId: string): string {
+  // If it contains underscore and timestamp, extract email part
+  const parts = requestId.split('_');
+  if (parts.length >= 2 && /^\d+$/.test(parts[parts.length - 1])) {
+    // Last part is a timestamp, remove it
+    return parts.slice(0, -1).join('_');
+  }
+  // Otherwise, return as is (might already be just email)
+  return requestId;
+}
+
+/**
  * Transform n8n response format to app format
  */
 function transformN8nData(n8nData: any) {
@@ -122,19 +137,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Resolve canonical email (dataId) from multiple possible sources.
-    // n8n and various callers may place the email in different locations,
-    // so check several places and prefer the first valid one.
-    const candidateEmails = [
-      learningData?.email,
+    // Resolve canonical dataId (email) from multiple possible sources.
+    // Priority order:
+    // 1. dataId from n8n callback (should be the requestId: email_timestamp)
+    // 2. requestId from n8n callback
+    // 3. email from various locations (fallback)
+    const candidateIds = [
+      n8nData?.dataId,              // n8n should send this as requestId
+      body?.dataId,                 // Top-level dataId
+      n8nData?.requestId,           // Alternative field name
+      body?.requestId,              // Top-level requestId
+      learningData?.email,          // Fallback to email
       n8nData?.email,
       n8nData?.learningData?.email,
       learningData?.profile_summary?.email,
       learningData?.profile_summary?.contact_email,
     ].filter((v) => typeof v === 'string' && v.length > 0);
 
-    const dataId = candidateEmails.length > 0 ? candidateEmails[0] : `learning-${Date.now()}`;
-    console.log('Resolved dataId/email candidates:', candidateEmails, '->', dataId);
+    const rawDataId = candidateIds.length > 0 ? candidateIds[0] : `learning-${Date.now()}`;
+    // Extract email from requestId format (remove timestamp suffix)
+    const dataId = extractEmailFromRequestId(rawDataId);
+    console.log('Resolved dataId candidates:', candidateIds, '-> raw:', rawDataId, '-> email:', dataId);
 
     // Store the transformed data (with disk + memory fallback)
     await storeDataWithFallback(dataId, learningData);
@@ -174,15 +197,19 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get dataId from query parameter
-    const dataId = request.nextUrl.searchParams.get('dataId');
+    // Get dataId from query parameter (might be requestId format: email_timestamp)
+    const rawDataId = request.nextUrl.searchParams.get('dataId');
 
-    if (!dataId) {
+    if (!rawDataId) {
       return NextResponse.json(
         { error: 'Missing dataId parameter' },
         { status: 400 }
       );
     }
+
+    // Extract email from requestId format
+    const dataId = extractEmailFromRequestId(rawDataId);
+    console.log(`🔍 GET request - raw dataId: ${rawDataId}, extracted email: ${dataId}`);
 
     // Check if data exists and is not expired
     const data = await getDataWithFallback(dataId);
@@ -210,14 +237,17 @@ export async function GET(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const dataId = request.nextUrl.searchParams.get('dataId');
+    const rawDataId = request.nextUrl.searchParams.get('dataId');
 
-    if (!dataId) {
+    if (!rawDataId) {
       return NextResponse.json(
         { error: 'Missing dataId parameter' },
         { status: 400 }
       );
     }
+
+    // Extract email from requestId format
+    const dataId = extractEmailFromRequestId(rawDataId);
 
     await deleteDataWithFallback(dataId);
 
