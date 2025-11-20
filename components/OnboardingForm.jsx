@@ -30,6 +30,21 @@ export default function OnboardingForm({
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Set default values for learning goals and preferred content
+  const defaultFormData = useMemo(() => ({
+    name: formData.name || '',
+    email: formData.email || '',
+    // learningGoals: formData.learningGoals || 'Upgrade career growth in Product Design (UI/UX)',
+    learningGoals: 'Upgrade career growth in Product Design (UI/UX)',
+    currentState: formData.currentState || '',
+    learningStyle: formData.learningStyle || '',
+    // preferredContent: formData.preferredContent || 'audioVisual'
+    preferredContent: 'audioVisual'
+  }), [formData]);
+
+  // Use default form data for validation and display
+  const currentFormData = { ...formData, ...defaultFormData };
+
   // Auto-transition from splash to form after 3 seconds
   useEffect(() => {
     if (showSplash) {
@@ -80,25 +95,107 @@ export default function OnboardingForm({
     return '';
   }, [validationRules]);
 
+  
+  const selectFields = useMemo(() => [
+    {
+      name: 'currentState',
+      label: 'Current Skill Level',
+      icon: TrendingUp,
+      options: [
+        { value: 'beginner', label: 'Beginner - Just starting out' },
+        { value: 'intermediate', label: 'Intermediate - Some experience' },
+        { value: 'advanced', label: 'Advanced - Experienced professional' }
+      ],
+      disabled: false
+    },
+    {
+      name: 'learningStyle',
+      label: 'Learning Pace',
+      icon: Clock,
+      options: [
+        { value: 'slow', label: 'Slow & Steady - Take your time' },
+        { value: 'moderate', label: 'Moderate Pace - Balanced approach' },
+        { value: 'fast', label: 'Fast Paced - Quick learning bursts' }
+      ],
+      disabled: false
+    },
+    {
+      name: 'preferredContent',
+      label: 'Preferred Content Type',
+      icon: BookOpen,
+      options: [
+        { value: 'audioVisual', label: 'Audio Visual - Videos & podcasts' },
+        { value: 'reading', label: 'Reading - Articles & books' },
+        { value: 'interactive', label: 'Interactive - Hands-on projects' }
+      ],
+      disabled: true
+    }
+  ], []);
+
+    // Form fields configuration for better maintainability
+  const formFields = useMemo(() => [
+    {
+      name: 'name',
+      label: 'Full Name',
+      type: 'text',
+      icon: User,
+      placeholder: 'Enter your full name',
+      required: true,
+      autoComplete: 'name',
+      disabled: false
+    },
+    {
+      name: 'email',
+      label: 'Email Address',
+      type: 'email',
+      icon: Mail,
+      placeholder: 'your.email@example.com',
+      required: true,
+      autoComplete: 'email',
+      disabled: false
+    },
+    {
+      name: 'learningGoals',
+      label: 'Learning Goals',
+      type: 'text',
+      icon: Target,
+      placeholder: 'e.g., Upgrade career growth in Product Design',
+      required: true,
+      autoComplete: 'off',
+      disabled: true
+    }
+  ], []);
+
   // Enhanced input change handler with validation
   const handleInputChangeEnhanced = useCallback((e) => {
     const { name, value } = e.target;
+
+    // Find if this field is disabled
+    const allFields = [...formFields, ...selectFields];
+    const fieldConfig = allFields.find(f => f.name === name);
+
+    if (fieldConfig?.disabled) {
+      return; // Don't allow changes to disabled fields
+    }
+
     handleInputChange(e);
 
-    // Real-time validation
+    // Real-time validation for non-disabled fields
     const error = validateField(name, value);
     setErrors(prev => ({ ...prev, [name]: error }));
-  }, [handleInputChange, validateField]);
+  }, [handleInputChange, formFields, selectFields, validateField]);
 
   // Enhanced submit handler
   const handleSubmitEnhanced = useCallback(async (e) => {
     e.preventDefault();
 
-    // Validate all fields
+    // Validate all non-disabled fields
     const newErrors = {};
-    Object.keys(validationRules).forEach(field => {
-      const error = validateField(field, formData[field]);
-      if (error) newErrors[field] = error;
+    [...formFields, ...selectFields].forEach(field => {
+      if (!field.disabled) {
+        const error = validateField(field.name, currentFormData[field.name]);
+        if (error) newErrors[field.name] = error;
+      }
     });
 
     setErrors(newErrors);
@@ -117,71 +214,7 @@ export default function OnboardingForm({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, validationRules, validateField, handleSubmit]);
-
-  // Form fields configuration for better maintainability
-  const formFields = useMemo(() => [
-    {
-      name: 'name',
-      label: 'Full Name',
-      type: 'text',
-      icon: User,
-      placeholder: 'Enter your full name',
-      required: true,
-      autoComplete: 'name'
-    },
-    {
-      name: 'email',
-      label: 'Email Address',
-      type: 'email',
-      icon: Mail,
-      placeholder: 'your.email@example.com',
-      required: true,
-      autoComplete: 'email'
-    },
-    {
-      name: 'learningGoals',
-      label: 'Learning Goals',
-      type: 'text',
-      icon: Target,
-      placeholder: 'e.g., Upgrade career growth in Product Design',
-      required: true,
-      autoComplete: 'off'
-    }
-  ], []);
-
-  const selectFields = useMemo(() => [
-    {
-      name: 'currentState',
-      label: 'Current Skill Level',
-      icon: TrendingUp,
-      options: [
-        { value: 'beginner', label: 'Beginner - Just starting out' },
-        { value: 'intermediate', label: 'Intermediate - Some experience' },
-        { value: 'advanced', label: 'Advanced - Experienced professional' }
-      ]
-    },
-    {
-      name: 'learningStyle',
-      label: 'Learning Pace',
-      icon: Clock,
-      options: [
-        { value: 'slow', label: 'Slow & Steady - Take your time' },
-        { value: 'moderate', label: 'Moderate Pace - Balanced approach' },
-        { value: 'fast', label: 'Fast Paced - Quick learning bursts' }
-      ]
-    },
-    {
-      name: 'preferredContent',
-      label: 'Preferred Content Type',
-      icon: BookOpen,
-      options: [
-        { value: 'audioVisual', label: 'Audio Visual - Videos & podcasts' },
-        { value: 'reading', label: 'Reading - Articles & books' },
-        { value: 'interactive', label: 'Interactive - Hands-on projects' }
-      ]
-    }
-  ], []);
+  }, [currentFormData, formFields, selectFields, validateField, handleSubmit]);
 
   // Splash Screen Component
   if (showSplash) {
@@ -281,8 +314,8 @@ export default function OnboardingForm({
             {/* Progress Indicator */}
             <div className="mb-8" aria-hidden="true">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-600">Setup Progress</span>
-                <span className="text-sm text-gray-500">6/6 steps</span>
+                <span className="text-sm font-medium text-gray-700">Setup Progress</span>
+                <span className="text-sm text-gray-600">6/6 steps</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full w-full transition-all duration-500"></div>
@@ -317,16 +350,19 @@ export default function OnboardingForm({
                         id={field.name}
                         name={field.name}
                         type={field.type}
-                        value={formData[field.name]}
+                        value={currentFormData[field.name] || ''}
                         onChange={handleInputChangeEnhanced}
                         onFocus={() => setFocusedField(field.name)}
                         onBlur={() => setFocusedField(null)}
-                        className={`w-full px-4 py-3 pl-12 border-2 rounded-xl transition-all duration-200 text-sm focus:outline-none ${
-                          hasError
-                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+                        disabled={field.disabled}
+                        className={`w-full px-4 py-3 pl-12 border-2 rounded-xl transition-all duration-200 text-sm focus:outline-none placeholder-gray-400 ${
+                          field.disabled
+                            ? 'bg-gray-100 border-gray-200 text-gray-600 cursor-not-allowed'
+                            : hasError
+                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 text-gray-900'
                             : isFocused
-                            ? 'border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200'
-                            : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200'
+                            ? 'border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-gray-900'
+                            : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-gray-900'
                         }`}
                         placeholder={field.placeholder}
                         required={field.required}
@@ -336,7 +372,13 @@ export default function OnboardingForm({
                       />
                       <Icon
                         className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${
-                          hasError ? 'text-red-400' : isFocused ? 'text-indigo-500' : 'text-gray-400'
+                          field.disabled
+                            ? 'text-gray-400'
+                            : hasError
+                            ? 'text-red-400'
+                            : isFocused
+                            ? 'text-indigo-500'
+                            : 'text-gray-400'
                         }`}
                         aria-hidden="true"
                       />
@@ -382,16 +424,19 @@ export default function OnboardingForm({
                       <select
                         id={field.name}
                         name={field.name}
-                        value={formData[field.name]}
+                        value={currentFormData[field.name] || ''}
                         onChange={handleInputChangeEnhanced}
                         onFocus={() => setFocusedField(field.name)}
                         onBlur={() => setFocusedField(null)}
-                        className={`w-full px-4 py-3 pl-12 pr-10 border-2 rounded-xl transition-all duration-200 text-sm focus:outline-none appearance-none bg-white ${
-                          hasError
-                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+                        disabled={field.disabled}
+                        className={`w-full px-4 py-3 pl-12 pr-10 border-2 rounded-xl transition-all duration-200 text-sm focus:outline-none appearance-none bg-white placeholder-gray-400 ${
+                          field.disabled
+                            ? 'bg-gray-100 border-gray-200 text-gray-600 cursor-not-allowed'
+                            : hasError
+                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 text-gray-900'
                             : isFocused
-                            ? 'border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200'
-                            : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200'
+                            ? 'border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-gray-900'
+                            : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-gray-900'
                         }`}
                         required
                         aria-describedby={hasError ? `${field.name}-error` : undefined}
@@ -406,7 +451,13 @@ export default function OnboardingForm({
                       </select>
                       <Icon
                         className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${
-                          hasError ? 'text-red-400' : isFocused ? 'text-indigo-500' : 'text-gray-400'
+                          field.disabled
+                            ? 'text-gray-400'
+                            : hasError
+                            ? 'text-red-400'
+                            : isFocused
+                            ? 'text-indigo-500'
+                            : 'text-gray-400'
                         }`}
                         aria-hidden="true"
                       />
@@ -463,7 +514,7 @@ export default function OnboardingForm({
         </div>
 
         {/* Footer */}
-        <footer className="text-center mt-6 text-sm text-gray-500 animate-fadeIn" style={{ animationDelay: '700ms' }}>
+        <footer className="text-center mt-6 text-sm text-gray-600 animate-fadeIn" style={{ animationDelay: '700ms' }}>
           <p>Your data is secure and will only be used to create your learning experience.</p>
         </footer>
       </div>

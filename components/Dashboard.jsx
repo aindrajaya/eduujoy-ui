@@ -12,6 +12,7 @@ export default function Dashboard({
   setCurrentView,
   data,
   onModuleSelect,
+  userInfo,
 }) {
   const renderView = () => {
     switch (currentView) {
@@ -20,7 +21,7 @@ export default function Dashboard({
           <LearningPathScreen data={data} onModuleSelect={onModuleSelect} />
         );
       case 'profile':
-        return <ProfileScreen data={data.profile_summary} />;
+        return <ProfileScreen data={data.profile_summary} userInfo={userInfo} />;
       case 'tips':
         return <ProTipsScreen data={data.pro_tips} />;
       default:

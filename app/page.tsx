@@ -235,6 +235,47 @@ export default function Page() {
   };
 
   /**
+   * Transform form data into profile summary format
+   */
+  const getProfileSummary = () => {
+    const levelMap: Record<string, string> = {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced'
+    };
+
+    const paceMap: Record<string, string> = {
+      slow: 'Slow & Steady',
+      moderate: 'Moderate Pace',
+      fast: 'Fast Paced'
+    };
+
+    const contentMap: Record<string, string> = {
+      audioVisual: 'Audio Visual',
+      reading: 'Reading',
+      interactive: 'Interactive'
+    };
+
+    return {
+      goal: formData.learningGoals || 'Upgrade career growth in Product Design (UI/UX)',
+      current_level: levelMap[formData.currentState] || 'Intermediate',
+      focus_area: 'Product Design (UI/UX)',
+      session_duration: formData.duration || '20 Minutes',
+      best_learning_time: 'Morning', // Could be made dynamic later
+      learning_pace: paceMap[formData.learningStyle] || 'Slow',
+      content_preference: contentMap[formData.preferredContent] || 'Audio Visual',
+    };
+  };
+
+  /**
+   * Get user info for profile display
+   */
+  const getUserInfo = () => ({
+    name: formData.name || 'Jane Doe',
+    email: formData.email || 'jane.doe@example.com',
+  });
+
+  /**
    * Handle form submission
    */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -276,8 +317,12 @@ export default function Page() {
           <Dashboard
             currentView={currentView}
             setCurrentView={setCurrentView}
-            data={learningData}
+            data={{
+              ...learningData,
+              profile_summary: getProfileSummary()
+            }}
             onModuleSelect={setSelectedModule}
+            userInfo={getUserInfo()}
           />
         );
       default:

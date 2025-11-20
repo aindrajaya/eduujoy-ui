@@ -5,7 +5,7 @@
 
 import { Target, BarChart3, Layers, Clock, Droplet, Tv } from 'lucide-react';
 
-export default function ProfileScreen({ data }) {
+export default function ProfileScreen({ data, userInfo }) {
   const profileItems = [
     { icon: Target, label: 'Main Goal', value: data.goal },
     { icon: BarChart3, label: 'Current Level', value: data.current_level },
@@ -19,10 +19,10 @@ export default function ProfileScreen({ data }) {
     <div className="p-4 md:p-6 animate-fadeIn">
       <div className="flex flex-col items-center mb-6">
         <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-indigo-500 text-white flex items-center justify-center text-2xl md:text-4xl font-bold shadow-lg mb-3">
-          JD
+          {userInfo?.name ? userInfo.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'JD'}
         </div>
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Jane Doe</h2>
-        <p className="text-gray-600 text-sm md:text-base">jane.doe@example.com</p>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">{userInfo?.name || 'Jane Doe'}</h2>
+        <p className="text-gray-600 text-sm md:text-base">{userInfo?.email || 'jane.doe@example.com'}</p>
       </div>
 
       <div className="bg-gray-50 p-4 rounded-lg">
