@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 
 // Sets up the WebSocket constructor for Node.js environments
@@ -15,11 +15,8 @@ if (!connectionString) {
   throw new Error('DATABASE_URL is not defined');
 }
 
-// Create Neon Pool
-const pool = new Pool({ connectionString });
-
 // Create Neon adapter for serverless
-const adapter = new PrismaNeon(pool);
+const adapter = new PrismaNeon({ connectionString });
 
 export const prisma =
   globalForPrisma.prisma ||
