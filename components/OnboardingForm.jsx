@@ -16,7 +16,8 @@ import {
   CheckCircle,
   ArrowRight,
   AlertCircle,
-  Play
+  Play,
+  Briefcase
 } from 'lucide-react';
 
 export default function OnboardingForm({
@@ -32,14 +33,12 @@ export default function OnboardingForm({
 
   // Set default values for learning goals and preferred content
   const defaultFormData = useMemo(() => ({
-    name: formData.name || '',
     email: formData.email || '',
-    // learningGoals: formData.learningGoals || 'Upgrade career growth in Product Design (UI/UX)',
-    learningGoals: 'Upgrade career growth in Product Design (UI/UX)',
+    learningGoals: formData.learningGoals || '',
+    skillCategory: formData.skillCategory || '',
     currentState: formData.currentState || '',
     learningStyle: formData.learningStyle || '',
-    // preferredContent: formData.preferredContent || 'audioVisual'
-    preferredContent: 'audioVisual'
+    preferredContent: formData.preferredContent || ''
   }), [formData]);
 
   // Use default form data for validation and display
@@ -65,9 +64,9 @@ export default function OnboardingForm({
 
   // Memoized validation rules for performance
   const validationRules = useMemo(() => ({
-    name: { required: true, minLength: 2, pattern: /^[a-zA-Z\s]+$/ },
     email: { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
     learningGoals: { required: true, minLength: 10 },
+    skillCategory: { required: true },
     currentState: { required: true },
     learningStyle: { required: true },
     preferredContent: { required: true }
@@ -97,6 +96,23 @@ export default function OnboardingForm({
 
   
   const selectFields = useMemo(() => [
+    {
+      name: 'skillCategory',
+      label: 'Skill Category',
+      icon: Briefcase,
+      options: [
+        { value: 'designer', label: 'Designer' },
+        { value: 'programmer', label: 'Programmer' },
+        { value: 'agriculture', label: 'Agriculture' },
+        { value: 'business', label: 'Business' },
+        { value: 'healthcare', label: 'Healthcare' },
+        { value: 'education', label: 'Education' },
+        { value: 'marketing', label: 'Marketing' },
+        { value: 'engineering', label: 'Engineering' },
+        { value: 'other', label: 'Other' }
+      ],
+      disabled: false
+    },
     {
       name: 'currentState',
       label: 'Current Skill Level',
@@ -128,22 +144,12 @@ export default function OnboardingForm({
         { value: 'reading', label: 'Reading - Articles & books' },
         { value: 'interactive', label: 'Interactive - Hands-on projects' }
       ],
-      disabled: true
+      disabled: false
     }
   ], []);
 
     // Form fields configuration for better maintainability
   const formFields = useMemo(() => [
-    {
-      name: 'name',
-      label: 'Full Name',
-      type: 'text',
-      icon: User,
-      placeholder: 'Enter your full name',
-      required: true,
-      autoComplete: 'name',
-      disabled: false
-    },
     {
       name: 'email',
       label: 'Email Address',
@@ -162,7 +168,7 @@ export default function OnboardingForm({
       placeholder: 'e.g., Upgrade career growth in Product Design',
       required: true,
       autoComplete: 'off',
-      disabled: true
+      disabled: false
     }
   ], []);
 
@@ -185,7 +191,7 @@ export default function OnboardingForm({
     setErrors(prev => ({ ...prev, [name]: error }));
   }, [handleInputChange, formFields, selectFields, validateField]);
 
-  // Enhanced submit handler
+  // Enhanced submit handler with webhook POST
   const handleSubmitEnhanced = useCallback(async (e) => {
     e.preventDefault();
 
@@ -210,7 +216,37 @@ export default function OnboardingForm({
 
     setIsSubmitting(true);
     try {
-      await handleSubmit(e);
+      // Prepare form data for webhook (only non-disabled fields)
+      const webhookData = {};
+      [...formFields, ...selectFields].forEach(field => {
+        if (!field.disabled) {
+          webhookData[field.name] = currentFormData[field.name];
+        }
+      });
+
+      // Send POST request to n8n webhook
+      const response = await fetch(
+        'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/826acb2a-ac8d-496e-828e-1c0791d1446d',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Webhook request failed with status ${response.status}`);
+      }
+
+      // Call original handleSubmit if provided
+      if (handleSubmit) {
+        await handleSubmit(e);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setErrors({ submit: 'Failed to submit form. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
