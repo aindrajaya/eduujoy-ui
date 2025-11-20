@@ -5,6 +5,20 @@
 
 import { prisma } from './prisma';
 
+/**
+ * Test database connection
+ */
+export async function testDatabaseConnection(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('✅ Database connection successful');
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    return false;
+  }
+}
+
 const CACHE_EXPIRATION = 30 * 60 * 1000; // 30 minutes
 
 interface StoredData {
@@ -17,41 +31,68 @@ interface StoredData {
  */
 export async function storeLearningData(dataId: string, data: any, userId?: string): Promise<void> {
   try {
+    console.log('🔄 Attempting to store data in Neon DB for:', dataId);
+    console.log('📊 Data keys:', Object.keys(data));
+
+    // Validate email format
+    if (!dataId || typeof dataId !== 'string' || !dataId.includes('@')) {
+      throw new Error(`Invalid email format: ${dataId}`);
+    }
+
+    // Validate required data structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid data object');
+    }
+
+    // Ensure data is JSON serializable
+    let serializedData;
+    try {
+      serializedData = JSON.parse(JSON.stringify(data));
+      console.log('✅ Data is JSON serializable');
+    } catch (serializeError) {
+      console.error('❌ Data serialization failed:', serializeError);
+      throw new Error('Data contains non-serializable values');
+    }
+
+    console.log('📊 Learning path length:', serializedData.learning_path?.length || 0);
+
     const expiresAt = new Date(Date.now() + CACHE_EXPIRATION);
-    
+
     // Upsert: update if exists, create if not
     const result = await prisma.learningData.upsert({
       where: { email: dataId },
       update: {
-        profileSummary: data.profile_summary,
-        learningPath: data.learning_path,
-        actionPlan: data.action_plan,
-        proTips: data.pro_tips,
-        expectedTimeline: data.expected_timeline,
+        profileSummary: serializedData.profile_summary,
+        learningPath: serializedData.learning_path,
+        actionPlan: serializedData.action_plan,
+        proTips: serializedData.pro_tips,
+        expectedTimeline: serializedData.expected_timeline,
         expiresAt: expiresAt,
         updatedAt: new Date(),
       },
       create: {
         email: dataId,
         userId: userId,
-        profileSummary: data.profile_summary,
-        learningPath: data.learning_path,
-        actionPlan: data.action_plan,
-        proTips: data.pro_tips,
-        expectedTimeline: data.expected_timeline,
+        profileSummary: serializedData.profile_summary,
+        learningPath: serializedData.learning_path,
+        actionPlan: serializedData.action_plan,
+        proTips: serializedData.pro_tips,
+        expectedTimeline: serializedData.expected_timeline,
         expiresAt: expiresAt,
       },
     });
 
     console.log(`✅ Learning data stored in Neon DB for: ${dataId}`);
-    console.log(`📊 Modules: ${data.learning_path?.length || 0}`);
+    console.log(`📊 Modules: ${serializedData.learning_path?.length || 0}`);
+    console.log(`🆔 Record ID: ${result.id}`);
   } catch (error) {
     console.error('❌ Failed to store data in Neon DB:', error);
+    console.error('❌ Error details:', error instanceof Error ? error.message : error);
+    console.error('❌ Data ID:', dataId);
+    console.error('❌ Data sample:', JSON.stringify(data).substring(0, 500));
     throw error;
   }
-}
-
-/**
+}/**
  * Retrieve learning data from Neon PostgreSQL
  */
 export async function getLearningData(dataId: string): Promise<any | null> {

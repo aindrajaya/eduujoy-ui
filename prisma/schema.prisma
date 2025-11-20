@@ -15,8 +15,8 @@ model LearningData {
   email     String  @unique
   userId    String?
   
-  // Learning profile information
-  profileSummary   String?
+  // Learning profile information (stored as JSON)
+  profileSummary   Json?
   
   // Learning path (stored as JSON for flexibility)
   learningPath     Json?
@@ -27,8 +27,8 @@ model LearningData {
   // Pro tips array (stored as JSON)
   proTips          Json?
   
-  // Expected timeline
-  expectedTimeline String?
+  // Expected timeline (stored as JSON)
+  expectedTimeline Json?
   
   // Timestamps
   createdAt DateTime @default(now())

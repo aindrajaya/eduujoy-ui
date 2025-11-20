@@ -12,13 +12,17 @@ import { storeDataWithFallback, getDataWithFallback, deleteDataWithFallback } fr
  * Transform n8n response format to app format
  */
 function transformN8nData(n8nData: any) {
+  console.log('🔄 Transforming n8n data:', JSON.stringify(n8nData, null, 2).substring(0, 1000));
+
   const data = Array.isArray(n8nData) ? n8nData[0] : n8nData;
   
   if (!data || !data.learningData) {
+    console.error('❌ Missing learningData in n8n response');
     throw new Error('Invalid data structure from n8n');
   }
 
   const learningData = data.learningData;
+  console.log('📊 Learning data keys:', Object.keys(learningData));
 
   // Transform learning_path to match app format
   const learning_path = (learningData.learning_path || []).map((module: any, index: number) => ({
@@ -50,7 +54,7 @@ function transformN8nData(n8nData: any) {
     return `<strong>${tip.title}:</strong> ${tip.description}`;
   });
 
-  return {
+  const transformed = {
     email: data.email,
     profile_summary: learningData.profile_summary,
     learning_path,
@@ -58,26 +62,40 @@ function transformN8nData(n8nData: any) {
     pro_tips,
     expected_timeline: learningData.expected_timeline
   };
+
+  console.log('✅ Transformed data keys:', Object.keys(transformed));
+  console.log('📊 Transformed learning path length:', transformed.learning_path.length);
+
+  return transformed;
 }
 
 export async function POST(request: NextRequest) {
   try {
     // Parse the learning data from n8n
     const body = await request.json();
-    
+
     console.log('📥 Webhook received from n8n');
     console.log('Request body keys:', Object.keys(body));
 
+    // Handle n8n's HTTP Request node format - extract actual data from "body" property
+    let actualData = body;
+    if (body.body) {
+      console.log('🔄 Extracting data from n8n "body" property');
+      console.log('📊 Body content type:', typeof body.body);
+      console.log('📊 Body keys:', Object.keys(body.body));
+      actualData = body.body;
+    }
+
     // Handle both single object and array response
-    let n8nData = body;
-    if (Array.isArray(body) && body.length > 0) {
-      n8nData = body[0];
+    let n8nData = actualData;
+    if (Array.isArray(actualData) && actualData.length > 0) {
+      n8nData = actualData[0];
     }
 
     console.log('Processing data for email:', n8nData.email);
 
     // Transform and validate the data
-    const learningData = transformN8nData(Array.isArray(body) ? body : [n8nData]);
+    const learningData = transformN8nData(Array.isArray(actualData) ? actualData : [n8nData]);
 
     // Validate that we have required fields
     if (!learningData || !learningData.learning_path || learningData.learning_path.length === 0) {
@@ -89,8 +107,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate email
+    if (!learningData.email || typeof learningData.email !== 'string' || !learningData.email.includes('@')) {
+      console.error('❌ Invalid or missing email:', learningData.email);
+      return NextResponse.json(
+        { error: 'Invalid or missing email address' },
+        { status: 400 }
+      );
+    }
+
     // Use email as key if available, otherwise generate ID
-    const dataId = learningData.email || `learning-${Date.now()}`;
+    const dataId = learningData.email;
 
     // Store the transformed data (with disk + memory fallback)
     await storeDataWithFallback(dataId, learningData);
