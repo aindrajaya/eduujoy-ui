@@ -149,6 +149,20 @@ export async function deleteLearningData(dataId: string): Promise<void> {
 }
 
 /**
+ * Delete all learning data (for cleanup/testing)
+ */
+export async function deleteAllLearningData(): Promise<number> {
+  try {
+    const result = await prisma.learningData.deleteMany({});
+    console.log(`🗑️ Deleted ${result.count} records from database`);
+    return result.count;
+  } catch (error) {
+    console.error('❌ Failed to delete all data:', error);
+    throw error;
+  }
+}
+
+/**
  * Clean up expired records (can be called by a cron job)
  */
 export async function cleanupExpiredData(): Promise<number> {

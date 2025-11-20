@@ -15,6 +15,8 @@ function transformN8nData(n8nData: any) {
   console.log('🔄 Transforming n8n data:', JSON.stringify(n8nData, null, 2).substring(0, 1000));
 
   const data = Array.isArray(n8nData) ? n8nData[0] : n8nData;
+  console.log('📊 Data after array check:', JSON.stringify(data, null, 2).substring(0, 500));
+  console.log('📧 data.email:', data.email);
   
   if (!data || !data.learningData) {
     console.error('❌ Missing learningData in n8n response');
@@ -93,9 +95,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Processing data for email:', n8nData.email);
+    console.log('Raw n8nData keys:', Object.keys(n8nData));
+    console.log('Raw n8nData.email:', n8nData.email);
 
     // Transform and validate the data
     const learningData = transformN8nData(Array.isArray(actualData) ? actualData : [n8nData]);
+
+    console.log('Transformed learningData.email:', learningData.email);
 
     // Validate that we have required fields
     if (!learningData || !learningData.learning_path || learningData.learning_path.length === 0) {
@@ -116,8 +122,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use email as key if available, otherwise generate ID
-    const dataId = learningData.email;
+    // Resolve canonical email (dataId) from multiple possible sources.
+    // n8n and various callers may place the email in different locations,
+    // so check several places and prefer the first valid one.
+    const candidateEmails = [
+      learningData?.email,
+      n8nData?.email,
+      n8nData?.learningData?.email,
+      learningData?.profile_summary?.email,
+      learningData?.profile_summary?.contact_email,
+    ].filter((v) => typeof v === 'string' && v.length > 0);
+
+    const dataId = candidateEmails.length > 0 ? candidateEmails[0] : `learning-${Date.now()}`;
+    console.log('Resolved dataId/email candidates:', candidateEmails, '->', dataId);
 
     // Store the transformed data (with disk + memory fallback)
     await storeDataWithFallback(dataId, learningData);
