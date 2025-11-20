@@ -107,27 +107,45 @@ export default function Page() {
   const pollForLearningData = async (id: string, maxAttempts: number = 120) => {
     let attempts = 0;
 
-    const poll = async (): Promise<boolean> => {
+    const poll = async (): Promise<any | null> => {
       attempts++;
 
       try {
-        const response = await fetch(`/api/learning-callback?dataId=${id}`);
+        // Use relative URL (will work on both localhost and Vercel)
+        const url = `/api/learning-callback?dataId=${encodeURIComponent(id)}`;
+        console.log(`[Attempt ${attempts}] Polling: ${url}`);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(`[Attempt ${attempts}] Response status: ${response.status}`);
 
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ Response data received:', data);
+          
           if (data && data.learning_path && data.learning_path.length > 0) {
-            setLearningData(data);
             console.log(`✅ Learning data received! Modules: ${data.learning_path.length}`);
-            return true;
+            return data; // Return the actual data
+          } else {
+            console.log('⚠️ Response OK but no valid learning_path');
           }
         } else if (response.status === 404) {
           // Data not ready yet, continue polling
-          console.log(`⏳ Waiting for learning data (attempt ${attempts}/${maxAttempts})...`);
+          console.log(`⏳ Data not found yet (404) - waiting... (attempt ${attempts}/${maxAttempts})`);
+        } else if (response.status === 500) {
+          // Server error
+          const errorData = await response.text();
+          console.error(`❌ Server error (500):`, errorData);
         } else {
-          throw new Error(`Callback error: ${response.status}`);
+          console.error(`❌ Unexpected status: ${response.status}`);
         }
       } catch (error) {
-        console.error('Poll error:', error);
+        console.error(`❌ Poll error (attempt ${attempts}):`, error);
       }
 
       // If we haven't reached max attempts, wait and try again
@@ -136,7 +154,8 @@ export default function Page() {
         return poll();
       }
 
-      return false;
+      console.warn(`⚠️ Max attempts (${maxAttempts}) reached. Stopping poll.`);
+      return null;
     };
 
     return poll();
@@ -156,16 +175,19 @@ export default function Page() {
       setDataId(id);
 
       console.log('📤 Form submitted to n8n');
+      console.log(`📧 Data ID (email): ${id}`);
       console.log('⏳ Waiting for n8n to process and send data back...');
 
       // Show loading screen and start polling for data
       setScreen('loading');
 
       // Poll for learning data (will be sent by n8n callback)
-      const dataReceived = await pollForLearningData(id);
+      const receivedData = await pollForLearningData(id);
 
-      if (dataReceived) {
-        // Data received from n8n callback - go directly to dashboard
+      if (receivedData) {
+        // Data received from n8n callback
+        console.log('Setting learning data and transitioning to dashboard...');
+        setLearningData(receivedData);
         console.log('🎉 Going to dashboard with received data!');
         setScreen('dashboard');
       } else {

@@ -68,18 +68,28 @@ function transformN8nData(n8nData: any) {
 export async function POST(request: NextRequest) {
   try {
     // Parse the learning data from n8n
-    const n8nData = await request.json();
-
+    const body = await request.json();
+    
     console.log('📥 Webhook received from n8n');
+    console.log('Request body keys:', Object.keys(body));
+
+    // Handle both single object and array response
+    let n8nData = body;
+    if (Array.isArray(body) && body.length > 0) {
+      n8nData = body[0];
+    }
+
+    console.log('Processing data for email:', n8nData.email);
 
     // Transform and validate the data
-    const learningData = transformN8nData(n8nData);
+    const learningData = transformN8nData(Array.isArray(body) ? body : [n8nData]);
 
     // Validate that we have required fields
     if (!learningData || !learningData.learning_path || learningData.learning_path.length === 0) {
       console.error('❌ Invalid learning data structure');
+      console.error('Received data:', JSON.stringify(learningData, null, 2));
       return NextResponse.json(
-        { error: 'Invalid learning data structure' },
+        { error: 'Invalid learning data structure - no learning_path found' },
         { status: 400 }
       );
     }
@@ -95,6 +105,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Learning data stored for: ${dataId}`);
     console.log(`📊 Modules received: ${learningData.learning_path.length}`);
+    console.log(`💾 Cache size: ${learningDataCache.size} items`);
 
     return NextResponse.json(
       { 
@@ -102,14 +113,22 @@ export async function POST(request: NextRequest) {
         message: 'Learning plan received successfully',
         dataId: dataId,
         timestamp: new Date().toISOString(),
-        modulesCount: learningData.learning_path.length
+        modulesCount: learningData.learning_path.length,
+        cacheSize: learningDataCache.size
       },
       { status: 200 }
     );
   } catch (error) {
     console.error('❌ Webhook callback error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error details:', errorMessage);
+    
     return NextResponse.json(
-      { error: 'Failed to process learning data', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Failed to process learning data', 
+        details: errorMessage,
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }
