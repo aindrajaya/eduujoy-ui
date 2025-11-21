@@ -238,23 +238,38 @@ export default function OnboardingForm({
       webhookData.requestId = newRequestId;
       console.log('📤 Sending data to n8n with requestId:', newRequestId);
 
-      // Send POST request to n8n webhook
-      const response = await fetch(
-        'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/826acb2a-ac8d-496e-828e-1c0791d1446d',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(webhookData),
-        }
-      );
+      // Send POST request to both the default n8n webhook and an additional one
+      const DEFAULT_N8N_WEBHOOK = 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/826acb2a-ac8d-496e-828e-1c0791d1446d';
+      const EXTRA_N8N_WEBHOOK = 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/73928a59-c6df-4fc6-b06d-ef0c7f02481a';
+
+      // Send to default webhook and await its response (drives app flow).
+      const defaultResponsePromise = fetch(DEFAULT_N8N_WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      });
+
+      // Fire-and-forget the extra webhook but catch errors so they don't create unhandled rejections.
+      const extraResponsePromise = fetch(EXTRA_N8N_WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      }).catch((err) => console.warn('Extra n8n webhook error:', err));
+
+      const response = await defaultResponsePromise;
 
       if (!response.ok) {
         throw new Error(`Webhook request failed with status ${response.status}`);
       }
 
-      console.log('✅ Successfully sent to n8n');
+      // Optionally handle extra webhook result asynchronously (already caught above).
+      extraResponsePromise.catch(() => {});
+
+      console.log('✅ Successfully sent to default n8n webhook (and attempted extra webhook)');
 
       // Call original handleSubmit if provided
       if (handleSubmit) {

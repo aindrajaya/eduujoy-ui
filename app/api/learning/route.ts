@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const N8N_WEBHOOK_URL = 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/826acb2a-ac8d-496e-828e-1c0791d1446d';
+const EXTRA_N8N_WEBHOOK = 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/73928a59-c6df-4fc6-b06d-ef0c7f02481a';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,8 +25,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward the request to n8n webhook
-    const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
+    // Forward the request to the default n8n webhook and also send the same payload
+    // to the extra webhook. The app will use the default webhook's response, while
+    // the extra webhook is invoked asynchronously (errors are logged but don't block).
+    const defaultResponse = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,16 +36,27 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(formData),
     });
 
-    if (!n8nResponse.ok) {
-      console.error(`n8n webhook error: ${n8nResponse.status}`);
+    // Fire-and-forget the extra webhook; catch errors to avoid unhandled rejections.
+    fetch(EXTRA_N8N_WEBHOOK, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    }).then(res => {
+      if (!res.ok) console.warn(`Extra n8n webhook returned status ${res.status}`);
+    }).catch(err => console.warn('Extra n8n webhook error:', err));
+
+    if (!defaultResponse.ok) {
+      console.error(`n8n webhook error: ${defaultResponse.status}`);
       return NextResponse.json(
-        { error: `n8n webhook failed with status ${n8nResponse.status}` },
-        { status: n8nResponse.status }
+        { error: `n8n webhook failed with status ${defaultResponse.status}` },
+        { status: defaultResponse.status }
       );
     }
 
-    // Parse the response from n8n
-    const learningData = await n8nResponse.json();
+    // Parse the response from the default n8n
+    const learningData = await defaultResponse.json();
 
     // Return the learning data
     return NextResponse.json(learningData, { status: 200 });
