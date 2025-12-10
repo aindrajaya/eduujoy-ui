@@ -4,16 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "@types/ws": "^8.18.1",
     "axios": "^1.13.2",
     "lucide-react": "^0.554.0",
-    "next": "16.0.3",
+    "next": "16.0.7",
+    "prisma": "^7.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "ws": "^8.18.3",
     "youtube-transcript": "^1.0.6"
   },
   "devDependencies": {

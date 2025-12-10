@@ -59,10 +59,14 @@ export default function ModuleDetailScreen({ module, onBack }) {
         Resources
       </h2>
       <div className="space-y-4">
-        {module.resources.map((resource, index) => (
+        {module.resources.map((resource, index) => {
+          const videoId = extractVideoId(resource.link);
+          const isYouTube = resource.type.toLowerCase().includes('youtube') && videoId;
+          
+          return (
           <div key={index}>
             {/* YouTube Resource with Player */}
-            {resource.type.toLowerCase() === 'youtube' ? (
+            {isYouTube ? (
               <div className="bg-white rounded-lg shadow border border-gray-100 p-4 space-y-4">
                 <div className="flex items-center mb-2">
                   {getIcon(resource.type)}
@@ -75,7 +79,7 @@ export default function ModuleDetailScreen({ module, onBack }) {
 
                 {/* Video Player Component */}
                 <VideoPlayerWithSummary
-                  videoId={extractVideoId(resource.link)}
+                  videoId={videoId}
                   title={resource.name}
                 />
               </div>
@@ -104,7 +108,8 @@ export default function ModuleDetailScreen({ module, onBack }) {
               </a>
             )}
           </div>
-        ))}
+        );
+        })}
       </div>
     </div>
   );

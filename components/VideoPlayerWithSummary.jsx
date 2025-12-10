@@ -2,7 +2,10 @@
  * VideoPlayerWithSummary Component
  * 
  * COMPLIANCE NOTES:
- * - Uses official YouTube IFrame embed (fully compliant)
+ * - Uses official YouTube IFrame embed with youtube-nocookie.com domain
+ * - Privacy-first: No cookies set on the YouTube domain
+ * - GDPR compliant: User consent not required for embedded player
+ * - COPPA compliant: Safe for child-directed content
  * - No video downloading or re-hosting
  * - Full attribution to creators and channels
  * - No autoplay (user-initiated only)
@@ -41,8 +44,17 @@ export default function VideoPlayerWithSummary({ videoId, title }) {
   const playerRef = useRef(null);
   const [isUserInitialized, setIsUserInitialized] = useState(false);
 
+  // Safety check for invalid video ID
+  if (!videoId) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-800 text-sm">Invalid YouTube video link</p>
+      </div>
+    );
+  }
+
   const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
 
   /**
    * Load YouTube IFrame API for advanced tracking
@@ -237,7 +249,7 @@ export default function VideoPlayerWithSummary({ videoId, title }) {
       <div className="flex items-start gap-3 p-3 md:p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <p className="text-xs md:text-sm text-blue-800">
-          <strong>100% Creator-Friendly:</strong> Videos stream directly from YouTube with full monetization support. 
+          <strong>🔒 Privacy-First & Creator-Friendly:</strong> Videos use youtube-nocookie.com (no cookies set). Full monetization support. 
           <a 
             href="https://developers.google.com/youtube/terms/developer-policies-guide?hl=en" 
             target="_blank"

@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model LearningData {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  userId    String?
+  
+  // Learning profile information (stored as JSON)
+  profileSummary   Json?
+  
+  // Learning path (stored as JSON for flexibility)
+  learningPath     Json?
+  
+  // Action plan (stored as JSON)
+  actionPlan       Json?
+  
+  // Pro tips array (stored as JSON)
+  proTips          Json?
+  
+  // Expected timeline (stored as JSON)
+  expectedTimeline Json?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime?
+  
+  // For tracking data source
+  source String? @default("n8n")
+  
+  @@index([email])
+  @@index([createdAt])
+}
