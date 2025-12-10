@@ -16,13 +16,15 @@ import {
   CheckCircle,
   ArrowRight,
   AlertCircle,
-  Play
+  Play,
+  Briefcase
 } from 'lucide-react';
 
 export default function OnboardingForm({
   formData,
   handleInputChange,
   handleSubmit,
+  onRequestIdGenerated,
 }) {
   const [showSplash, setShowSplash] = useState(true);
   const [splashAnimation, setSplashAnimation] = useState('enter');
@@ -32,14 +34,12 @@ export default function OnboardingForm({
 
   // Set default values for learning goals and preferred content
   const defaultFormData = useMemo(() => ({
-    name: formData.name || '',
     email: formData.email || '',
-    // learningGoals: formData.learningGoals || 'Upgrade career growth in Product Design (UI/UX)',
-    learningGoals: 'Upgrade career growth in Product Design (UI/UX)',
+    learningGoals: formData.learningGoals || '',
+    skillCategory: formData.skillCategory || '',
     currentState: formData.currentState || '',
     learningStyle: formData.learningStyle || '',
-    // preferredContent: formData.preferredContent || 'audioVisual'
-    preferredContent: 'audioVisual'
+    preferredContent: formData.preferredContent || ''
   }), [formData]);
 
   // Use default form data for validation and display
@@ -65,9 +65,9 @@ export default function OnboardingForm({
 
   // Memoized validation rules for performance
   const validationRules = useMemo(() => ({
-    name: { required: true, minLength: 2, pattern: /^[a-zA-Z\s]+$/ },
     email: { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
     learningGoals: { required: true, minLength: 10 },
+    skillCategory: { required: true },
     currentState: { required: true },
     learningStyle: { required: true },
     preferredContent: { required: true }
@@ -97,6 +97,23 @@ export default function OnboardingForm({
 
   
   const selectFields = useMemo(() => [
+    {
+      name: 'skillCategory',
+      label: 'Skill Category',
+      icon: Briefcase,
+      options: [
+        { value: 'designer', label: 'Designer' },
+        { value: 'programmer', label: 'Programmer' },
+        { value: 'agriculture', label: 'Agriculture' },
+        { value: 'business', label: 'Business' },
+        { value: 'healthcare', label: 'Healthcare' },
+        { value: 'education', label: 'Education' },
+        { value: 'marketing', label: 'Marketing' },
+        { value: 'engineering', label: 'Engineering' },
+        { value: 'other', label: 'Other' }
+      ],
+      disabled: false
+    },
     {
       name: 'currentState',
       label: 'Current Skill Level',
@@ -128,22 +145,12 @@ export default function OnboardingForm({
         { value: 'reading', label: 'Reading - Articles & books' },
         { value: 'interactive', label: 'Interactive - Hands-on projects' }
       ],
-      disabled: true
+      disabled: false
     }
   ], []);
 
     // Form fields configuration for better maintainability
   const formFields = useMemo(() => [
-    {
-      name: 'name',
-      label: 'Full Name',
-      type: 'text',
-      icon: User,
-      placeholder: 'Enter your full name',
-      required: true,
-      autoComplete: 'name',
-      disabled: false
-    },
     {
       name: 'email',
       label: 'Email Address',
@@ -162,7 +169,7 @@ export default function OnboardingForm({
       placeholder: 'e.g., Upgrade career growth in Product Design',
       required: true,
       autoComplete: 'off',
-      disabled: true
+      disabled: false
     }
   ], []);
 
@@ -185,7 +192,7 @@ export default function OnboardingForm({
     setErrors(prev => ({ ...prev, [name]: error }));
   }, [handleInputChange, formFields, selectFields, validateField]);
 
-  // Enhanced submit handler
+  // Enhanced submit handler with webhook POST
   const handleSubmitEnhanced = useCallback(async (e) => {
     e.preventDefault();
 
@@ -210,7 +217,67 @@ export default function OnboardingForm({
 
     setIsSubmitting(true);
     try {
-      await handleSubmit(e);
+      // Generate unique request ID for this submission (email + timestamp)
+      const newRequestId = `${currentFormData.email}_${Date.now()}`;
+      console.log('🆔 Generated requestId:', newRequestId);
+
+      // Notify parent about the requestId
+      if (onRequestIdGenerated) {
+        onRequestIdGenerated(newRequestId);
+      }
+
+      // Prepare form data for webhook (only non-disabled fields)
+      const webhookData = {};
+      [...formFields, ...selectFields].forEach(field => {
+        if (!field.disabled) {
+          webhookData[field.name] = currentFormData[field.name];
+        }
+      });
+
+      // Add requestId to webhook data so n8n can use it when calling back
+      webhookData.requestId = newRequestId;
+      console.log('📤 Sending data to n8n with requestId:', newRequestId);
+
+      // Send POST request to both the default n8n webhook and an additional one
+      const DEFAULT_N8N_WEBHOOK = 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/826acb2a-ac8d-496e-828e-1c0791d1446d';
+      const EXTRA_N8N_WEBHOOK = 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/73928a59-c6df-4fc6-b06d-ef0c7f02481a';
+
+      // Send to default webhook and await its response (drives app flow).
+      const defaultResponsePromise = fetch(DEFAULT_N8N_WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      });
+
+      // Fire-and-forget the extra webhook but catch errors so they don't create unhandled rejections.
+      const extraResponsePromise = fetch(EXTRA_N8N_WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      }).catch((err) => console.warn('Extra n8n webhook error:', err));
+
+      const response = await defaultResponsePromise;
+
+      if (!response.ok) {
+        throw new Error(`Webhook request failed with status ${response.status}`);
+      }
+
+      // Optionally handle extra webhook result asynchronously (already caught above).
+      extraResponsePromise.catch(() => {});
+
+      console.log('✅ Successfully sent to default n8n webhook (and attempted extra webhook)');
+
+      // Call original handleSubmit if provided
+      if (handleSubmit) {
+        await handleSubmit(e);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setErrors({ submit: 'Failed to submit form. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }

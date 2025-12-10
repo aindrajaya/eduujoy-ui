@@ -8,12 +8,17 @@ import ActionPlanCard from '../ActionPlanCard';
 import ModuleNode from '../ModuleNode';
 
 export default function LearningPathScreen({ data, onModuleSelect }) {
+  // Extract focus area from profile summary or use default
+  const focusArea = data?.profile_summary?.focus_area || 
+                    data?.profile_summary?.goal || 
+                    'Your Learning Journey';
+
   return (
     <div className="p-4 md:p-6 animate-fadeIn">
       <header className="mb-6">
         <p className="text-lg font-semibold text-green-600">Your Learning Path</p>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Product Design & UI/UX
+          {focusArea}
         </h1>
       </header>
 
