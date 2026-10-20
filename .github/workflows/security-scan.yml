@@ -1,0 +1,25 @@
+name: Security scan
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev-n8n]
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    name: security-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Pinned to a full commit SHA (v7.0.1) rather than a movable tag.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # Uses the runner's preinstalled Node. No npm install, no build,
+      # no repository code is executed — only the standalone scanner.
+      - name: Scan tracked files
+        run: node scripts/security-scan.mjs
