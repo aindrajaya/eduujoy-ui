@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { mockCheckpointFailed, mockCheckpointResult, mockPath } from '@/api/mocks/data';
+import { mockCheckpointFailed, mockCheckpointResult, mockJobAccepted, mockPath } from '@/api/mocks/data';
 import type { CheckpointResult, PathStep } from '@/api/types';
 import { expectNoAxeViolations } from '@/test/axe';
 import CheckpointResultView from './CheckpointResultView';
@@ -50,9 +50,15 @@ describe('CheckpointResultView (US-05)', () => {
     expect(screen.queryByRole('button', { name: /Try again/ })).not.toBeInTheDocument();
   });
 
-  it('passing the top of the band says the next stage is being built', () => {
-    renderResult({ ...mockCheckpointResult, stageAdvanced: true, nextStepId: null });
+  it('passing the top of the band opens the next path being built (contract 0.3.0)', () => {
+    renderResult({ ...mockCheckpointResult, stageAdvanced: true, nextStepId: null, nextPathJob: mockJobAccepted });
     expect(screen.getByRole('note')).toHaveTextContent('You reached the next stage');
+    expect(screen.getByRole('link', { name: /See your next path being built/ })).toHaveAttribute('href', '/paths/new/job-1');
+  });
+
+  it('without the job, a stage-up leads back to Today', () => {
+    renderResult({ ...mockCheckpointResult, stageAdvanced: true, nextStepId: null, nextPathJob: null });
+    expect(screen.getByRole('note')).toHaveTextContent('it appears on Today');
     expect(screen.getByRole('link', { name: /Back to Today/ })).toHaveAttribute('href', '/today');
   });
 

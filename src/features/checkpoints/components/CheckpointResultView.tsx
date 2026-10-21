@@ -14,7 +14,12 @@ export interface CheckpointResultViewProps {
 /** The screen's one primary action after a graded attempt (US-05). */
 function primaryAction(path: Path, result: CheckpointResult, onRetry: () => void): StickyActionBarProps {
   if (result.passed) {
-    if (result.stageAdvanced) return { label: 'Back to Today', to: '/today' };
+    if (result.stageAdvanced) {
+      // Contract 0.3.0: the re-assessment and next-path job (US-06); without it, Today shows the path.
+      return result.nextPathJob
+        ? { label: 'See your next path being built', to: `/paths/new/${encodeURIComponent(result.nextPathJob.jobId)}` }
+        : { label: 'Back to Today', to: '/today' };
+    }
     const next = path.steps.find((s) => s.id === result.nextStepId);
     if (result.nextStepId) {
       return { label: next ? `Next: Step ${next.n}` : 'Next step', to: stepHref(path.id, result.nextStepId) };
@@ -66,8 +71,8 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
           </div>
           {result.passed && result.stageAdvanced && (
             <p role="note" className="rounded-card bg-success-soft p-3 text-sm text-text">
-              You reached the next stage. We are checking your level and building your next path; it appears on Today
-              when it is ready.
+              You reached the next stage. We are checking your level and building your next path
+              {result.nextPathJob ? '.' : '; it appears on Today when it is ready.'}
             </p>
           )}
           {!result.passed && result.remedialStepId && (
