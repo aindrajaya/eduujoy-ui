@@ -2,12 +2,13 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { mockMe, mockProblem } from '@/api/mocks/data';
 import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { expectNoAxeViolations } from '@/test/axe';
 import { createTestQueryClient } from '@/test/providers';
+import { mockSignedOut } from '@/test/render';
 import { sessionKeys } from './session';
 import SignInPage from './SignInPage';
 
@@ -37,6 +38,11 @@ async function fillAndSubmit(email: string, password: string) {
 }
 
 describe('SignInPage', () => {
+  // These screens render without waiting for auth/me; the baseline visitor is signed out.
+  beforeEach(() => {
+    mockSignedOut();
+  });
+
   it('renders an accessible form with Google and sign-up links', async () => {
     const { container } = renderSignIn('/signin?next=%2Fsteps%2F2');
     expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument();
@@ -118,5 +124,25 @@ describe('SignInPage', () => {
   it('shows the session-expired notice', () => {
     renderSignIn('/signin?expired=1&next=%2Ftoday');
     expect(screen.getByRole('status')).toHaveTextContent('Your session expired.');
+  });
+
+  it('renders the form at once, before auth/me answers', async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    server.use(
+      http.get('/v1/auth/me', async ({ response }) => {
+        await gate;
+        return response(200).json(mockMe);
+      }),
+    );
+    const { router } = renderSignIn('/signin?next=%2Fpaths');
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
+    release();
+    // Once the session resolves signed in, the visitor is sent on to next.
+    await screen.findByRole('heading', { name: 'Landed' });
+    expect(router.state.location.pathname).toBe('/paths');
+    expect(router.state.historyAction).toBe('REPLACE');
   });
 });
