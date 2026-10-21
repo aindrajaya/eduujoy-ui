@@ -17,7 +17,7 @@ const SOURCE_LABEL: Record<TopicPosition['source'], string> = {
   override: 'your own choice',
 };
 
-const shortDate = (iso: string) => new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' }).format(new Date(iso));
+const shortDate = (iso: string) => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(new Date(iso));
 
 function ProgressSkeleton() {
   return (
