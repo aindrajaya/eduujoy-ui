@@ -35,6 +35,22 @@ export default tseslint.config(
     },
   },
   {
+    // PRD-UI §5: only src/api talks HTTP; features call endpoint functions through queries.ts hooks.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/api/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{ name: 'axios', message: 'Use the endpoint functions in src/api/endpoints.' }],
+          patterns: [
+            { group: ['@/api/client', '**/api/client'], message: 'Use src/api/endpoints instead.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.{ts,tsx}', 'src/test/**'],
     rules: { '@typescript-eslint/no-non-null-assertion': 'off' },
   },
