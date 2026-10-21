@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "size": "size-limit"
+    "size": "size-limit",
+    "lhci": "pnpm dlx @lhci/cli@0.15.1 autorun"
   },
   "dependencies": {
     "lucide-react": "0.577.0",
