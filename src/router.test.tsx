@@ -4,7 +4,7 @@ import { mockProblem } from './api/mocks/data';
 import { http, problemResponse } from './api/mocks/handlers';
 import { server } from './api/mocks/server';
 import { routes } from './router';
-import { renderRoute, useSignedOut } from './test/render';
+import { renderRoute, mockSignedOut } from './test/render';
 
 describe('router', () => {
   it('loads every screen lazily (no static Component or element)', () => {
@@ -26,7 +26,7 @@ describe('router', () => {
     expect(signedIn.router.state.location.pathname).toBe('/today');
     signedIn.unmount();
 
-    useSignedOut();
+    mockSignedOut();
     const signedOut = renderRoute('/');
     await screen.findByRole('heading', { name: 'Welcome back' });
     expect(signedOut.router.state.location.pathname).toBe('/signin');
@@ -35,7 +35,7 @@ describe('router', () => {
   it.each(['/today', '/steps/1', '/start', '/account'])(
     'redirects a signed-out visit to %s through /signin with next',
     async (path) => {
-      useSignedOut();
+      mockSignedOut();
       const { router } = renderRoute(path);
       await screen.findByRole('heading', { name: 'Welcome back' });
       expect(router.state.location.pathname).toBe('/signin');
@@ -59,7 +59,7 @@ describe('router', () => {
     expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
     expect(screen.queryByRole('main')).not.toBeInTheDocument();
     release();
-    useSignedOut();
+    mockSignedOut();
     await screen.findByRole('heading', { name: 'Welcome back' });
   });
 

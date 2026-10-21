@@ -25,7 +25,7 @@ export function renderRoute(path: string) {
 }
 
 /** Makes auth/me answer 401 and the refresh fail, i.e. a signed-out visitor. */
-export function useSignedOut() {
+export function mockSignedOut() {
   const unauthorized = () =>
     problemResponse(mockProblem(401, 'UNAUTHENTICATED', 'Sign in required'));
   server.use(
