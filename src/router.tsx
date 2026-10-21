@@ -84,6 +84,12 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'paths/:id',
+                lazy: async () => ({
+                  Component: (await import('./features/paths/PathPage')).default,
+                }),
+              },
+              {
                 path: 'progress',
                 lazy: async () => ({
                   Component: (await import('./features/progress/ProgressPage')).default,
