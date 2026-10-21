@@ -1,15 +1,20 @@
 import { redirect, type RouteObject } from 'react-router';
 import BootSplash from './app/BootSplash';
 import RouteError from './app/RouteError';
-import { HOME, loadSession, publicOnly, requireAuth } from './auth/guards';
+import { HOME, loadSession, requireAuth } from './auth/guards';
 
 // Every screen is a lazy chunk. The shell holds only the boot splash, the error boundary and the
-// session guards, which run in loaders so no protected markup renders before auth/me resolves.
+// session guards. Protected routes wait for auth/me in their loader (behind the boot splash), so no
+// protected markup renders first; /signin and /signup render at once and redirect via useSession.
 export const routes: RouteObject[] = [
   {
     id: 'root',
     path: '/',
-    loader: () => loadSession(),
+    // Starts auth/me as early as possible without blocking public screens on it.
+    loader: () => {
+      void loadSession().catch(() => undefined);
+      return null;
+    },
     HydrateFallback: BootSplash,
     ErrorBoundary: RouteError,
     lazy: async () => ({ Component: (await import('./app/RootLayout')).default }),
@@ -17,20 +22,20 @@ export const routes: RouteObject[] = [
       {
         index: true,
         loader: async () => redirect((await loadSession()) ? HOME : '/signin'),
+        HydrateFallback: BootSplash,
       },
       {
         path: 'signin',
-        loader: ({ request }) => publicOnly(request),
         lazy: async () => ({ Component: (await import('./auth/SignInPage')).default }),
       },
       {
         path: 'signup',
-        loader: ({ request }) => publicOnly(request),
         lazy: async () => ({ Component: (await import('./auth/SignUpPage')).default }),
       },
       {
         id: 'protected',
         loader: ({ request }) => requireAuth(request),
+        HydrateFallback: BootSplash,
         children: [
           {
             path: 'start',

@@ -3,7 +3,7 @@ import { mockMe, mockProblem } from '@/api/mocks/data';
 import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { createQueryClient } from '@/query-client';
-import { publicOnly, requireAuth, requireRole, safeNext, signInUrl } from './guards';
+import { requireAuth, requireRole, safeNext, signInUrl } from './guards';
 import { fetchSession, hasRole, sessionKeys } from './session';
 
 const req = (path: string) => new Request(`http://localhost${path}`);
@@ -109,15 +109,6 @@ describe('guards', () => {
     expect(res.status).toBe(403);
   });
 
-  it('publicOnly sends signed-in users to a safe next, and lets signed-out users through', async () => {
-    const res = await thrown(publicOnly(req('/signin?next=%2Fprogress'), createQueryClient()));
-    expect(res.headers.get('Location')).toBe('/progress');
-    const evil = await thrown(publicOnly(req('/signin?next=%2F%2Fevil.example'), createQueryClient()));
-    expect(evil.headers.get('Location')).toBe('/today');
-
-    signedOut();
-    await expect(publicOnly(req('/signin'), createQueryClient())).resolves.toBeNull();
-  });
 
   it('builds sign-in URLs with extra params', () => {
     expect(signInUrl(req('/today'), { expired: '1' })).toBe('/signin?next=%2Ftoday&expired=1');

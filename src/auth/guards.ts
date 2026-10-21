@@ -54,9 +54,3 @@ export async function requireRole(
   return me;
 }
 
-/** Loader guard for /signin and /signup: signed-in users go straight to `next` or Today. */
-export async function publicOnly(request: Request, client?: QueryClient): Promise<null> {
-  const me = await loadSession(client);
-  if (me) throw redirect(safeNext(new URL(request.url).searchParams.get('next')));
-  return null;
-}
