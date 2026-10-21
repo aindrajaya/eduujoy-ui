@@ -7,7 +7,8 @@ import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
 import GoogleButton from './GoogleButton';
-import { safeNext } from './guards';
+import { HOME, safeNext } from './guards';
+import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
 import { useSignUp } from './queries';
 import type { SignUpValues } from './schemas';
 
@@ -22,6 +23,8 @@ export default function SignUpPage() {
   const rawNext = params.get('next');
   const next = rawNext ? safeNext(rawNext) : NEW_ACCOUNT_HOME;
   const signUp = useSignUp();
+  // Already signed in: go to next or Today. A fresh account goes to `next` or onboarding instead.
+  useRedirectIfSignedIn(rawNext ? next : HOME, signUp.isIdle || signUp.isError);
 
   const {
     register,

@@ -2,13 +2,14 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { describe, expect, it } from 'vitest';
-import { mockProblem } from '@/api/mocks/data';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { mockMe, mockProblem } from '@/api/mocks/data';
 import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import type { RegisterRequest } from '@/api/types';
 import { expectNoAxeViolations } from '@/test/axe';
 import { createTestQueryClient } from '@/test/providers';
+import { mockSignedOut } from '@/test/render';
 import SignUpPage from './SignUpPage';
 
 function renderSignUp(path = '/signup') {
@@ -28,6 +29,11 @@ function renderSignUp(path = '/signup') {
 }
 
 describe('SignUpPage', () => {
+  // These screens render without waiting for auth/me; the baseline visitor is signed out.
+  beforeEach(() => {
+    mockSignedOut();
+  });
+
   it('enforces the 10-character password minimum', async () => {
     const { container } = renderSignUp();
     const user = userEvent.setup();
@@ -76,5 +82,12 @@ describe('SignUpPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('already exists');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fpaths');
     await expectNoAxeViolations(container);
+  });
+
+  it('sends an already signed-in visitor to Today, not onboarding', async () => {
+    server.use(http.get('/v1/auth/me', ({ response }) => response(200).json(mockMe)));
+    const { router } = renderSignUp();
+    await screen.findByRole('heading', { name: 'Landed' });
+    expect(router.state.location.pathname).toBe('/today');
   });
 });

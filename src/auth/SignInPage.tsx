@@ -8,6 +8,7 @@ import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
 import GoogleButton from './GoogleButton';
 import { safeNext } from './guards';
+import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
 import { useSignIn } from './queries';
 import type { SignInValues } from './schemas';
 
@@ -19,6 +20,7 @@ export default function SignInPage() {
   const next = safeNext(params.get('next'));
   const expired = params.get('expired') === '1';
   const signIn = useSignIn();
+  useRedirectIfSignedIn(next, signIn.isIdle || signIn.isError);
 
   const {
     register,
