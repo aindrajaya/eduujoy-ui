@@ -15,8 +15,12 @@ export interface QuizSubmitOptions<R> {
   baseDelayMs?: number;
 }
 
+/** The longest wait between automatic retries; a longer Retry-After goes back to the learner. */
+const MAX_RETRY_WAIT_MS = 8000;
+
 export function isRetryable(error: ApiError): boolean {
-  if (error.code === 'CANCELED') return false;
+  // The daily AI budget resets at UTC midnight (contract 0.2.1, Retry-After): retrying cannot help.
+  if (error.code === 'CANCELED' || error.code === 'AI_BUDGET_EXCEEDED') return false;
   return error.status === 0 || error.status >= 500 || error.status === 408 || error.status === 429;
 }
 
@@ -83,11 +87,12 @@ export function useQuizSubmit<R>({
         return;
       } catch (e) {
         const error = toApiError(e);
-        if (attempt >= retries || !isRetryable(error)) {
+        const wait = error.retryAfterMs ?? Math.min(baseDelayMs * 2 ** attempt, MAX_RETRY_WAIT_MS);
+        if (attempt >= retries || !isRetryable(error) || wait > MAX_RETRY_WAIT_MS) {
           if (mounted.current) dispatch({ type: 'FAILED', error });
           return;
         }
-        await sleep(error.retryAfterMs ?? Math.min(baseDelayMs * 2 ** attempt, 8000));
+        await sleep(wait);
         if (!mounted.current) return;
       }
     }

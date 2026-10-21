@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useQuizDispatch, useQuizQuestions, useQuizState } from './context';
 import QuestionView from './QuestionView';
-import ReviewScreen from './ReviewScreen';
+import ReviewScreen, { type ReviewScreenProps } from './ReviewScreen';
 import type { Answer } from './types';
 import { useQuizDraft } from './useQuizDraft';
 import { useQuizSubmit, type QuizSubmitOptions } from './useQuizSubmit';
@@ -13,6 +13,7 @@ export interface QuizRunnerProps<R> extends QuizSubmitOptions<R> {
   submitLabel?: string;
   /** Submit as soon as the last answer is committed (short batches like the diagnostic). */
   autoSubmit?: boolean;
+  describeError?: ReviewScreenProps['describeError'];
 }
 
 /**
@@ -24,6 +25,7 @@ export default function QuizRunner<R>({
   allowSkip,
   submitLabel,
   autoSubmit = false,
+  describeError,
   ...submitOptions
 }: QuizRunnerProps<R>) {
   const questions = useQuizQuestions();
@@ -65,7 +67,14 @@ export default function QuizRunner<R>({
   }
 
   if (status !== 'answering') {
-    return <ReviewScreen onSubmit={() => void submit()} submitLabel={submitLabel} waitingForNetwork={waitingForNetwork} />;
+    return (
+      <ReviewScreen
+        onSubmit={() => void submit()}
+        submitLabel={submitLabel}
+        waitingForNetwork={waitingForNetwork}
+        describeError={describeError}
+      />
+    );
   }
 
   const question = questions[index];

@@ -84,6 +84,23 @@ describe('/diagnostic/:id (US-02)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('You have used this month’s paths.');
   });
 
+  it('says when building can resume after the daily AI budget runs out', async () => {
+    server.use(
+      http.get('/v1/diagnostics/{id}', ({ response }) => response(200).json({ ...mockDiagnosticResume, ...mockDiagnosticCompleted, items: [] })),
+      http.post('/v1/paths', ({ response }) =>
+        response.untyped(
+          new Response(JSON.stringify(mockProblem(503, 'AI_BUDGET_EXCEEDED', 'Budget')), {
+            status: 503,
+            headers: { 'Content-Type': 'application/problem+json', 'Retry-After': '7200' },
+          }),
+        ),
+      ),
+    );
+    renderRoute('/diagnostic/diag-1');
+    await userEvent.click(await screen.findByRole('button', { name: 'Build my path' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Path building has reached today’s limit. Try again in about 2 hours.');
+  });
+
   it('explains when the diagnostic is not available', async () => {
     const { container } = renderRoute('/diagnostic/unknown');
     expect(await screen.findByText('This diagnostic isn’t available here')).toBeInTheDocument();
