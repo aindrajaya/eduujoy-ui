@@ -4,6 +4,7 @@ import {
   mockCheckpointResult,
   mockCostMetrics,
   mockDiagnosticCompleted,
+  mockDiagnosticResume,
   mockJobAccepted,
   mockMe,
   mockPath,
@@ -44,6 +45,11 @@ describe('endpoints', () => {
     await expect(
       diagnostics.submitDiagnosticAnswers('diag-1', { answers: [{ itemId: 'q1', skipped: true }] }),
     ).resolves.toEqual(mockDiagnosticCompleted);
+  });
+
+  it('diagnostics: resume returns the outstanding batch; unknown ids 404', async () => {
+    await expect(diagnostics.getDiagnostic('diag-1')).resolves.toEqual(mockDiagnosticResume);
+    await expect(diagnostics.getDiagnostic('nope')).rejects.toMatchObject({ status: 404 });
   });
 
   it('paths: list passes query params, get maps 404 to ApiError', async () => {
