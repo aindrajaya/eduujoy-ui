@@ -10,3 +10,5 @@ API shapes come only from docs/openapi.json; refresh it with `pnpm api:sync` (co
 - Keep every route lazy; run size-limit before finishing.
 - Run the slice's Verify commands; if the PRD is ambiguous, stop and list the question.
 - Env: VITE_API_URL=https://api.eduujoy.aindrajaya.my.id; every request uses withCredentials: true.
+
+- Micro-commits: one logical task per commit, Conventional Commits with the slice ID, e.g. `feat(scope): summary [A6]`; merge each slice with --no-ff.
