@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { useSignOut } from '@/auth/queries';
+import { useSignOut, type SignInLocationState } from '@/auth/queries';
 import { useSession } from '@/auth/session';
 import { demoProfile } from '@/fixtures/demo';
 import Profile from './components/Profile';
@@ -18,8 +18,9 @@ export default function AccountPage() {
 
   const handleSignOut = () => {
     signOut.mutate(undefined, {
-      onSettled: () => {
-        void navigate('/signin', { replace: true });
+      onSettled: (_data, error) => {
+        const state: SignInLocationState = { signOutFailed: Boolean(error) };
+        void navigate('/signin', { replace: true, state });
       },
     });
   };
