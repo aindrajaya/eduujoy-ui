@@ -41,3 +41,14 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# workspace bootstrap (pnpm + Vite)
+node_modules
+dist
+build
+coverage
+.env
+.env.*
+!.env.example
+.DS_Store
+.claude/settings.local.json
