@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 import { createApiClient, DEFAULT_TIMEOUT_MS } from './client';
+import { CONCURRENT_REFRESH_SETTLE_MS } from './interceptors';
 import { ApiError } from './errors';
 import { server } from './mocks/server';
 
@@ -116,6 +117,108 @@ describe('createApiClient', () => {
     }
     expect(onSessionExpired).toHaveBeenCalledTimes(1);
     expect(onSessionExpired.mock.calls[0]?.[0]).toMatchObject({ url: '/v1/paths/a' });
+  });
+
+  it('treats 409 REFRESH_CONCURRENT as a completed refresh and replays without signing out', async () => {
+    // Another tab rotated the refresh token first; the API leaves our (already rotated) cookies alone.
+    let otherTabRotated = false;
+    let refreshCalls = 0;
+    const seen: string[] = [];
+    const onSessionExpired = vi.fn();
+    server.use(
+      protectedRoute(() => otherTabRotated, seen),
+      http.post(`${BASE}/v1/auth/refresh`, () => {
+        refreshCalls += 1;
+        otherTabRotated = true;
+        return HttpResponse.json(
+          {
+            type: `${BASE}/problems/refresh-concurrent`,
+            title: 'Refresh already in progress',
+            status: 409,
+            code: 'REFRESH_CONCURRENT',
+            requestId: 'r409',
+          },
+          { status: 409, headers: { 'Content-Type': 'application/problem+json' } },
+        );
+      }),
+    );
+    const api = createApiClient({ baseURL: BASE, onSessionExpired });
+
+    const results = await Promise.all(['a', 'b', 'c'].map((id) => api.get<{ id: string }>(`/v1/paths/${id}`)));
+
+    expect(results.map((r) => r.data.id)).toEqual(['a', 'b', 'c']);
+    expect(refreshCalls).toBe(1);
+    expect(onSessionExpired).not.toHaveBeenCalled();
+    for (const id of ['a', 'b', 'c']) expect(seen.filter((s) => s === id)).toHaveLength(2);
+  });
+
+  it('two tabs: parallel 401s whose refreshes get 204 and 409 both succeed', async () => {
+    // A tiny cookie jar shared by two tabs. Tab A rotates the token (204); tab B's refresh of the
+    // same token lands inside the grace window (409) and must wait, then replay with A's cookies.
+    let rotated = false;
+    let refreshCalls = 0;
+    server.use(
+      http.get(`${BASE}/v1/paths/:id`, ({ params }) =>
+        rotated ? HttpResponse.json({ id: params.id }) : unauthorized(),
+      ),
+      http.post(`${BASE}/v1/auth/refresh`, async () => {
+        refreshCalls += 1;
+        if (refreshCalls === 1) {
+          await new Promise((r) => setTimeout(r, 30));
+          rotated = true;
+          return new HttpResponse(null, { status: 204 });
+        }
+        return HttpResponse.json(
+          { type: 'x', title: 'Concurrent', status: 409, code: 'REFRESH_CONCURRENT', requestId: 'r' },
+          { status: 409, headers: { 'Content-Type': 'application/problem+json' } },
+        );
+      }),
+    );
+    const onSessionExpired = vi.fn();
+    const tabA = createApiClient({ baseURL: BASE, onSessionExpired });
+    const tabB = createApiClient({ baseURL: BASE, onSessionExpired });
+
+    const started = Date.now();
+    const [a, b] = await Promise.all([tabA.get<{ id: string }>('/v1/paths/a'), tabB.get<{ id: string }>('/v1/paths/b')]);
+
+    expect([a.data.id, b.data.id]).toEqual(['a', 'b']);
+    expect(refreshCalls).toBe(2);
+    expect(onSessionExpired).not.toHaveBeenCalled();
+    // Tab B waited for tab A's Set-Cookie before replaying.
+    expect(Date.now() - started).toBeGreaterThanOrEqual(CONCURRENT_REFRESH_SETTLE_MS - 10);
+  });
+
+  it('treats a 401 on the replay after a 409 as signed out, reported once, with no loop', async () => {
+    let refreshCalls = 0;
+    const onSessionExpired = vi.fn();
+    server.use(
+      protectedRoute(() => false, []),
+      http.post(`${BASE}/v1/auth/refresh`, () => {
+        refreshCalls += 1;
+        return HttpResponse.json(
+          { type: 'x', title: 'Concurrent', status: 409, code: 'REFRESH_CONCURRENT', requestId: 'r' },
+          { status: 409 },
+        );
+      }),
+    );
+    const api = createApiClient({ baseURL: BASE, onSessionExpired });
+    const results = await Promise.allSettled(['x', 'y'].map((id) => api.get(`/v1/paths/${id}`)));
+    expect(results.map((r) => r.status)).toEqual(['rejected', 'rejected']);
+    expect(refreshCalls).toBe(1);
+    expect(onSessionExpired).toHaveBeenCalledOnce();
+  });
+
+  it('does not treat other 409s from refresh as success', async () => {
+    server.use(
+      protectedRoute(() => false, []),
+      http.post(`${BASE}/v1/auth/refresh`, () =>
+        HttpResponse.json({ type: 'x', title: 'Conflict', status: 409, code: 'CONFLICT', requestId: 'r' }, { status: 409 }),
+      ),
+    );
+    await expect(createApiClient({ baseURL: BASE }).get('/v1/paths/x')).rejects.toMatchObject({
+      status: 409,
+      code: 'CONFLICT',
+    });
   });
 
   it('does not refresh twice when the replay is also 401', async () => {
