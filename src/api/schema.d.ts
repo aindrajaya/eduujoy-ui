@@ -200,6 +200,9 @@ export interface paths {
         /**
          * Rotate the refresh token and issue a new access cookie.
          * @description Reads `ej_rt`. Reuse of a rotated token revokes the whole session family and returns 401.
+         *     A second refresh of the same token within the 10-second grace window (two tabs refreshing at
+         *     once) returns 409 `REFRESH_CONCURRENT` and leaves the cookies untouched: the other request
+         *     already rotated them, so the client replays its original request once instead of signing out.
          */
         post: operations["authRefresh"];
         delete?: never;
@@ -758,7 +761,7 @@ export interface components {
             type: string;
         };
         /** @enum {string} */
-        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "INTERNAL";
+        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "REFRESH_CONCURRENT" | "INTERNAL";
         ProgressHistoryResponse: {
             items: {
                 confidence: number;
@@ -980,6 +983,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description The refresh token was rotated by a concurrent request; cookies are unchanged. Code `REFRESH_CONCURRENT`. */
+        RefreshConcurrent: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Rate limited (code RATE_LIMITED). */
         TooManyRequests: {
             headers: {
@@ -1191,7 +1203,7 @@ export interface operations {
     authGoogleStart: {
         parameters: {
             query?: {
-                /** @description Path on APP_ORIGIN to land on after sign-in. */
+                /** @description Same-site path on APP_ORIGIN to land on after sign-in; unsafe or missing values fall back to /today. */
                 returnTo?: string;
             };
             header?: never;
@@ -1329,6 +1341,7 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["Unauthorized"];
+            409: components["responses"]["RefreshConcurrent"];
         };
     };
     authRegister: {
@@ -1588,6 +1601,8 @@ export interface operations {
             query?: {
                 cursor?: components["parameters"]["Cursor"];
                 limit?: components["parameters"]["Limit"];
+                /** @description Only paths with this status, for example `active` for the Today screen. */
+                status?: "generating" | "active" | "completed" | "failed" | "under_review";
                 topicId?: string;
             };
             header?: {
