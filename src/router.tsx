@@ -1,4 +1,4 @@
-import { createBrowserRouter, type RouteObject } from 'react-router';
+import { createBrowserRouter, redirect, type RouteObject } from 'react-router';
 
 // Every route is a lazy chunk; the shell holds only layout and routing.
 export const routes: RouteObject[] = [
@@ -6,6 +6,17 @@ export const routes: RouteObject[] = [
     path: '/',
     lazy: async () => ({ Component: (await import('./app/RootLayout')).default }),
     children: [
+      {
+        // U2 replaces this with a session-aware redirect (/today when signed in).
+        index: true,
+        lazy: async () => ({ loader: () => redirect('/start') }),
+      },
+      {
+        path: 'start',
+        lazy: async () => ({
+          Component: (await import('./features/onboarding/StartPage')).default,
+        }),
+      },
       {
         lazy: async () => ({ Component: (await import('./app/TabsLayout')).default }),
         children: [
