@@ -37,11 +37,11 @@ function Spy() {
   return <p data-testid="spy">{`${status}:${index}`}</p>;
 }
 
-function renderReview(onSubmit = vi.fn(), waitingForNetwork = false) {
+function renderReview(onSubmit = vi.fn(), waitingForNetwork = false, describeError?: (error: ApiError) => string | undefined) {
   const utils = render(
     <QuizProvider quizId="q" questions={questions}>
       <Spy />
-      <ReviewScreen onSubmit={onSubmit} waitingForNetwork={waitingForNetwork} />
+      <ReviewScreen onSubmit={onSubmit} waitingForNetwork={waitingForNetwork} describeError={describeError} />
     </QuizProvider>,
   );
   act(() => {
@@ -90,6 +90,20 @@ describe('ReviewScreen', () => {
     });
     expect(screen.getByRole('alert')).toHaveTextContent('saved on this device');
     expect(screen.getByRole('button', { name: 'Try again' })).toBeEnabled();
+    act(() => {
+      dispatchRef?.({ type: 'SUBMIT' });
+      dispatchRef?.({ type: 'FAILED', error: new ApiError({ status: 500, code: 'INTERNAL', title: 'x' }) });
+    });
+    expect(screen.getByRole('alert')).toHaveTextContent('We could not submit your answers.');
+  });
+
+  it('uses the screen’s copy for errors it knows, and the generic copy for the rest', () => {
+    renderReview(vi.fn(), false, (error) => (error.code === 'AI_BUDGET_EXCEEDED' ? 'Grading is paused.' : undefined));
+    act(() => {
+      dispatchRef?.({ type: 'SUBMIT' });
+      dispatchRef?.({ type: 'FAILED', error: new ApiError({ status: 503, code: 'AI_BUDGET_EXCEEDED', title: 'x' }) });
+    });
+    expect(screen.getByRole('alert')).toHaveTextContent('Grading is paused.');
     act(() => {
       dispatchRef?.({ type: 'SUBMIT' });
       dispatchRef?.({ type: 'FAILED', error: new ApiError({ status: 500, code: 'INTERNAL', title: 'x' }) });

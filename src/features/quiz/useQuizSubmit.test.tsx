@@ -63,6 +63,22 @@ describe('useQuizSubmit', () => {
     expect(result.current.state).toMatchObject({ status: 'error', idempotencyKey: 'attempt-key' });
   });
 
+  it('does not retry an exhausted AI budget, nor wait out a long Retry-After', async () => {
+    const budget = new ApiError({ status: 503, code: 'AI_BUDGET_EXCEEDED', title: 'x', retryAfterMs: 5 * 3600_000 });
+    const busy = new ApiError({ status: 503, code: 'INTERNAL', title: 'x', retryAfterMs: 60_000 });
+    for (const error of [budget, busy]) {
+      const submit = vi.fn().mockRejectedValue(error);
+      const { result, unmount } = setup({ submit });
+      await act(async () => {
+        await result.current.submit();
+      });
+      expect(submit).toHaveBeenCalledOnce();
+      expect(result.current.state.error?.code).toBe(error.code);
+      unmount();
+    }
+    expect(isRetryable(budget)).toBe(false);
+  });
+
   it('does not retry client errors', async () => {
     const submit = vi.fn().mockRejectedValue(new ApiError({ status: 409, code: 'CONFLICT', title: 'x' }));
     const { result } = setup({ submit });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatTimestamp, parseTimestamp } from './time';
+import { formatRetryWait, formatTimestamp, parseTimestamp } from './time';
 
 describe('timestamps', () => {
   it.each([
@@ -17,5 +17,15 @@ describe('timestamps', () => {
   it('formats seconds', () => {
     expect(formatTimestamp(250)).toBe('04:10');
     expect(formatTimestamp(3723)).toBe('1:02:03');
+  });
+});
+
+describe('formatRetryWait', () => {
+  it('says roughly when a daily limit lifts', () => {
+    expect(formatRetryWait(undefined)).toBe('after the daily reset at midnight UTC');
+    expect(formatRetryWait(1_000)).toBe('in a minute');
+    expect(formatRetryWait(20 * 60_000)).toBe('in about 20 minutes');
+    expect(formatRetryWait(70 * 60_000)).toBe('in about an hour');
+    expect(formatRetryWait(5 * 3600_000)).toBe('in about 5 hours');
   });
 });

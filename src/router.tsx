@@ -82,6 +82,13 @@ export const routes: RouteObject[] = [
             }),
           },
           {
+            path: 'checkpoints/:id',
+            loader: ({ request }) => prefetchPathData(new URL(request.url).searchParams.get('path')),
+            lazy: async () => ({
+              Component: (await import('./features/checkpoints/CheckpointPage')).default,
+            }),
+          },
+          {
             path: 'steps/:id',
             loader: ({ request }) => prefetchPathData(new URL(request.url).searchParams.get('path')),
             lazy: async () => ({ Component: (await import('./features/steps/StepPage')).default }),

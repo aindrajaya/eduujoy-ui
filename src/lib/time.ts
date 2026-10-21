@@ -13,3 +13,16 @@ export function formatTimestamp(seconds: number): string {
   const ss = String(s).padStart(2, '0');
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
+
+/**
+ * When a daily limit lifts, from Retry-After: "in about 5 hours", "in about 20 minutes".
+ * Without one, the AI budget resets at UTC midnight (contract 0.2.1).
+ */
+export function formatRetryWait(ms: number | undefined): string {
+  if (ms === undefined) return 'after the daily reset at midnight UTC';
+  const minutes = Math.ceil(ms / 60_000);
+  if (minutes <= 1) return 'in a minute';
+  if (minutes < 60) return `in about ${minutes} minutes`;
+  const hours = Math.round(minutes / 60);
+  return hours === 1 ? 'in about an hour' : `in about ${hours} hours`;
+}

@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mockPathJobEvents, mockProblem } from '@/api/mocks/data';
+import { mockCheckpointResult, mockGradeJobEvents, mockPathJobEvents, mockProblem } from '@/api/mocks/data';
 import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { after, sseResponse, type MockSseEvent } from '@/api/mocks/sse';
@@ -31,6 +31,18 @@ describe('applyJobEvent', () => {
     expect(failed.status).toBe('failed');
   });
 
+  it('collects graded checkpoint items and the inline result of a grading job', () => {
+    let view = emptyJobView();
+    for (const e of mockGradeJobEvents as unknown as MockSseEvent[]) {
+      view = applyJobEvent(view, { id: e.id, event: e.event, data: JSON.stringify(e.data) });
+    }
+    expect(view.partialItems.map((i) => i.itemId)).toEqual(['cp-2-3']);
+    expect(view.completed?.result).toEqual(mockCheckpointResult);
+    // The same item twice is replaced, not duplicated.
+    const again = applyJobEvent(view, { id: '4', event: 'partial', data: JSON.stringify(mockGradeJobEvents[1].data) });
+    expect(again.partialItems).toHaveLength(1);
+  });
+
   it('ignores bad JSON and unknown events (but keeps the id), and non-step partials', () => {
     const view = emptyJobView();
     expect(applyJobEvent(view, { id: '4', event: 'progress', data: 'nope' })).toMatchObject({ lastEventId: '4', status: 'connecting' });
@@ -40,9 +52,14 @@ describe('applyJobEvent', () => {
 });
 
 describe('resume point', () => {
+  it('reads resume points saved before checkpoint items existed', () => {
+    window.localStorage.setItem('job:old', JSON.stringify({ lastEventId: '2', partialSteps: [] }));
+    expect(readResumePoint('old')).toMatchObject({ lastEventId: '2', partialItems: [] });
+  });
+
   it('stores the last event id while running and clears it when the job ends', () => {
     saveResumePoint('j', { ...emptyJobView(), status: 'running', lastEventId: '3' });
-    expect(readResumePoint('j')).toMatchObject({ lastEventId: '3', status: 'connecting' });
+    expect(readResumePoint('j')).toMatchObject({ lastEventId: '3', status: 'connecting', partialItems: [] });
     saveResumePoint('j', { ...emptyJobView(), status: 'completed' });
     expect(readResumePoint('j')).toBeNull();
   });
