@@ -28,7 +28,7 @@ A Vite + React + TypeScript SPA with feature folders that mirror the API's modul
 
 | Concern | Choice | Note |
 | --- | --- | --- |
-| Build | Vite, TypeScript `strict` | Confirm the current codebase's build tool (open question) |
+| Build | Vite, TypeScript `strict` | Migrating from Next.js 16 (see the migration note below) |
 | Routing | React Router (data router: `loader`, `lazy` routes) | Route-level code splitting and auth checks before render |
 | Server state | TanStack Query | Fetching, caching, revalidation, request deduplication |
 | HTTP | Axios, one central instance in `src/api` | Interceptors, typed calls, problem+json mapping |
@@ -53,6 +53,19 @@ src/
   ui/           # design-system components, tokens.css, icons
   lib/          # formatters, storage (draft persistence), env
 ```
+
+**Migration from the existing Next.js app (slice U0a, decided 21 Oct 2026)**
+
+Today `ui/` is Next.js 16.0.10 with React 19.2 (App Router and `pages/api`), Prisma on Neon, Tailwind 4 and npm, with no tests. It becomes a Vite SPA in the same repo: keep the visual design and the screens, delete every piece of server code, because the API now owns it.
+
+| Keep and port into `features/` (proposed mapping) | Delete |
+| --- | --- |
+| `OnboardingForm` → `onboarding` · `Dashboard` → `/today` · `LearningPath`, `ModuleNode` → `paths` · `ModuleDetail`, `ActionPlanCard` → `steps` · `Profile` → `account` · `BottomNav`, `LoadingScreen` → `ui/` · `VideoPlayerWithSummary` → `YouTubeEmbed` (U8) | `app/api`, `pages/api`, Prisma schema and client, `lib` stores and caches, the n8n flow, `next.config`, and Next-only imports (`next/link`, `next/image`, `next/navigation`, `next/font`) |
+
+- Port components as presentation only: no data fetching moves over; all data arrives through the API module (U1).
+- Keep Tailwind 4 and the existing design tokens; map them onto the token roles in Section 4.
+- Replace `next/image` with plain `img` (explicit sizes, `loading="lazy"`), `next/font` with self-hosted fonts, and `next/link` with React Router `Link`.
+- The security-scan workflow moves from npm to pnpm in U0b.
 
 **Deployment and domains** (full DNS setup: [API PRD, Section 3](https://claude.ai/artifact/2hFY3AbqXzA13eGMJTWhsE))
 
@@ -294,11 +307,12 @@ WCAG 2.2 AA is a merge gate, and every user story in the master PRD has at least
 
 ## 11. Build plan for Claude Code
 
-Twelve slices, one per Claude Code session. Each slice builds against MSW mocks generated from `openapi.json`, so UI work never waits for the matching API slice; the "Pairs with" column says when to switch a slice to the real API.
+Thirteen slices, worked one at a time. Each slice builds against MSW mocks generated from `openapi.json`, so UI work never waits for the matching API slice; the "Pairs with" column says when to switch a slice to the real API.
 
 | ID | Slice | Pairs with | Done when | Verify |
 | --- | --- | --- | --- | --- |
-| U0 | Repo hygiene: strict TS, ESLint, Vitest, Tailwind tokens, `size-limit`, Lighthouse CI, CI pipeline | A0 | Existing app builds; budgets reported | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` |
+| U0a | Vite migration: new Vite + React Router shell in the same repo; port the kept screens as presentation-only components (Section 2 migration note); delete Next.js server code, Prisma and `next.config` | — | App runs on Vite with the kept screens rendering from static props; no `next` dependency left; no server code in the repo | `pnpm build && pnpm preview`; `grep -r "from 'next" src` returns nothing |
+| U0b | Tooling: strict TS, ESLint, Vitest, Tailwind tokens, `size-limit`, Lighthouse CI, CI pipeline (security scan moved to pnpm) | A0 | CI green on `main`; budgets reported | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` |
 | U1 | API module: Axios client, interceptors, `ApiError`, generated types, MSW setup | A3 | Refresh single-flight test passes with 5 parallel 401s | `vitest api/` |
 | U2 | Router and auth: data router, lazy routes, session loader, `RequireAuth`, `RequireRole`, sign-in and sign-up | A2 | No protected markup in the DOM before `auth/me` resolves | Playwright `auth.spec.ts` |
 | U3 | App shell: bottom tabs, sticky action bar, skeletons, toasts, wake-up state | — | Lighthouse mobile LCP ≤ 2.5 s on `/today` (mocked) | Lighthouse CI |
@@ -327,9 +341,9 @@ API shapes come only from docs/openapi.json; refresh it with `pnpm api:sync` (co
 
 ## 12. Open questions
 
-- [ ] Is the current React codebase on Vite and React Router? If it uses Create React App or another router, slice U0 migrates it first.
-- [ ] What existing screens or components should be kept, and which are replaced by this PRD?
-- [ ] Brand assets (logo, colours, font) for the tokens in Section 4, or start from neutral defaults?
+- [x] Build tool: the codebase is Next.js 16; it migrates to a Vite SPA in U0a (decided 21 Oct 2026).
+- [x] What to keep and what to replace: see the migration note in Section 2.
+- [ ] Brand assets (logo, colours, font) for the tokens in Section 4, or start from the existing app's design?
 
 ## Sources
 
