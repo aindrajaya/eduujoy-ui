@@ -49,7 +49,8 @@ describe('checkpoint answers', () => {
 
   it('describes the submit errors a checkpoint can hit, and leaves the rest generic', () => {
     const err = (status: number, code: ConstructorParameters<typeof ApiError>[0]['code']) => new ApiError({ status, code, title: 'x' });
-    expect(describeSubmitError(err(503, 'AI_BUDGET_EXCEEDED'))).toMatch(/Grading is paused/);
+    expect(describeSubmitError(err(503, 'AI_BUDGET_EXCEEDED'))).toMatch(/today’s limit/);
+    expect(describeSubmitError(new ApiError({ status: 503, code: 'AI_BUDGET_EXCEEDED', title: 'x', retryAfterMs: 5 * 3600_000 }))).toMatch(/again in about 5 hours/);
     expect(describeSubmitError(err(409, 'CONFLICT'))).toMatch(/already sent/);
     expect(describeSubmitError(err(404, 'NOT_FOUND'))).toMatch(/no longer part/);
     expect(describeSubmitError(err(403, 'FORBIDDEN'))).toMatch(/not open yet/);

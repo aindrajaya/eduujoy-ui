@@ -4,6 +4,7 @@ import type { ApiError } from '@/api/errors';
 import type { CheckpointAnswer, CheckpointItem } from '@/api/types';
 import { pathKeys } from '@/features/paths/keys';
 import type { Answer, QuizQuestion } from '@/features/quiz/types';
+import { formatRetryWait } from '@/lib/time';
 
 /** CheckpointItem kinds are a subset of the quiz engine's. */
 export const toQuizQuestions = (items: readonly CheckpointItem[]): QuizQuestion[] => items.map((item) => ({ ...item }));
@@ -38,7 +39,7 @@ export function onCheckpointGraded(client: QueryClient): void {
 export function describeSubmitError(error: ApiError): string | undefined {
   switch (error.code) {
     case 'AI_BUDGET_EXCEEDED':
-      return 'Grading is paused for a moment. Your answers are saved on this device; try again shortly.';
+      return `Grading has reached today’s limit. Your answers are saved on this device; submit them again ${formatRetryWait(error.retryAfterMs)}.`;
     case 'CONFLICT':
       return 'These answers were already sent with a different attempt. Reload the page to start a new attempt.';
     case 'NOT_FOUND':
