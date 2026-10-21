@@ -23,6 +23,7 @@ Requires Node 22+ and pnpm (version pinned in `package.json`).
 pnpm install
 cp env.example .env.local     # public values only
 pnpm dev                     # http://localhost:5173
+VITE_API_MOCKS=true pnpm dev # same, against the contract-typed MSW mocks (no API needed)
 ```
 
 ## Scripts

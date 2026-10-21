@@ -1,10 +1,27 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 
+/** Dev server only: serves MSW's worker from the installed package, so it never ships in dist/. */
+function mswWorker(): Plugin {
+  return {
+    name: 'eduujoy:msw-worker',
+    apply: 'serve',
+    configureServer(server) {
+      const file = fileURLToPath(import.meta.resolve('msw/mockServiceWorker.js'));
+      server.middlewares.use('/mockServiceWorker.js', (_req, res) => {
+        res.setHeader('Content-Type', 'text/javascript');
+        res.end(readFileSync(file));
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), mswWorker()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
