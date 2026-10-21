@@ -5,8 +5,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  // Legacy Next.js sources are excluded until each is ported into src/ and deleted.
-  { ignores: ['dist', 'coverage', 'app', 'components', 'lib', 'raw-ui.js'] },
+  { ignores: ['dist', 'coverage'] },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
