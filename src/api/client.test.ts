@@ -1,21 +1,11 @@
 import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createApiClient, DEFAULT_TIMEOUT_MS } from './client';
 import { ApiError } from './errors';
+import { server } from './mocks/server';
 
+// A separate origin keeps these handlers apart from the default contract mocks.
 const BASE = 'http://api.test';
-const server = setupServer();
-
-beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
-});
-afterEach(() => {
-  server.resetHandlers();
-});
-afterAll(() => {
-  server.close();
-});
 
 const unauthorized = () =>
   HttpResponse.json(
