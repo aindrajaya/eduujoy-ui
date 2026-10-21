@@ -83,6 +83,7 @@ export default defineConfig({
       // PRD-UI §10: the API error mapper (and the quiz reducer, U5) need 100% branch coverage.
       thresholds: {
         'src/api/errors.ts': { branches: 100, functions: 100, lines: 100, statements: 100 },
+        'src/features/quiz/reducer.ts': { branches: 100, functions: 100, lines: 100, statements: 100 },
       },
     },
   },
