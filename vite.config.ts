@@ -10,11 +10,17 @@ export default defineConfig({
   },
   server: { port: 5173 },
   preview: { port: 4173 },
-  build: { target: 'es2022', sourcemap: false },
+  build: { target: 'es2022', sourcemap: false, manifest: true },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     restoreMocks: true,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/fixtures/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      reporter: ['text-summary', 'html', 'lcov'],
+    },
   },
 });

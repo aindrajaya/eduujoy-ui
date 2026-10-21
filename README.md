@@ -35,6 +35,12 @@ pnpm dev                     # http://localhost:5173
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm test` | Vitest (unit and component tests, including axe checks) |
+| `pnpm test:coverage` | Tests with V8 coverage (`coverage/`) |
+| `pnpm size` | JS budgets after `pnpm build`: initial ≤ 150 KB, any chunk ≤ 60 KB gzip |
+| `pnpm lhci` | Lighthouse CI on `pnpm preview` (needs Chrome and a display; runs in CI) |
+
+CI (`.github/workflows/ci.yml`) runs lint → typecheck → tests → build → size → Lighthouse.
+Design tokens (colour roles, radii, motion; light and dark) live in `src/ui/tokens.css`.
 
 ## Layout
 
