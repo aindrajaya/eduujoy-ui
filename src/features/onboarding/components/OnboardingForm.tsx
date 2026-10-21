@@ -126,16 +126,16 @@ export interface OnboardingFormProps {
 }
 
 function inputClass(hasError: boolean): string {
-  return `w-full rounded-xl border-2 py-3 pl-12 text-base text-gray-900 placeholder-gray-500 transition-all duration-200 focus:ring-2 focus:outline-none ${
+  return `w-full rounded-xl border-2 py-3 pl-12 text-base text-text placeholder-text-muted transition-all duration-200 focus:ring-2 focus:outline-none ${
     hasError
-      ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-      : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500 focus:ring-indigo-200'
+      ? 'border-danger focus:border-danger focus:ring-danger/30'
+      : 'border-border hover:border-text-muted focus:border-primary focus:ring-focus/40'
   }`;
 }
 
 function FieldError({ id, message }: { id: string; message: string }) {
   return (
-    <p id={id} className="mt-2 flex animate-fade-in items-center gap-2 text-sm text-red-700">
+    <p id={id} className="mt-2 flex animate-fade-in items-center gap-2 text-sm text-danger">
       <CircleAlert className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
       <span>{message}</span>
     </p>
@@ -244,7 +244,7 @@ export default function OnboardingForm({
   return (
     <main
       aria-labelledby="onboarding-title"
-      className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4"
+      className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 dark:from-bg dark:via-bg dark:to-bg"
     >
       <div className="w-full max-w-2xl">
         <header className="mb-8 animate-fade-in text-center">
@@ -253,16 +253,16 @@ export default function OnboardingForm({
           </div>
           <h1
             id="onboarding-title"
-            className="mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent"
+            className="mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-4xl dark:from-indigo-300 dark:to-purple-300 font-bold text-transparent"
           >
             Let&apos;s Get Started!
           </h1>
-          <p className="mx-auto max-w-md text-lg leading-relaxed text-gray-600">
+          <p className="mx-auto max-w-md text-lg leading-relaxed text-text-muted">
             Tell us about yourself and we&apos;ll craft the perfect path to achieve your goals.
           </p>
         </header>
 
-        <div className="animate-slide-up overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+        <div className="animate-slide-up overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
           <form onSubmit={handleSubmit} noValidate className="p-6 md:p-10">
             <div className="space-y-6">
               {textFields.map((field) => {
@@ -272,11 +272,11 @@ export default function OnboardingForm({
                   <div key={field.name} className="relative">
                     <label
                       htmlFor={field.name}
-                      className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700"
+                      className="mb-2 flex items-center gap-2 text-sm font-semibold text-text"
                     >
-                      <Icon className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+                      <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                       {field.label}
-                      <span className="text-red-600" aria-hidden="true">
+                      <span className="text-danger" aria-hidden="true">
                         *
                       </span>
                     </label>
@@ -295,7 +295,7 @@ export default function OnboardingForm({
                         className={`${inputClass(Boolean(error))} pr-4`}
                       />
                       <Icon
-                        className={`absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 ${error ? 'text-red-400' : 'text-gray-400'}`}
+                        className={`absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 ${error ? 'text-danger' : 'text-text-muted'}`}
                         aria-hidden="true"
                       />
                     </div>
@@ -311,11 +311,11 @@ export default function OnboardingForm({
                   <div key={field.name} className="relative">
                     <label
                       htmlFor={field.name}
-                      className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700"
+                      className="mb-2 flex items-center gap-2 text-sm font-semibold text-text"
                     >
-                      <Icon className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+                      <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                       {field.label}
-                      <span className="text-red-600" aria-hidden="true">
+                      <span className="text-danger" aria-hidden="true">
                         *
                       </span>
                     </label>
@@ -328,7 +328,7 @@ export default function OnboardingForm({
                         required
                         aria-invalid={error ? true : undefined}
                         aria-describedby={error ? `${field.name}-error` : undefined}
-                        className={`${inputClass(Boolean(error))} appearance-none bg-white pr-10`}
+                        className={`${inputClass(Boolean(error))} appearance-none bg-surface pr-10`}
                       >
                         <option value="">Select an option...</option>
                         {field.options.map((o) => (
@@ -338,7 +338,7 @@ export default function OnboardingForm({
                         ))}
                       </select>
                       <Icon
-                        className={`absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 ${error ? 'text-red-400' : 'text-gray-400'}`}
+                        className={`absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 ${error ? 'text-danger' : 'text-text-muted'}`}
                         aria-hidden="true"
                       />
                     </div>
@@ -349,7 +349,7 @@ export default function OnboardingForm({
             </div>
 
             {submitError && (
-              <p role="alert" className="mt-6 rounded-lg bg-red-50 p-3 text-sm text-red-800">
+              <p role="alert" className="mt-6 rounded-lg bg-danger-soft p-3 text-sm text-danger">
                 {submitError}
               </p>
             )}
@@ -377,7 +377,7 @@ export default function OnboardingForm({
           </form>
         </div>
 
-        <footer className="mt-6 text-center text-sm text-gray-600">
+        <footer className="mt-6 text-center text-sm text-text-muted">
           <p>Your data is secure and will only be used to create your learning experience.</p>
         </footer>
       </div>
