@@ -37,6 +37,7 @@ export type PathCreateRequest = Schemas['PathCreateRequest'];
 export type PathStep = Schemas['PathStep'];
 export type StepPatchRequest = Schemas['StepPatchRequest'];
 export type Resource = Schemas['Resource'];
+export type ResourceType = Schemas['ResourceType'];
 export type ResourceSwapRequest = Schemas['ResourceSwapRequest'];
 export type FeedbackRequest = Schemas['FeedbackRequest'];
 

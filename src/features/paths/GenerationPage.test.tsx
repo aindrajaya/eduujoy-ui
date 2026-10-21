@@ -26,10 +26,10 @@ describe('/paths/new/:jobId (US-03 generation)', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('when the path is ready, goes to Today with a toast', async () => {
+  it('when the path is ready, opens it with a toast', async () => {
     const { router } = renderRoute('/paths/new/job-1');
     expect(await screen.findByText('Your path is ready')).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/today');
+    expect(router.state.location.pathname).toBe('/paths/path-1');
     expect(router.state.historyAction).toBe('REPLACE');
   });
 

@@ -78,14 +78,23 @@ export const mockDiagnosticCompleted: DiagnosticBatchResponse = {
   },
 };
 
+const STEP_OBJECTIVES = [
+  'Map the questions your team needs answered',
+  'Plan and run five user interviews',
+  'Synthesise interview notes into themes',
+  'Choose between a survey and a usability test',
+  'Run a moderated usability test',
+  'Turn findings into a prioritised recommendation'
+];
+
 function step(n: number, status: PathStep['status']): PathStep {
   return {
     id: `step-${n}`,
     n,
     status,
     remedial: false,
-    bloom: n === 1 ? 'C2' : 'C3',
-    objective: `Step ${n}: practise one research method end to end`,
+    bloom: n === 1 ? 'C2' : n < 5 ? 'C3' : 'C4',
+    objective: STEP_OBJECTIVES[n - 1] ?? `Step ${n}`,
     doneWhen: 'You can explain when to use the method and have one artefact to show.',
     estMinutes: 45,
     difficulty: null,
@@ -105,7 +114,13 @@ function step(n: number, status: PathStep['status']): PathStep {
         bloomLevels: ['C2', 'C3'],
         durationMin: 10,
         whyThis: 'Short, visual overview that matches your preferred format.',
-        keyTakeaways: ['Pick the method from the question, not habit'],
+        keyTakeaways: [
+          'Pick the method from the question, not habit',
+          'Interviews explain why; analytics show what',
+          'Five users surface most usability problems',
+        ],
+        concepts: [{ name: 'Choosing a method', start: '4:10', end: '7:45' }],
+        quality: { relevance: 0.92, teaching: 0.88, recency: 0.7, accuracySignals: 0.9 },
       },
       {
         id: `res-${n}-doc`,
@@ -145,9 +160,16 @@ export const mockPath: Path = {
   from: { stage: 'advanced_beginner', bloom: 'C3' },
   to: { stage: 'competent', bloom: 'C4' },
   stepsDone: 1,
-  stepsTotal: 3,
-  totalHours: 2.25,
-  steps: [step(1, 'completed'), step(2, 'active'), step(3, 'locked')],
+  stepsTotal: 6,
+  totalHours: 4.5,
+  steps: [
+    step(1, 'completed'),
+    step(2, 'active'),
+    step(3, 'locked'),
+    step(4, 'locked'),
+    step(5, 'locked'),
+    step(6, 'locked'),
+  ],
 };
 
 export const mockJobAccepted: JobAccepted = {

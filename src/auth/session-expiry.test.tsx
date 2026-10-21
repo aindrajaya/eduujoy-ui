@@ -17,7 +17,7 @@ afterEach(() => {
 
 describe('installSessionExpiry', () => {
   it('sends the learner to /signin with next and the expired notice after a failed refresh', async () => {
-    const { router } = renderRoute('/steps/2?tab=resources');
+    const { router } = renderRoute('/steps/step-2?path=path-1&tab=resources');
     await screen.findByRole('heading', { level: 1 });
     uninstall = installSessionExpiry(router, queryClient);
     queryClient.setQueryData(['paths', 'detail', 'path-1'], { cached: true });
@@ -32,7 +32,7 @@ describe('installSessionExpiry', () => {
 
     expect(await screen.findByText(/Your session expired/)).toHaveAttribute('role', 'status');
     expect(router.state.location.pathname).toBe('/signin');
-    expect(new URLSearchParams(router.state.location.search).get('next')).toBe('/steps/2?tab=resources');
+    expect(new URLSearchParams(router.state.location.search).get('next')).toBe('/steps/step-2?path=path-1&tab=resources');
     expect(router.state.historyAction).toBe('REPLACE');
     expect(queryClient.getQueryData(['paths', 'detail', 'path-1'])).toBeUndefined();
   });

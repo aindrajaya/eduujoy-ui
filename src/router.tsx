@@ -2,6 +2,23 @@ import { redirect, type RouteObject } from 'react-router';
 import BootSplash from './app/BootSplash';
 import RouteError from './app/RouteError';
 import { HOME, loadSession, requireAuth } from './auth/guards';
+import { queryClient } from './query-client';
+
+/**
+ * Starts a path screen's requests once auth/me resolves, without blocking the route on them: the
+ * path (or, without an id, the active path) loads while the page chunk does (PRD-UI §9 LCP budget).
+ */
+function prefetchPathData(pathId: string | null): null {
+  const queries = import('./features/paths/pathQueries');
+  void loadSession()
+    .then(async (me) => {
+      if (!me) return;
+      const { prefetchActivePath, pathQuery } = await queries;
+      await (pathId ? queryClient.query(pathQuery(pathId)) : prefetchActivePath(queryClient));
+    })
+    .catch(() => undefined);
+  return null;
+}
 
 // Every screen is a lazy chunk. The shell holds only the boot splash, the error boundary and the
 // session guards. Protected routes wait for auth/me in their loader (behind the boot splash), so no
@@ -66,6 +83,7 @@ export const routes: RouteObject[] = [
           },
           {
             path: 'steps/:id',
+            loader: ({ request }) => prefetchPathData(new URL(request.url).searchParams.get('path')),
             lazy: async () => ({ Component: (await import('./features/steps/StepPage')).default }),
           },
           {
@@ -73,6 +91,7 @@ export const routes: RouteObject[] = [
             children: [
               {
                 path: 'today',
+                loader: () => prefetchPathData(null),
                 lazy: async () => ({
                   Component: (await import('./features/paths/TodayPage')).default,
                 }),
@@ -81,6 +100,12 @@ export const routes: RouteObject[] = [
                 path: 'paths',
                 lazy: async () => ({
                   Component: (await import('./features/paths/PathsPage')).default,
+                }),
+              },
+              {
+                path: 'paths/:id',
+                lazy: async () => ({
+                  Component: (await import('./features/paths/PathPage')).default,
                 }),
               },
               {
