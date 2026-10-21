@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "lucide-react": "0.577.0",
@@ -28,6 +29,7 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "5.2.0",
+    "@vitest/coverage-v8": "4.1.12",
     "axe-core": "4.14.0",
     "eslint": "9.39.5",
     "eslint-plugin-react-hooks": "7.1.1",
