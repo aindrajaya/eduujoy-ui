@@ -8,7 +8,8 @@ const MAX_RETRY_DELAY_MS = 30_000;
 export function shouldRetry(failureCount: number, error: unknown): boolean {
   if (failureCount >= MAX_QUERY_RETRIES) return false;
   const { status, code } = toApiError(error);
-  if (code === 'CANCELED') return false;
+  // The daily AI budget resets at UTC midnight (Retry-After, contract 0.2.1); retrying cannot help.
+  if (code === 'CANCELED' || code === 'AI_BUDGET_EXCEEDED') return false;
   if (status === 0 || status >= 500) return true;
   return status === 408 || status === 429;
 }

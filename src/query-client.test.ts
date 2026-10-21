@@ -18,8 +18,8 @@ describe('shouldRetry', () => {
     }
   });
 
-  it('never retries other 4xx or cancellations', () => {
-    for (const e of [err(400), err(401), err(403), err(404), err(409), err(0, 'CANCELED')]) {
+  it('never retries other 4xx, cancellations or an exhausted AI budget', () => {
+    for (const e of [err(400), err(401), err(403), err(404), err(409), err(0, 'CANCELED'), err(503, 'AI_BUDGET_EXCEEDED')]) {
       expect(shouldRetry(0, e)).toBe(false);
     }
   });
