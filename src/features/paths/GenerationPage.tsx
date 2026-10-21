@@ -6,6 +6,7 @@ import type { JobProgressEvent } from '@/api/types';
 import type { JobView } from '@/realtime/jobView';
 import { useJobStream } from '@/realtime/useJobStream';
 import StateMessage from '@/ui/StateMessage';
+import { pathKeys } from './keys';
 import { toast } from '@/ui/toast/store';
 
 type Stage = JobProgressEvent['stage'];
@@ -37,12 +38,16 @@ export default function GenerationPage() {
   const navigate = useNavigate();
   const client = useQueryClient();
 
-  const onCompleted = useCallback(() => {
-    void client.invalidateQueries({ queryKey: ['paths'] });
-    toast({ title: 'Your path is ready', tone: 'success' });
-    // U8 opens the path itself; Today shows the active path.
-    void navigate('/today', { replace: true });
-  }, [client, navigate]);
+  const onCompleted = useCallback(
+    (done: JobView) => {
+      void client.invalidateQueries({ queryKey: pathKeys.all });
+      toast({ title: 'Your path is ready', tone: 'success' });
+      // resultRef is the new path's id; without one, Today shows the active path.
+      const pathId = done.completed?.resultRef;
+      void navigate(pathId ? `/paths/${encodeURIComponent(pathId)}` : '/today', { replace: true });
+    },
+    [client, navigate],
+  );
 
   const view = useJobStream(jobId, { onCompleted });
 
