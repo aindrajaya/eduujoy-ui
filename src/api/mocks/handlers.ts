@@ -13,6 +13,8 @@ import {
   mockDiagnosticBatch,
   mockDiagnosticCompleted,
   mockDiagnosticResume,
+  mockGradeJobAccepted,
+  mockGradeJobEvents,
   mockJobAccepted,
   mockLatencyMetrics,
   mockMe,
@@ -98,19 +100,23 @@ export const handlers = [
   http.post('/v1/feedback', ({ response }) => response(204).empty()),
 
   // Checkpoints
-  http.post('/v1/checkpoints/{id}/submissions', ({ request, response }) =>
-    request.headers.get('Idempotency-Key')
-      ? response(200).json(mockCheckpointResult)
-      : response.untyped(
-          problemResponse(mockProblem(400, 'VALIDATION_FAILED', 'Idempotency-Key is required')),
-        ),
-  ),
+  // Open answers need AI grading (202 + job); choice-only submissions are graded at once (200).
+  http.post('/v1/checkpoints/{id}/submissions', async ({ request, response }) => {
+    if (!request.headers.get('Idempotency-Key')) {
+      return response.untyped(problemResponse(mockProblem(400, 'VALIDATION_FAILED', 'Idempotency-Key is required')));
+    }
+    const { answers } = await request.json();
+    return answers.some((a) => a.text)
+      ? response(202).json(mockGradeJobAccepted)
+      : response(200).json(mockCheckpointResult);
+  }),
 
   // Progress and billing
   // Jobs: path generation progress over SSE; replays events after Last-Event-ID.
-  http.get('/v1/jobs/{id}/events', ({ request, response }) =>
-    response.untyped(sseResponse(after(mockPathJobEvents, request.headers.get('Last-Event-ID')))),
-  ),
+  http.get('/v1/jobs/{id}/events', ({ params, request, response }) => {
+    const events = params.id === mockGradeJobAccepted.jobId ? mockGradeJobEvents : mockPathJobEvents;
+    return response.untyped(sseResponse(after(events, request.headers.get('Last-Event-ID'))));
+  }),
 
   http.get('/v1/progress', ({ response }) => response(200).json(mockProgress)),
   http.get('/v1/progress/{topicId}/history', ({ response }) =>

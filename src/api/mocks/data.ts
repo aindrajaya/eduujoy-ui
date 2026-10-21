@@ -134,9 +134,10 @@ function step(n: number, status: PathStep['status']): PathStep {
       },
     ],
     checkpoint: {
-      passScore: 0.7,
+      passScore: 80,
       attempts: 0,
       lastScore: null,
+      rubric: ['Names a method that fits the question', 'Explains why it fits with one concrete reason'],
       items: [
         {
           id: `cp-${n}-1`,
@@ -145,7 +146,23 @@ function step(n: number, status: PathStep['status']): PathStep {
           options: [
             { id: 'a', label: 'Surveys' },
             { id: 'b', label: 'Interviews' },
+            { id: 'c', label: 'Analytics' },
           ],
+        },
+        {
+          id: `cp-${n}-2`,
+          kind: 'multi_choice',
+          prompt: 'Which of these are qualitative methods? Pick all that apply.',
+          options: [
+            { id: 'a', label: 'Usability tests' },
+            { id: 'b', label: 'A/B tests' },
+            { id: 'c', label: 'Contextual inquiry' },
+          ],
+        },
+        {
+          id: `cp-${n}-3`,
+          kind: 'open',
+          prompt: 'Your team wants to know why sign-ups dropped last month. Which method would you start with, and why?',
         },
       ],
     },
@@ -178,16 +195,57 @@ export const mockJobAccepted: JobAccepted = {
   eventsUrl: '/v1/jobs/job-1/events',
 };
 
+/** A passing grade for step 2's checkpoint (scores are 0–100). */
 export const mockCheckpointResult: CheckpointResult = {
   submissionId: 'sub-1',
   stepId: 'step-2',
-  score: 1,
+  score: 87,
   passed: true,
   stageAdvanced: false,
   nextStepId: 'step-3',
   remedialStepId: null,
-  items: [{ itemId: 'cp-2-1', score: 1, feedback: 'Right: interviews reveal motivations.' }],
+  items: [
+    { itemId: 'cp-2-1', score: 100, feedback: 'Right: interviews reveal motivations.' },
+    { itemId: 'cp-2-2', score: 100, feedback: 'Both observe people doing real tasks.' },
+    {
+      itemId: 'cp-2-3',
+      score: 60,
+      feedback: 'Interviews fit. Say what you would ask, e.g. what changed for them last month.',
+      misconception: null,
+    },
+  ],
 };
+
+/** A failing grade; a second fail inserts a remedial step (US-05). */
+export const mockCheckpointFailed: CheckpointResult = {
+  ...mockCheckpointResult,
+  submissionId: 'sub-2',
+  score: 40,
+  passed: false,
+  nextStepId: null,
+  items: [
+    { itemId: 'cp-2-1', score: 0, feedback: 'Surveys show what people say, not why.', misconception: 'Surveys explain motivation' },
+    { itemId: 'cp-2-2', score: 50, feedback: 'A/B tests are quantitative.' },
+    { itemId: 'cp-2-3', score: 50, feedback: 'Name a method and give one reason it fits.' },
+  ],
+};
+
+export const mockGradeJobAccepted: JobAccepted = {
+  jobId: 'grade-1',
+  status: 'queued',
+  eventsUrl: '/v1/jobs/grade-1/events',
+};
+
+/** An open-answer grading job's event stream: progress, one item at a time, then the result inline. */
+export const mockGradeJobEvents = [
+  { id: '1', event: 'progress', data: { jobId: 'grade-1', stage: 'grade', done: 0, total: 1, message: 'Reading your answer' } },
+  { id: '2', event: 'partial', data: { jobId: 'grade-1', kind: 'checkpoint_item', itemResult: mockCheckpointResult.items[2] } },
+  {
+    id: '3',
+    event: 'completed',
+    data: { jobId: 'grade-1', resultRef: '/v1/checkpoints/step-2/submissions/sub-1', result: mockCheckpointResult },
+  },
+] as const;
 
 export const mockProgress: ProgressResponse = {
   items: [
