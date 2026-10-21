@@ -7,6 +7,17 @@ export const routes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./app/RootLayout')).default }),
     children: [
       {
+        lazy: async () => ({ Component: (await import('./app/TabsLayout')).default }),
+        children: [
+          {
+            path: 'today',
+            lazy: async () => ({
+              Component: (await import('./features/paths/TodayPage')).default,
+            }),
+          },
+        ],
+      },
+      {
         path: '*',
         lazy: async () => ({ Component: (await import('./app/NotFound')).default }),
       },
