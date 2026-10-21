@@ -32,7 +32,8 @@ export function installSessionExpiry(router: AppRouter, client: QueryClient): ()
   });
 
   const unsubscribe = client.getQueryCache().subscribe((event) => {
-    if (event.type !== 'updated' || event.action.type !== 'success') return;
+    // Only fetched answers count; manual writes (sign-out seeding null) are deliberate.
+    if (event.type !== 'updated' || event.action.type !== 'success' || event.action.manual) return;
     if (event.query.queryHash !== SESSION_HASH || event.query.state.data !== null) return;
     // During the first load or a navigation, the route loaders redirect on their own.
     if (!router.state.initialized || router.state.navigation.state !== 'idle') return;

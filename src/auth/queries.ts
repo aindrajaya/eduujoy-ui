@@ -24,13 +24,17 @@ export function useSignUp() {
   });
 }
 
-/** PRD-UI §6: log out, then drop every cached query (session, paths, progress). */
+/**
+ * PRD-UI §6: log out (public since contract 0.1.0, so it works with an expired access cookie),
+ * then drop every cached query and record "signed out", so /signin does not ask auth/me again.
+ */
 export function useSignOut() {
   const client = useQueryClient();
   return useMutation<unknown, ApiError>({
     mutationFn: logout,
     onSettled: () => {
       client.clear();
+      client.setQueryData(sessionKeys.me(), null);
     },
   });
 }
