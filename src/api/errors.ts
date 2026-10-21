@@ -54,6 +54,7 @@ const PROBLEM_CODE_KEYS = {
   AI_BUDGET_EXCEEDED: true,
   NO_REPLACEMENT: true,
   CSRF_REJECTED: true,
+  REFRESH_CONCURRENT: true,
   INTERNAL: true,
 } as const satisfies Record<ProblemCode, true>;
 
