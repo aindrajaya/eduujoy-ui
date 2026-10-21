@@ -16,7 +16,9 @@ export interface TopicChoicesProps {
 export default function TopicChoices({ typed, choices, onConfirm, onEditTopic, submitting = false, errorMessage }: TopicChoicesProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const titleId = useId();
-  const selected = choices.find((c) => c.id === selectedId);
+  // US-01 allows at most three; the contract caps it too, but never show more.
+  const shown = choices.slice(0, 3);
+  const selected = shown.find((c) => c.id === selectedId);
 
   return (
     <main aria-labelledby={titleId} className="flex min-h-dvh items-center justify-center bg-bg p-4">
@@ -38,7 +40,7 @@ export default function TopicChoices({ typed, choices, onConfirm, onEditTopic, s
           <fieldset>
             <legend className="sr-only">Topics</legend>
             <div className="space-y-3">
-              {choices.map((topic) => (
+              {shown.map((topic) => (
                 <label
                   key={topic.id}
                   className="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border-2 border-border p-4 has-checked:border-primary has-checked:bg-primary-soft"
