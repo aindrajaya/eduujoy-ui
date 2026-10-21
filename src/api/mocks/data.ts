@@ -9,6 +9,7 @@ import type {
   Me,
   Path,
   PathStep,
+  PathSummary,
   Problem,
   ProblemCode,
   ProgressHistoryResponse,
@@ -188,6 +189,18 @@ export const mockPath: Path = {
     step(6, 'locked'),
   ],
 };
+
+/** The list item for mockPath (contract 0.3.0): no steps, but the current step for Today. */
+export const mockPathSummary: PathSummary = (() => {
+  const { steps, ...summary } = mockPath;
+  const current = steps.find((s) => s.status !== 'completed' && s.status !== 'skipped');
+  return {
+    ...summary,
+    currentStep: current
+      ? { id: current.id, n: current.n, objective: current.objective, bloom: current.bloom, estMinutes: current.estMinutes, status: current.status }
+      : null,
+  };
+})();
 
 export const mockJobAccepted: JobAccepted = {
   jobId: 'job-1',
