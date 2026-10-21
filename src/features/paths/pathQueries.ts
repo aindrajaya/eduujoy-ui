@@ -35,6 +35,22 @@ export const usePaths = () => useQuery(pathsQuery());
 export const useActivePaths = (enabled = true) => useQuery({ ...activePathsQuery(), enabled });
 export const usePath = (id: string | undefined) => useQuery({ ...pathQuery(id ?? ''), enabled: Boolean(id) });
 
+/**
+ * The path a step-level screen belongs to: `?path=` in the URL, else (old links) the active path.
+ * `noPath` is true once the list has loaded without an active path.
+ */
+export function useRoutedPath(fromUrl: string | null) {
+  const active = useActivePaths(!fromUrl);
+  const pathId = fromUrl ?? active.data?.[0]?.id;
+  const path = usePath(pathId);
+  return {
+    path,
+    // A disabled query counts as pending; only wait for the list when it is the source.
+    isPending: path.isPending || (!fromUrl && active.isPending),
+    noPath: !fromUrl && active.isSuccess && !pathId,
+  };
+}
+
 export const findStep = (path: Path | undefined, stepId: string): PathStep | undefined =>
   path?.steps.find((s) => s.id === stepId);
 
@@ -53,6 +69,10 @@ export function pathIdFromRef(ref: string | undefined): string | undefined {
   if (match) return decodeURIComponent(match[1] ?? '');
   return /^[^/?#]+$/.test(ref) ? ref : undefined;
 }
+
+/** Link to a step's checkpoint (the contract keys checkpoints by step id). */
+export const checkpointHref = (pathId: string, stepId: string) =>
+  `/checkpoints/${encodeURIComponent(stepId)}?path=${encodeURIComponent(pathId)}`;
 
 /** Link to a step; the path id travels in the URL so a reload can load the path (no GET /v1/steps). */
 export const stepHref = (pathId: string, stepId: string) =>
