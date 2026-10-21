@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "size": "size-limit",
-    "lhci": "pnpm dlx @lhci/cli@0.15.1 autorun"
+    "lhci": "pnpm dlx @lhci/cli@0.15.1 autorun",
+    "api:types": "node scripts/api-types.mjs",
+    "api:sync": "node scripts/api-types.mjs --sync"
   },
   "dependencies": {
     "lucide-react": "0.577.0",
@@ -39,6 +41,7 @@
     "eslint-plugin-react-refresh": "0.5.7",
     "globals": "17.13.0",
     "jsdom": "27.4.0",
+    "openapi-typescript": "7.13.0",
     "size-limit": "14.2.0",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
