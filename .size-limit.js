@@ -22,12 +22,19 @@ function withStaticImports(key, seen = new Set()) {
   return seen;
 }
 
+// Rollup may emit a module as a shared chunk (key `_Name-hash.js`, `name: 'Name'`) instead of
+// keying it by source path, so look up by path first, then by chunk name.
+function chunkKey(src) {
+  if (manifest[src]) return src;
+  const name = src.split('/').pop().replace(/\.[jt]sx?$/, '');
+  const key = Object.keys(manifest).find((k) => manifest[k].name === name && manifest[k].file.endsWith('.js'));
+  if (!key) throw new Error(`${src} is not a chunk; update FIRST_SCREENS`);
+  return key;
+}
+
 function initialKeys(screen) {
   const keys = new Set();
-  for (const key of [entryKey, ...screen]) {
-    if (!manifest[key]) throw new Error(`${key} is not a chunk; update FIRST_SCREENS`);
-    withStaticImports(key, keys);
-  }
+  for (const key of [entryKey, ...screen.map(chunkKey)]) withStaticImports(key, keys);
   return [...keys];
 }
 
