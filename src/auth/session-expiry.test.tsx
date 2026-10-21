@@ -7,6 +7,7 @@ import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { queryClient } from '@/query-client';
 import { mockSignedOut, renderRoute } from '@/test/render';
+import { sessionKeys } from './session';
 import { installSessionExpiry } from './session-expiry';
 
 let uninstall: (() => void) | undefined;
@@ -36,7 +37,30 @@ describe('installSessionExpiry', () => {
     expect(queryClient.getQueryData(['paths', 'detail', 'path-1'])).toBeUndefined();
   });
 
-  it('ignores auth/me failures, which the route guards handle', async () => {
+  it('redirects when auth/me settles on signed out while a protected screen is idle', async () => {
+    const { router } = renderRoute('/account#plan');
+    await screen.findByRole('heading', { name: 'Jane Doe' });
+    uninstall = installSessionExpiry(router, queryClient);
+
+    mockSignedOut();
+    await queryClient.refetchQueries({ queryKey: sessionKeys.me() });
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Your session expired.');
+    expect(router.state.location.pathname).toBe('/signin');
+    expect(new URLSearchParams(router.state.location.search).get('next')).toBe('/account#plan');
+    expect(router.state.historyAction).toBe('REPLACE');
+  });
+
+  it('does nothing on public pages, where signed out is expected', async () => {
+    mockSignedOut();
+    const { router } = renderRoute('/signin');
+    await screen.findByRole('heading', { name: 'Welcome back' });
+    uninstall = installSessionExpiry(router, queryClient);
+    await queryClient.refetchQueries({ queryKey: sessionKeys.me() });
+    expect(router.state.location.search).toBe('');
+  });
+
+  it('ignores a bare auth/me 401 outside the session query', async () => {
     const { router } = renderRoute('/today');
     await screen.findByRole('navigation', { name: 'Main' });
     uninstall = installSessionExpiry(router, queryClient);
