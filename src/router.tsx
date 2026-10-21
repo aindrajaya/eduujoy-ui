@@ -43,6 +43,15 @@ export const routes: RouteObject[] = [
               Component: (await import('./features/onboarding/StartPage')).default,
             }),
           },
+          // E2E-only harness; import.meta.env.MODE is a build-time constant, so production drops it.
+          ...(import.meta.env.MODE === 'e2e'
+            ? [
+                {
+                  path: 'dev/quiz-lab',
+                  lazy: async () => ({ Component: (await import('./dev/QuizLabPage')).default }),
+                },
+              ]
+            : []),
           {
             path: 'diagnostic/:id',
             lazy: async () => ({

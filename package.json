@@ -16,7 +16,7 @@
     "lhci": "pnpm dlx @lhci/cli@0.15.1 autorun",
     "api:types": "node scripts/api-types.mjs",
     "api:sync": "node scripts/api-types.mjs --sync",
-    "build:e2e": "vite build --outDir dist-e2e",
+    "build:e2e": "vite build --mode e2e --outDir dist-e2e",
     "test:e2e": "playwright test",
     "build:lh": "VITE_API_URL=http://localhost:4173 vite build --mode lighthouse --outDir dist-lh"
   },
