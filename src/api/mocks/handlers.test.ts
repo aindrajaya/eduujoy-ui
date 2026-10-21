@@ -3,13 +3,12 @@ import spec from '../../../docs/openapi.json';
 import { handlers } from './handlers';
 
 // Operations the SPA never calls through Axios: OAuth redirects (full-page navigation),
-// the Lemon Squeezy webhook (server to server), readiness, and SSE (EventSource, mocked in U7).
+// the Lemon Squeezy webhook (server to server) and readiness.
 const NOT_MOCKED = new Set([
   'GET /v1/auth/google',
   'GET /v1/auth/google/callback',
   'POST /v1/billing/webhook',
   'GET /ready',
-  'GET /v1/jobs/:id/events',
 ]);
 
 const METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
