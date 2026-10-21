@@ -976,6 +976,8 @@ export interface components {
         /** @description Daily AI budget reached for cold topics (code AI_BUDGET_EXCEEDED). */
         BudgetExceeded: {
             headers: {
+                /** @description Whole seconds until the next UTC midnight, when the daily budget resets (at least 1). */
+                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {
