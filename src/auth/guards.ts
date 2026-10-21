@@ -6,10 +6,21 @@ import { hasRole, sessionQuery } from './session';
 
 export const HOME = '/today';
 
-/** Only same-origin absolute paths are allowed as post-sign-in targets (no open redirects). */
-export function safeNext(raw: string | null | undefined): string {
-  if (!raw?.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) return HOME;
-  return raw;
+/**
+ * Post-sign-in target, limited to this origin (no open redirects). The value is parsed the way
+ * the browser would parse it, so `//host`, `/\host`, tab/newline tricks and `javascript:` all
+ * resolve to another origin (or none) and fall back to Today.
+ */
+export function safeNext(raw: string | null | undefined, origin: string = window.location.origin): string {
+  if (!raw) return HOME;
+  let url: URL;
+  try {
+    url = new URL(raw, origin);
+  } catch {
+    return HOME;
+  }
+  if (url.origin !== origin) return HOME;
+  return url.pathname + url.search + url.hash;
 }
 
 export function signInUrl(request: Request, extra: Record<string, string> = {}): string {
