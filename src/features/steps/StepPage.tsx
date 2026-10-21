@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router';
 import { demoModules } from '@/fixtures/demo';
+import StickyActionBar from '@/ui/StickyActionBar';
 import ModuleDetail from './components/ModuleDetail';
 
 // Static props for U0a; U8 loads the step from GET /v1/paths/:id.
@@ -18,5 +19,14 @@ export default function StepPage() {
     );
   }
 
-  return <ModuleDetail module={module} backTo="/today" />;
+  const next = demoModules.find((m) => m.number === module.number + 1);
+  return (
+    <>
+      <ModuleDetail module={module} backTo="/today" />
+      <StickyActionBar
+        label={next ? `Next: Module ${next.number}` : 'Back to Today'}
+        to={next ? `/steps/${next.number}` : '/today'}
+      />
+    </>
+  );
 }

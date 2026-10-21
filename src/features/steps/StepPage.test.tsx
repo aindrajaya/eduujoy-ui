@@ -19,3 +19,13 @@ describe('/steps/:id', () => {
     expect(await screen.findByRole('heading', { name: 'Step not found' })).toBeInTheDocument();
   });
 });
+
+describe('/steps/:id primary action', () => {
+  it('points to the next module, or back to Today on the last one', async () => {
+    const first = renderRoute('/steps/1');
+    expect(await screen.findByRole('link', { name: 'Next: Module 2' })).toHaveAttribute('href', '/steps/2');
+    first.unmount();
+    renderRoute(`/steps/${demoModules.length}`);
+    expect(await screen.findByRole('link', { name: 'Back to Today' })).toHaveAttribute('href', '/today');
+  });
+});
