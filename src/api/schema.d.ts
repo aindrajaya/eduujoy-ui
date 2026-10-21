@@ -163,7 +163,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Clear both cookies and revoke the session. */
+        /**
+         * Clear both cookies and revoke the session.
+         * @description Public, so an expired access cookie can't block sign-out; CsrfGuard still applies. Revokes the
+         *     session found by the `ej_rt` hash and, when a valid `ej_at` is sent, the session in its `sid`.
+         *     Always answers 204 and clears both cookies, even when no session matched.
+         */
         post: operations["authLogout"];
         delete?: never;
         options?: never;
@@ -761,7 +766,7 @@ export interface components {
             type: string;
         };
         /** @enum {string} */
-        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "REFRESH_CONCURRENT" | "INTERNAL";
+        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "REFRESH_CONCURRENT" | "SERVICE_UNAVAILABLE" | "INTERNAL";
         ProgressHistoryResponse: {
             items: {
                 confidence: number;
@@ -1080,7 +1085,7 @@ export interface operations {
                     "application/json": components["schemas"]["HealthResponse"];
                 };
             };
-            /** @description Not ready. */
+            /** @description Not ready (a dependency check failed). Code `SERVICE_UNAVAILABLE`, type `/problems/not-ready`. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1288,7 +1293,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Signed out. */
+            /** @description Signed out (always, including when no session matched). */
             204: {
                 headers: {
                     "Set-Cookie": components["headers"]["SetSessionCookies"];
@@ -1296,7 +1301,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     authMe: {

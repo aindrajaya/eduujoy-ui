@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Eduujoy API",
-    "version": "0.1.0-v0",
+    "version": "0.1.1-v0",
     "summary": "Frozen v0 contract for the Eduujoy MVP.",
     "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
   },
@@ -163,6 +163,8 @@
         ],
         "operationId": "authLogout",
         "summary": "Clear both cookies and revoke the session.",
+        "description": "Public, so an expired access cookie can't block sign-out; CsrfGuard still applies. Revokes the\nsession found by the `ej_rt` hash and, when a valid `ej_at` is sent, the session in its `sid`.\nAlways answers 204 and clears both cookies, even when no session matched.\n",
+        "security": [],
         "parameters": [
           {
             "$ref": "#/components/parameters/XRequestedWith"
@@ -170,15 +172,15 @@
         ],
         "responses": {
           "204": {
-            "description": "Signed out.",
+            "description": "Signed out (always, including when no session matched).",
             "headers": {
               "Set-Cookie": {
                 "$ref": "#/components/headers/SetSessionCookies"
               }
             }
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       }
@@ -1268,7 +1270,7 @@
             }
           },
           "503": {
-            "description": "Not ready.",
+            "description": "Not ready (a dependency check failed). Code `SERVICE_UNAVAILABLE`, type `/problems/not-ready`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1626,6 +1628,7 @@
           "NO_REPLACEMENT",
           "CSRF_REJECTED",
           "REFRESH_CONCURRENT",
+          "SERVICE_UNAVAILABLE",
           "INTERNAL"
         ]
       },

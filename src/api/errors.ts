@@ -55,6 +55,7 @@ const PROBLEM_CODE_KEYS = {
   NO_REPLACEMENT: true,
   CSRF_REJECTED: true,
   REFRESH_CONCURRENT: true,
+  SERVICE_UNAVAILABLE: true,
   INTERNAL: true,
 } as const satisfies Record<ProblemCode, true>;
 
