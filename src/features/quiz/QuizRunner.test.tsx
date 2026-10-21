@@ -45,3 +45,39 @@ describe('QuizRunner', () => {
     expect(submit).toHaveBeenCalledWith({ q1: { optionIds: ['b'] }, q2: { text: 'Because users' } }, 'key-1');
   });
 });
+
+describe('QuizRunner autoSubmit', () => {
+  it('submits right after the last answer, without a review step', async () => {
+    const submit = vi.fn().mockResolvedValue('ok');
+    render(
+      <QuizProvider quizId="quiz-2" questions={questions} idempotencyKey="key-2">
+        <QuizRunner userId="u1" submit={submit} autoSubmit submitLabel="Continue" />
+      </QuizProvider>,
+    );
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('radio', { name: 'Alpha' }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.type(screen.getByRole('textbox', { name: 'Your answer' }), 'Short');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.queryByRole('heading', { name: 'Review your answers' })).not.toBeInTheDocument();
+    await vi.waitFor(() => {
+      expect(submit).toHaveBeenCalledOnce();
+    });
+  });
+});
+
+describe('QuizRunner autoSubmit status', () => {
+  it('shows a saving status (not the review screen) while the batch is sent', async () => {
+    let release: (v: string) => void = () => undefined;
+    const submit = vi.fn(() => new Promise<string>((r) => { release = r; }));
+    render(
+      <QuizProvider quizId="quiz-3" questions={questions.slice(0, 1)} idempotencyKey="key-3">
+        <QuizRunner userId="u1" submit={submit} autoSubmit submitLabel="Continue" />
+      </QuizProvider>,
+    );
+    await userEvent.click(screen.getByRole('radio', { name: 'Alpha' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(await screen.findByText('Saving your answers…')).toBeInTheDocument();
+    release('ok');
+  });
+});

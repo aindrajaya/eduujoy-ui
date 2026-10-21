@@ -23,8 +23,10 @@ export type DreyfusStage = Schemas['DreyfusStage'];
 export type Position = Schemas['Position'];
 
 export type DiagnosticStartRequest = Schemas['DiagnosticStartRequest'];
+export type DiagnosticAnswer = Schemas['DiagnosticAnswer'];
 export type DiagnosticAnswersRequest = Schemas['DiagnosticAnswersRequest'];
 export type DiagnosticBatchResponse = Schemas['DiagnosticBatchResponse'];
+export type DiagnosticResponse = Schemas['DiagnosticResponse'];
 export type DiagnosticItem = Schemas['DiagnosticItem'];
 export type Placement = Schemas['Placement'];
 
