@@ -1,16 +1,19 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { getDiagnostic, submitDiagnosticAnswers } from '@/api/endpoints/diagnostics';
-import { toApiError } from '@/api/errors';
-import type { DiagnosticAnswer, DiagnosticBatchResponse, DiagnosticItem } from '@/api/types';
+import { toApiError, type ApiError } from '@/api/errors';
+import type { DiagnosticAnswer, DiagnosticBatchResponse, DiagnosticItem, Topic } from '@/api/types';
 import type { Answer } from '@/features/quiz/types';
 import { diagnosticKeys } from './keys';
+
+/** The cached diagnostic: a batch, plus the topic when it came from GET /v1/diagnostics/{id}. */
+export type DiagnosticState = DiagnosticBatchResponse & { topic?: Topic };
 
 /**
  * The diagnostic's current batch. Onboarding seeds this key with the first batch, so the hand-off
  * makes no request; after a reload GET /v1/diagnostics/{id} resumes it (contract 0.2.0).
  */
 export const diagnosticQuery = (id: string) =>
-  queryOptions<DiagnosticBatchResponse>({
+  queryOptions<DiagnosticState, ApiError>({
     queryKey: diagnosticKeys.batch(id),
     queryFn: () => getDiagnostic(id),
     staleTime: Infinity,
