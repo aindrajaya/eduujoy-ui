@@ -92,7 +92,7 @@ Passing the top-of-band checkpoint sends the learner back to "Generating path" f
 | `/start` | Topic, goal, weekly hours, formats | `POST /v1/topics/resolve` | — | US-01 |
 | `/diagnostic/:id` | Adaptive diagnostic, 4 items per batch | `POST /v1/diagnostics/:id/answers` | — | US-02 |
 | `/paths/new/:jobId` | Generation progress ("Finding videos… 4 of 6") | SSE `GET /v1/jobs/:id/events` | SSE | US-03 |
-| `/today` (home) | Current step, next action, streak | `GET /v1/paths?active=1` | WebSocket | US-03 |
+| `/today` (home) | Current step, next action, streak | `GET /v1/paths?status=active` (contract 0.1.0; until A9 serves it, pick `status: 'active'` client-side) | WebSocket | US-03 |
 | `/paths`, `/paths/:id` | Path list and SOP overview | `GET /v1/paths/:id` | WebSocket | US-03, US-06 |
 | `/steps/:id` | Step: actions, resources, embeds, "why this" | `GET /v1/paths/:id` (cached) | — | US-04, US-07, US-08 |
 | `/checkpoints/:id` | Checkpoint quiz and result | `POST /v1/checkpoints/:id/submissions` | SSE (open answers) | US-05 |
@@ -145,7 +145,7 @@ Components never call Axios: they call typed functions in `src/api/endpoints`, w
 let refreshing: Promise<void> | null = null;
 api.interceptors.response.use(undefined, async (error) => {
   const original = error.config;
-  if (error.response?.status !== 401 || original._retried || original.url?.includes('/auth/')) throw toApiError(error);
+  if (error.response?.status !== 401 || original._retried || NO_REFRESH.some((p) => original.url?.endsWith(p))) throw toApiError(error); // login, register, logout, refresh only
   original._retried = true;
   refreshing ??= api.post('/v1/auth/refresh').then(() => undefined).finally(() => { refreshing = null; });
   await refreshing;           // throws → session expired handler
@@ -179,7 +179,7 @@ The browser never sees a token: the API sets HttpOnly cookies, and the UI learns
 **Boot sequence (no flash of unauthenticated content)**
 
 1. `index.html` ships a static splash (logo + skeleton) inside `#root`, so first paint never shows protected UI or a login form by mistake.
-2. The root route `loader` calls `queryClient.ensureQueryData(sessionQuery)`, which hits `/v1/auth/me` once and caches it for 5 min.
+2. The root route `loader` calls `queryClient.query(sessionQuery)` (`ensureQueryData` is deprecated in TanStack Query 5.104), which hits `/v1/auth/me` once and caches it for 5 min.
 3. Protected routes (`RequireAuth`) read that cached result inside their `loader`: signed out → `redirect('/signin?next=…')` before any component renders.
 4. `RequireRole('reviewer' | 'admin')` does the same for admin routes; the API enforces roles regardless.
 5. Public-only routes (`/signin`, `/signup`) redirect signed-in users to `/today`.
@@ -261,12 +261,14 @@ The app shell must be interactive on a mid-range Android over 4G within the mast
 
 | Budget | Limit | Checked by |
 | --- | --- | --- |
-| Initial JS (shell + first route), gzip | ≤ 150 KB | `size-limit` in CI |
+| Initial JS (shell + first screen: `/signin` signed out, `/today` signed in), gzip | ≤ 150 KB, per screen | `size-limit` in CI |
 | Any single route chunk, gzip | ≤ 60 KB | `size-limit` |
 | LCP (mobile, simulated 4G) | ≤ 2.5 s | Lighthouse CI on `/signin`, `/today`, `/steps/:id` |
 | INP | ≤ 200 ms | Lighthouse CI + `web-vitals` RUM to the API |
 | CLS | ≤ 0.1 | Lighthouse CI |
 | Third-party scripts at load | 0 | Code review; YouTube loads on tap only |
+
+Lighthouse CI runs on a `--mode mock` build that ships the MSW worker, so authenticated screens can be audited without an API; production builds never contain MSW.
 
 **Code splitting and lazy loading**
 

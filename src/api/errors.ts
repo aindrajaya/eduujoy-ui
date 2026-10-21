@@ -54,6 +54,8 @@ const PROBLEM_CODE_KEYS = {
   AI_BUDGET_EXCEEDED: true,
   NO_REPLACEMENT: true,
   CSRF_REJECTED: true,
+  REFRESH_CONCURRENT: true,
+  SERVICE_UNAVAILABLE: true,
   INTERNAL: true,
 } as const satisfies Record<ProblemCode, true>;
 
@@ -74,6 +76,8 @@ function codeForStatus(status: number): ProblemCode {
       return 'CONFLICT';
     case 429:
       return 'RATE_LIMITED';
+    case 503:
+      return 'SERVICE_UNAVAILABLE';
     default:
       return 'INTERNAL';
   }
