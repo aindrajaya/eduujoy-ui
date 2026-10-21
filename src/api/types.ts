@@ -50,6 +50,7 @@ export type JobFailedEvent = Schemas['JobFailedEvent'];
 export type Checkpoint = Schemas['Checkpoint'];
 export type CheckpointSubmissionRequest = Schemas['CheckpointSubmissionRequest'];
 export type CheckpointResult = Schemas['CheckpointResult'];
+export type CheckpointItemResult = Schemas['CheckpointItemResult'];
 
 export type ProgressResponse = Schemas['ProgressResponse'];
 export type ProgressHistoryResponse = Schemas['ProgressHistoryResponse'];
