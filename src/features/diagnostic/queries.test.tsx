@@ -48,23 +48,19 @@ describe('diagnostic queries', () => {
 
   it('submits a batch and returns the next state', async () => {
     let body: DiagnosticAnswersRequest | undefined;
+    let key: string | null = null;
     server.use(
       http.post('/v1/diagnostics/{id}/answers', async ({ request, response }) => {
         body = await request.json();
+        key = request.headers.get('Idempotency-Key');
         return response(200).json(mockDiagnosticCompleted);
       }),
     );
-    await expect(submitBatch('diag-1', items, { q1: { optionIds: ['a'] } })).resolves.toEqual(mockDiagnosticCompleted);
-    expect(body?.answers).toHaveLength(2);
-  });
-
-  it('treats 409 as already recorded and fetches the current state', async () => {
-    server.use(
-      http.post('/v1/diagnostics/{id}/answers', ({ response }) =>
-        response.untyped(problemResponse(mockProblem(409, 'CONFLICT', 'Batch already answered'))),
-      ),
+    await expect(submitBatch('diag-1', items, { q1: { optionIds: ['a'] } }, 'batch-key-1')).resolves.toEqual(
+      mockDiagnosticCompleted,
     );
-    await expect(submitBatch('diag-1', items, {})).resolves.toEqual(mockDiagnosticResume);
+    expect(body?.answers).toHaveLength(2);
+    expect(key).toBe('batch-key-1');
   });
 
   it('passes other errors through', async () => {
@@ -73,6 +69,6 @@ describe('diagnostic queries', () => {
         response.untyped(problemResponse(mockProblem(403, 'FORBIDDEN', 'Not yours'))),
       ),
     );
-    await expect(submitBatch('diag-1', items, {})).rejects.toMatchObject({ status: 403 });
+    await expect(submitBatch('diag-1', items, {}, 'batch-key-2')).rejects.toMatchObject({ status: 403 });
   });
 });

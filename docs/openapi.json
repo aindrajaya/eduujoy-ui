@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Eduujoy API",
-    "version": "0.2.1-v0",
+    "version": "0.3.0-v0",
     "summary": "Frozen v0 contract for the Eduujoy MVP.",
-    "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
+    "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- CORS exposes `X-Request-Id` and `Retry-After` to allow-listed origins, so the UI can read\n  both on cross-origin responses (Retry-After on 429 and on 503 AI_BUDGET_EXCEEDED).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
   },
   "servers": [
     {
@@ -455,9 +455,13 @@
         ],
         "operationId": "diagnosticsSubmitAnswers",
         "summary": "Submit a batch of answers; returns the next batch or the placement (FR-04).",
+        "description": "Send the same optional `Idempotency-Key` on every retry of one batch. A replay with the\nsame key and body returns the stored 200 response and records nothing twice; the same\nkey with a different body returns 409 CONFLICT.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRequestedWith"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyOptional"
           },
           {
             "$ref": "#/components/parameters/IdPath"
@@ -1395,6 +1399,17 @@
           "maxLength": 128
         }
       },
+      "IdempotencyKeyOptional": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Optional; when sent, retries of the same request reuse it (see the operation).",
+        "schema": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        }
+      },
       "IfNoneMatch": {
         "name": "If-None-Match",
         "in": "header",
@@ -1539,6 +1554,7 @@
         "description": "Rate limited (code RATE_LIMITED).",
         "headers": {
           "Retry-After": {
+            "description": "Whole seconds to wait before retrying. Exposed to allow-listed origins via CORS.",
             "schema": {
               "type": "integer"
             }
@@ -1556,7 +1572,7 @@
         "description": "Daily AI budget reached for cold topics (code AI_BUDGET_EXCEEDED).",
         "headers": {
           "Retry-After": {
-            "description": "Whole seconds until the next UTC midnight, when the daily budget resets (at least 1).",
+            "description": "Whole seconds until the next UTC midnight, when the daily budget resets (at least 1). Exposed to allow-listed origins via CORS.",
             "schema": {
               "type": "integer",
               "minimum": 1
@@ -2622,6 +2638,50 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "currentStep": {
+            "description": "The first step that is not done yet, so Today renders from the list alone. Null when the path is not active or every step is done.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PathStepSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "PathStepSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "n",
+          "objective",
+          "bloom",
+          "estMinutes",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "objective": {
+            "type": "string"
+          },
+          "bloom": {
+            "$ref": "#/components/schemas/BloomLevel"
+          },
+          "estMinutes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
           }
         }
       },
@@ -2823,6 +2883,17 @@
           "stageAdvanced": {
             "type": "boolean",
             "default": false
+          },
+          "nextPathJob": {
+            "description": "Set when `stageAdvanced` is true. The job that re-assesses the learner and builds the next stage's path (US-06); stream it from `eventsUrl`, and its `resultRef` names the new path. Absent or null otherwise.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JobAccepted"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
@@ -3329,8 +3400,10 @@
           },
           "resultRef": {
             "type": "string",
+            "description": "Always an API path, never a bare id. Format per job kind:\n- path generation and the stage-advance job (`nextPathJob`): `/v1/paths/{pathId}`, the new path.\n- checkpoint grading: `/v1/checkpoints/{stepId}/submissions/{submissionId}`. An identifier only\n  (v0 has no GET for it); the graded result is inline in `result`.\n",
             "examples": [
-              "/v1/paths/path_19c2"
+              "/v1/paths/path_19c2",
+              "/v1/checkpoints/step_4/submissions/sub_81"
             ]
           },
           "result": {

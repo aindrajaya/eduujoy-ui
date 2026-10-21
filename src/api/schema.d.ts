@@ -335,7 +335,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Submit a batch of answers; returns the next batch or the placement (FR-04). */
+        /**
+         * Submit a batch of answers; returns the next batch or the placement (FR-04).
+         * @description Send the same optional `Idempotency-Key` on every retry of one batch. A replay with the
+         *     same key and body returns the stored 200 response and records nothing twice; the same
+         *     key with a different body returns 409 CONFLICT.
+         */
         post: operations["diagnosticsSubmitAnswers"];
         delete?: never;
         options?: never;
@@ -548,6 +553,8 @@ export interface components {
         };
         CheckpointResult: {
             items: components["schemas"]["CheckpointItemResult"][];
+            /** @description Set when `stageAdvanced` is true. The job that re-assesses the learner and builds the next stage's path (US-06); stream it from `eventsUrl`, and its `resultRef` names the new path. Absent or null otherwise. */
+            nextPathJob?: components["schemas"]["JobAccepted"] | null;
             nextStepId?: string | null;
             passed: boolean;
             /** @description Set when a second fail inserted a remedial step. */
@@ -663,7 +670,14 @@ export interface components {
             jobId: string;
             /** @description Inline result for grading jobs. */
             result?: components["schemas"]["CheckpointResult"];
-            /** @example /v1/paths/path_19c2 */
+            /**
+             * @description Always an API path, never a bare id. Format per job kind:
+             *     - path generation and the stage-advance job (`nextPathJob`): `/v1/paths/{pathId}`, the new path.
+             *     - checkpoint grading: `/v1/checkpoints/{stepId}/submissions/{submissionId}`. An identifier only
+             *       (v0 has no GET for it); the graded result is inline in `result`.
+             * @example /v1/paths/path_19c2
+             * @example /v1/checkpoints/step_4/submissions/sub_81
+             */
             resultRef: string;
         };
         JobFailedEvent: {
@@ -755,9 +769,19 @@ export interface components {
             resources: components["schemas"]["Resource"][];
             status: components["schemas"]["StepStatus"];
         };
+        PathStepSummary: {
+            bloom: components["schemas"]["BloomLevel"];
+            estMinutes: number;
+            id: string;
+            n: number;
+            objective: string;
+            status: components["schemas"]["StepStatus"];
+        };
         PathSummary: {
             /** Format: date-time */
             createdAt: string;
+            /** @description The first step that is not done yet, so Today renders from the list alone. Null when the path is not active or every step is done. */
+            currentStep?: components["schemas"]["PathStepSummary"] | null;
             from: components["schemas"]["Position"];
             id: string;
             /** @enum {string} */
@@ -976,7 +1000,7 @@ export interface components {
         /** @description Daily AI budget reached for cold topics (code AI_BUDGET_EXCEEDED). */
         BudgetExceeded: {
             headers: {
-                /** @description Whole seconds until the next UTC midnight, when the daily budget resets (at least 1). */
+                /** @description Whole seconds until the next UTC midnight, when the daily budget resets (at least 1). Exposed to allow-listed origins via CORS. */
                 "Retry-After"?: number;
                 [name: string]: unknown;
             };
@@ -1032,6 +1056,7 @@ export interface components {
         /** @description Rate limited (code RATE_LIMITED). */
         TooManyRequests: {
             headers: {
+                /** @description Whole seconds to wait before retrying. Exposed to allow-listed origins via CORS. */
                 "Retry-After"?: number;
                 [name: string]: unknown;
             };
@@ -1062,6 +1087,8 @@ export interface components {
         Cursor: string;
         From: string;
         IdempotencyKey: string;
+        /** @description Optional; when sent, retries of the same request reuse it (see the operation). */
+        IdempotencyKeyOptional: string;
         IdPath: string;
         IfNoneMatch: string;
         Limit: number;
@@ -1570,6 +1597,8 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
+                /** @description Optional; when sent, retries of the same request reuse it (see the operation). */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKeyOptional"];
                 /** @description CSRF guard for unsafe methods. */
                 "X-Requested-With": components["parameters"]["XRequestedWith"];
             };
