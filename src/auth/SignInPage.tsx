@@ -7,6 +7,7 @@ import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
 import GoogleButton from './GoogleButton';
+import SignOutFailedNotice from './SignOutFailedNotice';
 import { safeNext } from './guards';
 import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
 import { useSignIn } from './queries';
@@ -49,6 +50,7 @@ export default function SignInPage() {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue your learning path.">
+      <SignOutFailedNotice />
       {expired && (
         <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
           Your session expired. Sign in again to continue.
