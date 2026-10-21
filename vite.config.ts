@@ -10,7 +10,7 @@ export default defineConfig({
   },
   server: { port: 5173 },
   preview: { port: 4173 },
-  build: { target: 'es2022', sourcemap: false },
+  build: { target: 'es2022', sourcemap: false, manifest: true },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
