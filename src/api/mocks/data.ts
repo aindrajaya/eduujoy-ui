@@ -265,3 +265,12 @@ export const mockDiagnosticResume: DiagnosticResponse = {
   createdAt: '2026-10-21T08:00:00Z',
   completedAt: null,
 };
+
+/** A path-generation job's event stream (contract x-sse-events). */
+export const mockPathJobEvents = [
+  { id: '1', event: 'progress', data: { jobId: 'job-1', stage: 'discover', done: 2, total: 6, message: 'Finding videos' } },
+  { id: '2', event: 'progress', data: { jobId: 'job-1', stage: 'analyse', done: 4, total: 6, message: 'Analysing videos' } },
+  { id: '3', event: 'partial', data: { jobId: 'job-1', kind: 'path_step', pathId: 'path-1', step: mockPath.steps[0] } },
+  { id: '4', event: 'progress', data: { jobId: 'job-1', stage: 'validate', done: 6, total: 6 } },
+  { id: '5', event: 'completed', data: { jobId: 'job-1', resultRef: 'path-1' } },
+] as const;

@@ -6,6 +6,7 @@ import { createOpenApiHttp } from 'openapi-msw';
 import { env } from '@/lib/env';
 import type { paths } from '../schema';
 import type { Problem } from '../types';
+import { after, sseResponse } from './sse';
 import {
   mockCheckpointResult,
   mockCostMetrics,
@@ -15,6 +16,7 @@ import {
   mockJobAccepted,
   mockLatencyMetrics,
   mockMe,
+  mockPathJobEvents,
   mockPath,
   mockProblem,
   mockProgress,
@@ -105,6 +107,11 @@ export const handlers = [
   ),
 
   // Progress and billing
+  // Jobs: path generation progress over SSE; replays events after Last-Event-ID.
+  http.get('/v1/jobs/{id}/events', ({ request, response }) =>
+    response.untyped(sseResponse(after(mockPathJobEvents, request.headers.get('Last-Event-ID')))),
+  ),
+
   http.get('/v1/progress', ({ response }) => response(200).json(mockProgress)),
   http.get('/v1/progress/{topicId}/history', ({ response }) =>
     response(200).json(mockProgressHistory),
