@@ -33,10 +33,13 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     );
     renderRoute('/progress');
     expect(await screen.findByText('Advanced beginner · C3 Apply')).toBeInTheDocument();
-    // The bridge is a lazy chunk; the socket opens right after the screen.
-    await waitFor(() => {
-      expect(openedSockets).toHaveLength(1);
-    });
+    // The socket opens once the first paint has settled (1 s) and the bridge chunk has loaded.
+    await waitFor(
+      () => {
+        expect(openedSockets).toHaveLength(1);
+      },
+      { timeout: 3000 },
+    );
 
     act(() => {
       openedSockets[0]!.serverEmit('stage.advanced', {
@@ -55,7 +58,7 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     server.use(http.post('/v1/auth/refresh', ({ response }) => response.untyped(problemResponse(mockProblem(401, 'UNAUTHENTICATED', 'x')))));
     renderRoute('/signin');
     expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     expect(openedSockets).toHaveLength(0);
   });
 
@@ -69,9 +72,12 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     );
     renderRoute('/progress');
     await screen.findByText('Advanced beginner · C3 Apply');
-    await waitFor(() => {
-      expect(openedSockets).toHaveLength(1);
-    });
+    await waitFor(
+      () => {
+        expect(openedSockets).toHaveLength(1);
+      },
+      { timeout: 3000 },
+    );
     const socket = openedSockets[0]!;
 
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });

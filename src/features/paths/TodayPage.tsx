@@ -3,6 +3,7 @@ import { Clock } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'react-router';
 import type { Path, PathStep, PathSummary } from '@/api/types';
+import { afterFirstPaint } from '@/lib/idle';
 import { BLOOM_LABEL } from '@/lib/levels';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
@@ -38,17 +39,7 @@ function usePrefetchStepScreen(pathId: string | undefined) {
       void import('@/features/steps/StepPage');
       void client.query(pathQuery(pathId)).catch(() => undefined);
     };
-    // Start after the first paint has settled, then wait for idle, so neither request competes
-    // with Today's own render.
-    let idle: number | undefined;
-    const timer = setTimeout(() => {
-      if ('requestIdleCallback' in window) idle = window.requestIdleCallback(load);
-      else load();
-    }, 1000);
-    return () => {
-      clearTimeout(timer);
-      if (idle !== undefined) window.cancelIdleCallback(idle);
-    };
+    return afterFirstPaint(load);
   }, [client, pathId]);
 }
 
