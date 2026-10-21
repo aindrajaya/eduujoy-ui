@@ -6,7 +6,7 @@ import { useSession } from '@/auth/session';
 import IntakeForm from './components/IntakeForm';
 import TopicChoices from './components/TopicChoices';
 import WelcomeSplash from './components/WelcomeSplash';
-import { intakeErrorMessage } from './errors';
+import { intakeErrorMessage, type IntakeStep } from './errors';
 import { useResolveTopic, useStartDiagnostic } from './queries';
 import type { IntakeValues } from './schema';
 
@@ -27,6 +27,8 @@ export default function StartPage() {
   const [step, setStep] = useState<Step>({ name: 'splash' });
   const [values, setValues] = useState<IntakeValues | undefined>();
   const [error, setError] = useState<ApiError | null>(null);
+  // Which call failed: topic search (resolve) has its own outage copy (contract 0.4.0).
+  const [failedStep, setFailedStep] = useState<IntakeStep>('start');
 
   const showForm = useCallback(() => {
     setStep({ name: 'form' });
@@ -50,8 +52,10 @@ export default function StartPage() {
   const handleIntake = async (intake: IntakeValues) => {
     setValues(intake);
     setError(null);
+    setFailedStep('resolve');
     try {
       const result = await resolve.mutateAsync({ text: intake.topic });
+      setFailedStep('start');
       if (result.status === 'choices' && result.choices?.length) {
         setStep({ name: 'choices', values: intake, choices: result.choices });
         return;
@@ -65,6 +69,7 @@ export default function StartPage() {
 
   const handleChoice = async (intake: IntakeValues, topic: Topic) => {
     setError(null);
+    setFailedStep('start');
     try {
       await startDiagnostic(intake, topic);
     } catch (e) {
@@ -80,7 +85,7 @@ export default function StartPage() {
         typed={step.values.topic}
         choices={step.choices}
         submitting={start.isPending}
-        errorMessage={error ? intakeErrorMessage(error) : undefined}
+        errorMessage={error ? intakeErrorMessage(error, failedStep) : undefined}
         onConfirm={(topic) => void handleChoice(step.values, topic)}
         onEditTopic={() => {
           setError(null);
@@ -96,7 +101,7 @@ export default function StartPage() {
       onSubmit={(intake) => void handleIntake(intake)}
       submitting={resolve.isPending || start.isPending}
       error={error}
-      errorMessage={error ? intakeErrorMessage(error) : undefined}
+      errorMessage={error ? intakeErrorMessage(error, failedStep) : undefined}
     />
   );
 }

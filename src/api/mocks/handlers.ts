@@ -49,7 +49,16 @@ export const handlers = [
   http.post('/v1/auth/refresh', ({ response }) => response(204).empty()),
 
   // Catalog and assessment
-  http.post('/v1/topics/resolve', ({ response }) => response(200).json(mockResolveMatched)),
+  // Contract 0.4.0: the topic "embedding outage" simulates an outage with no name-fallback match.
+  http.post('/v1/topics/resolve', async ({ request, response }) => {
+    const { text } = await request.json();
+    if (text.trim().toLowerCase() === 'embedding outage') {
+      return response.untyped(
+        problemResponse(mockProblem(503, 'SERVICE_UNAVAILABLE', 'Topic search is unavailable'), { 'Retry-After': '30' }),
+      );
+    }
+    return response(200).json(mockResolveMatched);
+  }),
   http.post('/v1/diagnostics', ({ response }) => response(201).json(mockDiagnosticBatch)),
   http.get('/v1/diagnostics/{id}', ({ params, response }) =>
     params.id === mockDiagnosticResume.diagnosticId
