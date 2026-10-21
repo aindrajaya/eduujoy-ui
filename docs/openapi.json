@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Eduujoy API",
-    "version": "0.1.1-v0",
+    "version": "0.2.0-v0",
     "summary": "Frozen v0 contract for the Eduujoy MVP.",
     "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
   },
@@ -405,6 +405,39 @@
           },
           "400": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/diagnostics/{id}": {
+      "get": {
+        "tags": [
+          "assessment"
+        ],
+        "operationId": "diagnosticsGet",
+        "summary": "Read my diagnostic so the UI can resume it after a reload (US-02).",
+        "description": "Owner only. `items` is the batch issued last and not answered yet (empty once completed), so a\nreloaded client continues exactly where it stopped; `placement` is set once `status` is\n`completed`. Another user's diagnostic answers 404, so IDs can't be probed.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The diagnostic with its outstanding batch and progress.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticResponse"
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2087,6 +2120,37 @@
             "description": "One-line reason (US-02)."
           }
         }
+      },
+      "DiagnosticResponse": {
+        "description": "GET /v1/diagnostics/{id}. The batch shape plus the topic and timestamps.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DiagnosticBatchResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "topic",
+              "createdAt"
+            ],
+            "properties": {
+              "topic": {
+                "$ref": "#/components/schemas/Topic"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "completedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              }
+            }
+          }
+        ]
       },
       "DiagnosticBatchResponse": {
         "type": "object",
