@@ -1,29 +1,28 @@
 @import 'tailwindcss';
 @import './ui/tokens.css';
 
-/* Keyframes shared by every screen (previously scoped inside OnboardingForm). */
+/*
+ * Entry motion for screens and cards (PRD-UI §4: 150-200 ms ease-out). Transform only: content is
+ * never at opacity 0, because Chrome skips invisible elements as LCP candidates (PRD-UI §9).
+ */
 @theme {
-  --animate-fade-in: fade-in 0.6s ease-out both;
-  --animate-slide-up: slide-up 0.8s ease-out both;
+  --animate-fade-in: fade-in 200ms ease-out both;
+  --animate-slide-up: slide-up 200ms ease-out both;
 
   @keyframes fade-in {
     from {
-      opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(8px);
     }
     to {
-      opacity: 1;
       transform: translateY(0);
     }
   }
 
   @keyframes slide-up {
     from {
-      opacity: 0;
-      transform: translateY(40px);
+      transform: translateY(16px);
     }
     to {
-      opacity: 1;
       transform: translateY(0);
     }
   }

@@ -10,13 +10,9 @@ import './index.css';
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root element');
 
-// `vite dev` or a `--mode mock` build (Lighthouse CI) with VITE_API_MOCKS=true runs against the
-// contract-typed MSW handlers. Production builds have MODE 'production' and DEV false, so this
-// branch and msw are tree-shaken out.
-if (
-  (import.meta.env.DEV || import.meta.env.MODE === 'mock') &&
-  import.meta.env.VITE_API_MOCKS === 'true'
-) {
+// `vite dev` with VITE_API_MOCKS=true runs against the contract-typed MSW handlers.
+// import.meta.env.DEV is false in production builds, so this branch and msw are tree-shaken out.
+if (import.meta.env.DEV && import.meta.env.VITE_API_MOCKS === 'true') {
   const { startMockWorker } = await import('./api/mocks/browser');
   await startMockWorker();
 }

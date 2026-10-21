@@ -39,8 +39,8 @@ VITE_API_MOCKS=true pnpm dev # same, against the contract-typed MSW mocks (no AP
 | `pnpm test:coverage` | Tests with V8 coverage (`coverage/`) |
 | `pnpm size` | JS budgets after `pnpm build`: initial ≤ 150 KB, any chunk ≤ 60 KB gzip |
 | `pnpm test:e2e` | Playwright on a production build with the API mocked via `page.route` (system Chrome) |
-| `pnpm build:mock` | Production-like build that runs against the MSW mocks (`dist-mock/`, Lighthouse only) |
-| `pnpm lhci` | Lighthouse CI on the mock build (needs Chrome and a display; runs in CI) |
+| `pnpm build:lh` | Production bundle for Lighthouse (`dist-lh/`); `vite preview --mode lighthouse` answers the API from mock data |
+| `pnpm lhci` | Lighthouse CI on the `build:lh` bundle (runs in CI) |
 
 CI (`.github/workflows/ci.yml`) runs API types → lint → typecheck → tests → build → size → Playwright → Lighthouse.
 Design tokens (colour roles, radii, motion; light and dark) live in `src/ui/tokens.css`.
