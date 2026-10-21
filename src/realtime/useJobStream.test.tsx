@@ -54,7 +54,7 @@ describe('useJobStream', () => {
     await waitFor(() => {
       expect(result.current.status).toBe('completed');
     });
-    expect(result.current.completed?.resultRef).toBe('path-1');
+    expect(result.current.completed?.resultRef).toBe('/v1/paths/path-1');
     expect(result.current.partialSteps).toHaveLength(1);
     expect(client.getQueryData(jobKeys.detail('job-1'))).toMatchObject({ status: 'completed' });
     expect(onCompleted).toHaveBeenCalledOnce();

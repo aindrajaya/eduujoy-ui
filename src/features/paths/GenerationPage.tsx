@@ -7,6 +7,7 @@ import type { JobView } from '@/realtime/jobView';
 import { useJobStream } from '@/realtime/useJobStream';
 import StateMessage from '@/ui/StateMessage';
 import { pathKeys } from './keys';
+import { pathIdFromRef } from './pathQueries';
 import { toast } from '@/ui/toast/store';
 
 type Stage = JobProgressEvent['stage'];
@@ -42,8 +43,8 @@ export default function GenerationPage() {
     (done: JobView) => {
       void client.invalidateQueries({ queryKey: pathKeys.all });
       toast({ title: 'Your path is ready', tone: 'success' });
-      // resultRef is the new path's id; without one, Today shows the active path.
-      const pathId = done.completed?.resultRef;
+      // resultRef names the new path; without one, Today shows the active path.
+      const pathId = pathIdFromRef(done.completed?.resultRef);
       void navigate(pathId ? `/paths/${encodeURIComponent(pathId)}` : '/today', { replace: true });
     },
     [client, navigate],

@@ -43,6 +43,17 @@ export const currentStep = (path: Path): PathStep | undefined =>
   path.steps.find((s) => s.status === 'active') ??
   path.steps.find((s) => s.status !== 'completed' && s.status !== 'skipped');
 
+/**
+ * A job's `resultRef` names the result as an API path (contract example `/v1/paths/path_19c2`).
+ * A bare id is accepted too. Anything else gives undefined, so the caller falls back to Today.
+ */
+export function pathIdFromRef(ref: string | undefined): string | undefined {
+  if (!ref) return undefined;
+  const match = /^\/v1\/paths\/([^/?#]+)$/.exec(ref);
+  if (match) return decodeURIComponent(match[1] ?? '');
+  return /^[^/?#]+$/.test(ref) ? ref : undefined;
+}
+
 /** Link to a step; the path id travels in the URL so a reload can load the path (no GET /v1/steps). */
 export const stepHref = (pathId: string, stepId: string) =>
   `/steps/${encodeURIComponent(stepId)}?path=${encodeURIComponent(pathId)}`;
