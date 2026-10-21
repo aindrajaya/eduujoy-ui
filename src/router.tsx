@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect, type RouteObject } from 'react-router';
+import { redirect, type RouteObject } from 'react-router';
 import BootSplash from './app/BootSplash';
 import RouteError from './app/RouteError';
 import { HOME, loadSession, publicOnly, requireAuth } from './auth/guards';
@@ -80,5 +80,3 @@ export const routes: RouteObject[] = [
     ],
   },
 ];
-
-export const router = createBrowserRouter(routes);
