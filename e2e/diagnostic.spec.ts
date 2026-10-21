@@ -124,6 +124,14 @@ test.describe('diagnostic (US-02)', () => {
   test('“Build my path” starts generation and hands off', async ({ page }) => {
     await mockAuth(page, { signedIn: true });
     await mockDiagnosticApi(page, BATCHES.length);
+    // The generation screen (U7) opens the job's event stream; the job has just started.
+    await page.route('**/v1/jobs/job-e2e/events', (route) =>
+      route.fulfill({
+        status: 200,
+        headers: { 'Content-Type': 'text/event-stream' },
+        body: 'id: 1\nevent: progress\ndata: {"jobId":"job-e2e","stage":"queued","done":0,"total":0}\n\n',
+      }),
+    );
     await page.goto('/diagnostic/diag-e2e');
     await page.getByRole('button', { name: 'Build my path' }).click();
     await expect(page).toHaveURL(/\/paths\/new\/job-e2e$/);
