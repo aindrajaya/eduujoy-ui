@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import type { ApiError } from '@/api/errors';
 import { Skeleton } from '@/ui/Skeleton';
 import { useQuizQuestions, useQuizState } from './context';
 
@@ -9,10 +10,17 @@ export interface ReviewScreenProps {
   submitLabel?: string;
   /** Shown while submitting when the device is offline and the submit is queued. */
   waitingForNetwork?: boolean;
+  /** Screen-specific copy for a failed submit; the generic copy covers the rest. */
+  describeError?: (error: ApiError) => string | undefined;
 }
 
 /** Review before submit: answers at a glance, unanswered count, one primary action. */
-export default function ReviewScreen({ onSubmit, submitLabel = 'Submit answers', waitingForNetwork = false }: ReviewScreenProps) {
+export default function ReviewScreen({
+  onSubmit,
+  submitLabel = 'Submit answers',
+  waitingForNetwork = false,
+  describeError,
+}: ReviewScreenProps) {
   const questions = useQuizQuestions();
   const { answers, status, error } = useQuizState();
   const unanswered = questions.filter((q) => !answers[q.id]).length;
@@ -33,9 +41,10 @@ export default function ReviewScreen({ onSubmit, submitLabel = 'Submit answers',
       </Suspense>
       {status === 'error' && error && (
         <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
-          {error.status === 0
-            ? 'Your answers are saved on this device, but we could not reach the server. Try again.'
-            : 'We could not submit your answers. Try again.'}
+          {describeError?.(error) ??
+            (error.status === 0
+              ? 'Your answers are saved on this device, but we could not reach the server. Try again.'
+              : 'We could not submit your answers. Try again.')}
         </p>
       )}
       <div aria-live="polite" className="text-sm text-text-muted">
