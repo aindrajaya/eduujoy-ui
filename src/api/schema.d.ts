@@ -500,7 +500,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Resolve free text to a canonical topic or up to 3 choices (FR-01, FR-02). */
+        /**
+         * Resolve free text to a canonical topic or up to 3 choices (FR-01, FR-02).
+         * @description If the embedding provider is unavailable, the API falls back to a name and alias search
+         *     and returns `choices` when any are close enough; it never creates a topic during an
+         *     outage. If nothing is close, it returns 503 with Retry-After.
+         */
         post: operations["topicsResolve"];
         delete?: never;
         options?: never;
@@ -1047,6 +1052,17 @@ export interface components {
         /** @description The refresh token was rotated by a concurrent request; cookies are unchanged. Code `REFRESH_CONCURRENT`. */
         RefreshConcurrent: {
             headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description A dependency is briefly unavailable (code SERVICE_UNAVAILABLE). Retry after the given wait. */
+        ServiceUnavailable: {
+            headers: {
+                /** @description Whole seconds to wait before retrying (30 for topic resolve). Exposed to allow-listed origins via CORS. */
+                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {
@@ -1941,6 +1957,7 @@ export interface operations {
             400: components["responses"]["ValidationError"];
             401: components["responses"]["Unauthorized"];
             429: components["responses"]["TooManyRequests"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
 }
