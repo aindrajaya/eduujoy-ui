@@ -16,7 +16,7 @@
     "lhci": "pnpm dlx @lhci/cli@0.15.1 autorun",
     "api:types": "node scripts/api-types.mjs",
     "api:sync": "node scripts/api-types.mjs --sync",
-    "build:e2e": "vite build --outDir dist-e2e",
+    "build:e2e": "vite build --mode e2e --outDir dist-e2e",
     "test:e2e": "playwright test",
     "build:lh": "VITE_API_URL=http://localhost:4173 vite build --mode lighthouse --outDir dist-lh"
   },
@@ -24,6 +24,7 @@
     "@hookform/resolvers": "5.9.1",
     "@radix-ui/react-toast": "1.2.24",
     "@tanstack/react-query": "5.104.1",
+    "@tanstack/react-virtual": "3.14.13",
     "axios": "1.20.0",
     "lucide-react": "0.577.0",
     "react": "19.2.9",
