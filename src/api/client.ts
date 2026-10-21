@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
 import { env } from '@/lib/env';
 import { installInterceptors, type InterceptorOptions } from './interceptors';
+import { emitSessionExpired } from './session-events';
 
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const UPLOAD_TIMEOUT_MS = 60_000;
@@ -21,16 +22,8 @@ export function createApiClient({ baseURL, ...options }: ApiClientOptions): Axio
   return instance;
 }
 
-type SessionExpiredHandler = NonNullable<InterceptorOptions['onSessionExpired']>;
-let sessionExpiredHandler: SessionExpiredHandler | undefined;
-
-/** Registers what happens when a refresh fails (U2: clear the cache, go to /signin?next=…). */
-export function setSessionExpiredHandler(handler: SessionExpiredHandler | undefined): void {
-  sessionExpiredHandler = handler;
-}
-
 /** The app's single API instance, used only by src/api/endpoints. */
 export const api = createApiClient({
   baseURL: env.apiUrl,
-  onSessionExpired: (ctx) => sessionExpiredHandler?.(ctx),
+  onSessionExpired: emitSessionExpired,
 });

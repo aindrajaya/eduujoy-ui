@@ -5,23 +5,30 @@ import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 
-/** Dev server only: serves MSW's worker from the installed package, so it never ships in dist/. */
-function mswWorker(): Plugin {
+const workerFile = () => fileURLToPath(import.meta.resolve('msw/mockServiceWorker.js'));
+
+/**
+ * Serves MSW's worker from the installed package in `vite dev`, and emits it only into
+ * `--mode mock` builds (Lighthouse CI). Production builds never contain it.
+ */
+function mswWorker(mode: string): Plugin {
   return {
     name: 'eduujoy:msw-worker',
-    apply: 'serve',
     configureServer(server) {
-      const file = fileURLToPath(import.meta.resolve('msw/mockServiceWorker.js'));
       server.middlewares.use('/mockServiceWorker.js', (_req, res) => {
         res.setHeader('Content-Type', 'text/javascript');
-        res.end(readFileSync(file));
+        res.end(readFileSync(workerFile()));
       });
+    },
+    generateBundle() {
+      if (mode !== 'mock') return;
+      this.emitFile({ type: 'asset', fileName: 'mockServiceWorker.js', source: readFileSync(workerFile()) });
     },
   };
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), mswWorker()],
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), tailwindcss(), mswWorker(mode)],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
@@ -30,6 +37,7 @@ export default defineConfig({
   build: { target: 'es2022', sourcemap: false, manifest: true },
   test: {
     environment: 'jsdom',
+    include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     restoreMocks: true,
@@ -44,4 +52,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
