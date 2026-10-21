@@ -10,8 +10,8 @@ export default function StepPage() {
   if (!module) {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Step not found</h1>
-        <Link to="/today" className="font-semibold text-indigo-700 underline">
+        <h1 className="text-2xl font-bold text-text">Step not found</h1>
+        <Link to="/today" className="font-semibold text-primary underline">
           Back to Today
         </Link>
       </main>

@@ -36,20 +36,20 @@ export default function Profile({ profile, user }: ProfileProps) {
         >
           {initials(user.name)}
         </div>
-        <h1 className="text-xl font-bold text-gray-900 md:text-2xl">{user.name}</h1>
-        <p className="text-base text-gray-600">{user.email}</p>
+        <h1 className="text-xl font-bold text-text md:text-2xl">{user.name}</h1>
+        <p className="text-base text-text-muted">{user.email}</p>
       </header>
 
-      <section aria-labelledby="profile-title" className="rounded-lg bg-gray-50 p-4">
-        <h2 id="profile-title" className="mb-4 text-base font-bold text-gray-800 md:text-lg">
+      <section aria-labelledby="profile-title" className="rounded-lg bg-surface-muted p-4">
+        <h2 id="profile-title" className="mb-4 text-base font-bold text-text md:text-lg">
           Your Learning Profile
         </h2>
         <dl className="space-y-3">
           {items.map(({ icon: Icon, label, value }) => (
             <div key={label} className="grid grid-cols-[1.25rem_1fr] items-center gap-x-3">
-              <Icon className="row-span-2 h-5 w-5 text-indigo-600" aria-hidden="true" />
-              <dt className="text-xs text-gray-600">{label}</dt>
-              <dd className="min-w-0 text-sm font-semibold break-words text-gray-900">{value}</dd>
+              <Icon className="row-span-2 h-5 w-5 text-primary" aria-hidden="true" />
+              <dt className="text-xs text-text-muted">{label}</dt>
+              <dd className="min-w-0 text-sm font-semibold break-words text-text">{value}</dd>
             </div>
           ))}
         </dl>
