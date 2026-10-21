@@ -27,8 +27,32 @@ describe('/steps/:id (US-04, US-07, US-08)', () => {
     expect(within(screen.getByRole('region', { name: 'Actions' })).getAllByRole('checkbox')).toHaveLength(2);
     expect(screen.getAllByRole('article')).toHaveLength(2);
     expect(container.querySelector('iframe')).toBeNull();
-    expect(screen.getByRole('link', { name: /Next: Step 3/ })).toHaveAttribute('href', '/steps/step-3?path=path-1');
+    expect(screen.getByRole('link', { name: /Start checkpoint/ })).toHaveAttribute('href', '/checkpoints/step-2?path=path-1');
     await expectNoAxeViolations(container);
+  });
+
+  it('a finished step shows its checkpoint score and moves on; a review step says why it is there', async () => {
+    server.use(
+      http.get('/v1/paths/{id}', ({ response }) =>
+        response(200).json({
+          ...mockPath,
+          steps: mockPath.steps.map((s) =>
+            s.n === 1
+              ? { ...s, checkpoint: { ...s.checkpoint, lastScore: 90 } }
+              : s.n === 2
+                ? { ...s, remedial: true, checkpoint: { ...s.checkpoint, lastScore: 40, attempts: 2 } }
+                : s,
+          ),
+        }),
+      ),
+    );
+    const { unmount } = renderRoute('/steps/step-1?path=path-1');
+    expect(await screen.findByText('Checkpoint passed: 90%')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Next: Step 2/ })).toHaveAttribute('href', '/steps/step-2?path=path-1');
+    unmount();
+    renderRoute('/steps/step-2?path=path-1');
+    expect(await screen.findByText('Last checkpoint score: 40%')).toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent('after two missed checkpoints');
   });
 
   it('ticks an action at once and saves it', async () => {
