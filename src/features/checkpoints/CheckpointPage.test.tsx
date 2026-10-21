@@ -126,9 +126,10 @@ describe('/checkpoints/:id (US-05)', () => {
     server.use(
       http.post('/v1/checkpoints/{id}/submissions', ({ response }) =>
         response.untyped(
-          new Response(JSON.stringify(mockProblem(403, 'AI_BUDGET_EXCEEDED', 'Paused')), {
-            status: 403,
-            headers: { 'Content-Type': 'application/problem+json' },
+          new Response(JSON.stringify(mockProblem(503, 'AI_BUDGET_EXCEEDED', 'Paused')), {
+            status: 503,
+            // Contract 0.2.1: whole seconds until UTC midnight. The submit must not wait it out.
+            headers: { 'Content-Type': 'application/problem+json', 'Retry-After': '18000' },
           }),
         ),
       ),
