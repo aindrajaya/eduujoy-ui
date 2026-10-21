@@ -38,7 +38,6 @@ describe('CheckpointResultView (US-05)', () => {
     expect(screen.getByRole('heading', { name: 'Not passed yet' })).toBeInTheDocument();
     expect(screen.getByText('Surveys explain motivation')).toBeInTheDocument();
     expect(screen.getByText(/If you miss it twice/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Back to the step' })).toHaveAttribute('href', '/steps/step-2?path=path-1');
     await userEvent.click(screen.getByRole('button', { name: /Try again/ }));
     expect(onRetry).toHaveBeenCalledOnce();
     await expectNoAxeViolations(container);

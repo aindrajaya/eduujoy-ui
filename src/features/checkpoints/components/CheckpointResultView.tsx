@@ -1,6 +1,5 @@
 import { CircleCheck, CircleX } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router';
 import type { CheckpointResult, Path, PathStep } from '@/api/types';
 import { stepHref } from '@/features/paths/pathQueries';
 import StickyActionBar, { type StickyActionBarProps } from '@/ui/StickyActionBar';
@@ -45,9 +44,9 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
         <section aria-labelledby="result-title" className="space-y-3">
           <div className="flex items-center gap-3">
             <Icon className={`h-8 w-8 ${result.passed ? 'text-success' : 'text-danger'}`} aria-hidden="true" />
-            <h2 id="result-title" ref={heading} tabIndex={-1} className="text-xl font-bold text-text outline-none">
+            <h1 id="result-title" ref={heading} tabIndex={-1} className="text-2xl font-bold text-text outline-none">
               {result.passed ? 'You passed this checkpoint' : 'Not passed yet'}
-            </h2>
+            </h1>
           </div>
           <p className="text-text">
             Your score: <span className="font-bold">{result.score}%</span>
@@ -85,9 +84,9 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
         </section>
 
         <section aria-labelledby="feedback-title" className="space-y-3">
-          <h3 id="feedback-title" className="font-semibold text-text">
+          <h2 id="feedback-title" className="font-semibold text-text">
             Feedback on your answers
-          </h3>
+          </h2>
           <ol className="space-y-3">
             {result.items.map((item, i) => (
               <li key={item.itemId} className="space-y-1 rounded-card border border-border p-4">
@@ -106,12 +105,6 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
             ))}
           </ol>
         </section>
-
-        {!result.passed && (
-          <Link to={stepHref(path.id, step.id)} className="inline-flex min-h-11 items-center font-semibold text-primary underline">
-            Back to the step
-          </Link>
-        )}
       </div>
       <StickyActionBar {...primaryAction(path, result, onRetry)} />
     </>
