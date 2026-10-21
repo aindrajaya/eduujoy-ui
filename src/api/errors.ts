@@ -38,22 +38,26 @@ export class ApiError extends Error {
   }
 }
 
-const PROBLEM_CODES: ReadonlySet<string> = new Set<ProblemCode>([
-  'VALIDATION_FAILED',
-  'UNAUTHENTICATED',
-  'SESSION_REVOKED',
-  'FORBIDDEN',
-  'NOT_FOUND',
-  'CONFLICT',
-  'EMAIL_TAKEN',
-  'IDEMPOTENCY_MISMATCH',
-  'QUOTA_EXCEEDED',
-  'RATE_LIMITED',
-  'AI_BUDGET_EXCEEDED',
-  'NO_REPLACEMENT',
-  'CSRF_REJECTED',
-  'INTERNAL',
-]);
+// Keyed by the generated ProblemCode union: `satisfies Record<ProblemCode, true>` fails typecheck
+// when the contract adds or removes a code (after `pnpm api:types`), so this cannot drift.
+const PROBLEM_CODE_KEYS = {
+  VALIDATION_FAILED: true,
+  UNAUTHENTICATED: true,
+  SESSION_REVOKED: true,
+  FORBIDDEN: true,
+  NOT_FOUND: true,
+  CONFLICT: true,
+  EMAIL_TAKEN: true,
+  IDEMPOTENCY_MISMATCH: true,
+  QUOTA_EXCEEDED: true,
+  RATE_LIMITED: true,
+  AI_BUDGET_EXCEEDED: true,
+  NO_REPLACEMENT: true,
+  CSRF_REJECTED: true,
+  INTERNAL: true,
+} as const satisfies Record<ProblemCode, true>;
+
+export const PROBLEM_CODES: ReadonlySet<string> = new Set(Object.keys(PROBLEM_CODE_KEYS));
 
 /** Fallback code when a response is not problem+json (e.g. a proxy's HTML 502). */
 function codeForStatus(status: number): ProblemCode {

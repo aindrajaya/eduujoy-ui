@@ -1,6 +1,7 @@
 import { AxiosError, AxiosHeaders, CanceledError, type AxiosResponse } from 'axios';
 import { describe, expect, it } from 'vitest';
-import { ApiError, parseRetryAfter, toApiError } from './errors';
+import spec from '../../docs/openapi.json';
+import { ApiError, PROBLEM_CODES, parseRetryAfter, toApiError } from './errors';
 
 function axiosError({
   status,
@@ -146,5 +147,11 @@ describe('parseRetryAfter', () => {
     expect(parseRetryAfter(undefined)).toBeUndefined();
     expect(parseRetryAfter('')).toBeUndefined();
     expect(parseRetryAfter('soon')).toBeUndefined();
+  });
+});
+
+describe('PROBLEM_CODES', () => {
+  it('matches the ProblemCode enum in docs/openapi.json exactly', () => {
+    expect([...PROBLEM_CODES].sort()).toEqual([...spec.components.schemas.ProblemCode.enum].sort());
   });
 });
