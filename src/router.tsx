@@ -24,6 +24,10 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        path: 'steps/:id',
+        lazy: async () => ({ Component: (await import('./features/steps/StepPage')).default }),
+      },
+      {
         path: '*',
         lazy: async () => ({ Component: (await import('./app/NotFound')).default }),
       },
