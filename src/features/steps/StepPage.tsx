@@ -2,7 +2,7 @@ import { ArrowLeft, Clock, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import type { Path, PathStep, StepPatchRequest } from '@/api/types';
-import { findStep, stepHref, useRoutedPath } from '@/features/paths/pathQueries';
+import { checkpointHref, findStep, stepHref, useRoutedPath } from '@/features/paths/pathQueries';
 import { BLOOM_LABEL } from '@/lib/levels';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
@@ -38,6 +38,9 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
   const feedback = useSendFeedback();
   const [thumbs, setThumbs] = useState<Record<string, Thumb>>({});
   const next = path.steps.find((s) => s.n === step.n + 1);
+  const lastScore = step.checkpoint.lastScore ?? null;
+  // US-05: an open step ends in its checkpoint; finished and locked steps move on through the path.
+  const canCheck = step.status === 'active';
 
   // Optimistic thumbs (PRD-UI §4): show the choice at once, undo it if the API refuses.
   const thumb = (targetType: 'resource' | 'step', targetId: string, kind: 'up' | 'down') => {
@@ -94,6 +97,16 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
           {step.status === 'locked' && (
             <p role="note" className="rounded-lg bg-warning-soft p-3 text-sm text-warning">
               This step opens after the ones before it. You can look ahead.
+            </p>
+          )}
+          {step.remedial && (
+            <p role="note" className="rounded-lg bg-primary-soft p-3 text-sm text-text">
+              We added this review step after two missed checkpoints. It is one level lower, with a different resource.
+            </p>
+          )}
+          {lastScore !== null && (
+            <p className="text-sm text-text-muted">
+              {step.status === 'completed' ? 'Checkpoint passed' : 'Last checkpoint score'}: {lastScore}%
             </p>
           )}
           <p className="rounded-card bg-surface-muted p-4 text-text">
@@ -197,8 +210,11 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
         </section>
       </div>
       <StickyActionBar
-        label={next ? `Next: Step ${next.n}` : 'Back to path'}
-        to={next ? stepHref(path.id, next.id) : `/paths/${encodeURIComponent(path.id)}`}
+        {...(canCheck
+          ? { label: 'Start checkpoint', to: checkpointHref(path.id, step.id) }
+          : next
+            ? { label: `Next: Step ${next.n}`, to: stepHref(path.id, next.id) }
+            : { label: 'Back to path', to: `/paths/${encodeURIComponent(path.id)}` })}
       />
     </>
   );
