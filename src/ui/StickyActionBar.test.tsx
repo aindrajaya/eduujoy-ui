@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '@/test/axe';
 import StickyActionBar from './StickyActionBar';
 
@@ -23,5 +24,13 @@ describe('StickyActionBar', () => {
       </MemoryRouter>,
     );
     expect(container.firstElementChild?.className).toContain('bottom-0');
+  });
+
+  it('can hold an action on this screen instead of a link', async () => {
+    const onClick = vi.fn();
+    render(<StickyActionBar label="Try again" onClick={onClick} />);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(onClick).toHaveBeenCalledOnce();
   });
 });
