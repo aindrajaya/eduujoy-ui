@@ -2,7 +2,7 @@ import { ArrowLeft, Clock, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import type { Path, PathStep, StepPatchRequest } from '@/api/types';
-import { findStep, stepHref, useActivePaths, usePath } from '@/features/paths/pathQueries';
+import { findStep, stepHref, useRoutedPath } from '@/features/paths/pathQueries';
 import { BLOOM_LABEL } from '@/lib/levels';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
@@ -208,12 +208,7 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
 export default function StepPage() {
   const { id = '' } = useParams();
   const [params] = useSearchParams();
-  const fromUrl = params.get('path');
-  // Without ?path= (old links), fall back to the active path.
-  const active = useActivePaths(!fromUrl);
-  const pathId = fromUrl ?? active.data?.[0]?.id;
-  const path = usePath(pathId);
-  const noPath = !fromUrl && active.isSuccess && !pathId;
+  const { path, isPending, noPath } = useRoutedPath(params.get('path'));
 
   return (
     <main>
@@ -232,7 +227,7 @@ export default function StepPage() {
         </div>
       ) : (
         <AsyncView
-          query={{ ...path, isPending: path.isPending || (!fromUrl && active.isPending) }}
+          query={{ ...path, isPending }}
           label="this step"
           skeleton={<StepSkeleton />}
         >
