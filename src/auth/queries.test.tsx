@@ -4,7 +4,8 @@ import { mockMe, mockProblem } from '@/api/mocks/data';
 import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { createTestQueryClient, withQueryClient } from '@/test/providers';
-import { useSignIn, useSignOut, useSignUp } from './queries';
+import { ApiError } from '@/api/errors';
+import { shouldRetrySignOut, useSignIn, useSignOut, useSignUp } from './queries';
 import { sessionKeys } from './session';
 
 describe('auth mutations', () => {
@@ -50,7 +51,13 @@ describe('auth mutations', () => {
 
   // Contract 0.1.1: logout always answers 204, so the only failure left is the network.
   it('sign-out clears every cached query and records signed out, even if logout never arrives', async () => {
-    server.use(http.post('/v1/auth/logout', ({ response }) => response.untyped(Response.error())));
+    let calls = 0;
+    server.use(
+      http.post('/v1/auth/logout', ({ response }) => {
+        calls += 1;
+        return response.untyped(Response.error());
+      }),
+    );
     const client = createTestQueryClient();
     client.setQueryData(sessionKeys.me(), mockMe);
     client.setQueryData(['paths', 'list'], { items: [] });
@@ -58,10 +65,27 @@ describe('auth mutations', () => {
     act(() => {
       result.current.mutate();
     });
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
+    // Two retries at 0.5 s and 1 s come first.
+    await waitFor(
+      () => {
+        expect(result.current.isError).toBe(true);
+      },
+      { timeout: 4000 },
+    );
     expect(client.getQueryCache().getAll().map((q) => q.queryKey)).toEqual([sessionKeys.me()]);
     expect(client.getQueryData(sessionKeys.me())).toBeNull();
+    // One attempt plus two retries.
+    expect(calls).toBe(3);
+  });
+});
+
+describe('shouldRetrySignOut', () => {
+  const err = (status: number) => new ApiError({ status, code: status ? 'INTERNAL' : 'NETWORK_ERROR', title: 't' });
+
+  it('retries network and 5xx failures twice, never 4xx', () => {
+    expect(shouldRetrySignOut(0, err(0))).toBe(true);
+    expect(shouldRetrySignOut(1, err(503))).toBe(true);
+    expect(shouldRetrySignOut(2, err(0))).toBe(false);
+    expect(shouldRetrySignOut(0, err(403))).toBe(false);
   });
 });

@@ -44,4 +44,31 @@ describe('/account', () => {
     expect(router.state.historyAction).toBe('REPLACE');
     expect(queryClient.getQueryData(['auth', 'me'])).toBeNull();
   });
+
+  it('offline sign-out: clears the cache, says they may still be signed in, and offers a retry', { timeout: 10_000 }, async () => {
+    let online = false;
+    let calls = 0;
+    server.use(
+      http.post('/v1/auth/logout', ({ response }) => {
+        calls += 1;
+        if (!online) return response.untyped(Response.error());
+        mockSignedOut();
+        return response(204).empty();
+      }),
+    );
+    const { router, container } = renderRoute('/account');
+    await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+
+    const alert = await screen.findByRole('alert', {}, { timeout: 5000 });
+    expect(alert).toHaveTextContent("We couldn't reach the server. You may still be signed in on this device.");
+    expect(router.state.location.pathname).toBe('/signin');
+    expect(calls).toBe(3);
+    expect(queryClient.getQueryData(['auth', 'me'])).toBeNull();
+    await expectNoAxeViolations(container);
+
+    online = true;
+    await userEvent.click(screen.getByRole('button', { name: 'Try signing out again' }));
+    expect(await screen.findByText('You are signed out.')).toBeInTheDocument();
+    expect(calls).toBe(4);
+  });
 });
