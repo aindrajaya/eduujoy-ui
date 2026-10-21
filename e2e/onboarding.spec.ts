@@ -48,7 +48,7 @@ test.describe('onboarding (US-01)', () => {
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(page).toHaveURL(/\/diagnostic\/diag-1$/);
-    await expect(page.getByRole('heading', { name: 'Your quick diagnostic is ready' })).toBeVisible();
+    await expect(page.getByText('Question 1 of 2')).toBeVisible();
     expect(sent.resolve).toEqual([{ text: 'UX research' }]);
     expect(sent.start).toEqual([
       {

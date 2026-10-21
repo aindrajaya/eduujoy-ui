@@ -2,6 +2,7 @@ import { api } from '../client';
 import type {
   DiagnosticAnswersRequest,
   DiagnosticBatchResponse,
+  DiagnosticResponse,
   DiagnosticStartRequest,
 } from '../types';
 
@@ -18,5 +19,11 @@ export async function submitDiagnosticAnswers(
     `/v1/diagnostics/${encodeURIComponent(id)}/answers`,
     body,
   );
+  return data;
+}
+
+/** Contract 0.2.0: the outstanding batch (or the placement) so a reload resumes where it stopped. */
+export async function getDiagnostic(id: string): Promise<DiagnosticResponse> {
+  const { data } = await api.get<DiagnosticResponse>(`/v1/diagnostics/${encodeURIComponent(id)}`);
   return data;
 }

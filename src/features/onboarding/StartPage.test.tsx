@@ -55,7 +55,7 @@ describe('/start (US-01)', () => {
     await expectNoAxeViolations(container);
     await submitIntake(user);
 
-    expect(await screen.findByRole('heading', { name: 'Your quick diagnostic is ready' })).toBeInTheDocument();
+    expect(await screen.findByText('Question 1 of 2')).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/diagnostic/diag-1');
     expect(sent.resolve).toEqual({ text: 'ux research' });
     expect(sent.start).toEqual({
@@ -78,7 +78,7 @@ describe('/start (US-01)', () => {
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole('radio', { name: /^JavaScript/ }));
     await user.click(screen.getByRole('button', { name: 'Continue with this topic' }));
-    await screen.findByRole('heading', { name: 'Your quick diagnostic is ready' });
+    await screen.findByText('Question 1 of 2');
     expect(sent.start?.topicId).toBe('javascript');
     expect(router.state.location.pathname).toBe('/diagnostic/diag-1');
   });
@@ -103,7 +103,7 @@ describe('/start (US-01)', () => {
     );
     const { user } = await openForm();
     await submitIntake(user, 'beekeeping');
-    await screen.findByRole('heading', { name: 'Your quick diagnostic is ready' });
+    await screen.findByText('Question 1 of 2');
     expect(sent.start?.topicId).toBe('new-topic');
   });
 
