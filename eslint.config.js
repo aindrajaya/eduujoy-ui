@@ -33,6 +33,10 @@ export default tseslint.config(
           selector: "MemberExpression[object.name=/^(localStorage|sessionStorage)$/]",
           message: 'No session data in browser storage (PRD-UI §6); use lib/storage for drafts.',
         },
+        {
+          selector: "MemberExpression[property.name=/^(localStorage|sessionStorage)$/]",
+          message: 'No session data in browser storage (PRD-UI §6); use lib/storage for drafts.',
+        },
       ],
     },
   },
@@ -51,6 +55,11 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    // Quiz drafts (PRD-UI §7) are the one sanctioned use of browser storage; tests may inspect it.
+    files: ['src/lib/storage.ts', '**/*.test.{ts,tsx}', 'e2e/**'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
   {
     files: ['**/*.test.{ts,tsx}', 'src/test/**'],
