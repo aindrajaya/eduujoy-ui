@@ -4,7 +4,7 @@ import {
   mockCheckpointResult,
   mockGradeJobAccepted,
   mockGradeJobEvents,
-  mockPath,
+  mockPath, mockPathSummary,
 } from '../src/api/mocks/data';
 import { toEventStreamText } from '../src/api/mocks/sse';
 import type { CheckpointResult, Path, PathStep } from '../src/api/types';
@@ -13,7 +13,6 @@ import { json, mockAuth } from './api';
 // U9 done-when: US-05 passes, including offline submit (PRD-UI §11). Open answers are graded by a
 // job whose result streams over SSE; two fails insert a review step one level lower.
 
-const summary = Object.fromEntries(Object.entries(mockPath).filter(([key]) => key !== 'steps'));
 const step2 = mockPath.steps[1];
 if (!step2) throw new Error('mockPath needs step 2');
 const reviewStep: PathStep = { ...step2, id: 'step-2r', n: 3, remedial: true, bloom: 'C2', status: 'active' };
@@ -24,7 +23,7 @@ type Reply = { status: 200; result: CheckpointResult } | { status: 202 };
 async function mockCheckpoint(page: Page, replies: Reply[], pathAfter: (submissions: number) => Path = () => mockPath) {
   const calls = { keys: [] as string[], bodies: [] as unknown[] };
   await mockAuth(page, { signedIn: true });
-  await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [summary], nextCursor: null }));
+  await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [mockPathSummary], nextCursor: null }));
   await page.route('**/v1/paths/path-1', (route) => json(route, 200, pathAfter(calls.keys.length)));
   await page.route('**/v1/checkpoints/*/submissions', (route) => {
     calls.keys.push(route.request().headers()['idempotency-key'] ?? '');
