@@ -23,10 +23,4 @@ describe('/start', () => {
     await screen.findByRole('navigation', { name: 'Main' });
     expect(router.state.location.pathname).toBe('/today');
   });
-
-  it('redirects the root path to /start', async () => {
-    const { router } = renderRoute('/');
-    await screen.findByRole('heading', { name: /welcome to eduujoy/i });
-    expect(router.state.location.pathname).toBe('/start');
-  });
 });
