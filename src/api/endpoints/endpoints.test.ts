@@ -54,8 +54,8 @@ describe('endpoints', () => {
         return response(200).json({ items: [], nextCursor: null });
       }),
     );
-    await paths.listPaths({ topicId: 'topic-ux', limit: 10 });
-    expect(query).toBe('?topicId=topic-ux&limit=10');
+    await paths.listPaths({ status: 'active', topicId: 'topic-ux', limit: 10 });
+    expect(query).toBe('?status=active&topicId=topic-ux&limit=10');
     await expect(paths.getPath(mockPath.id)).resolves.toEqual(mockPath);
     await expect(paths.getPath('missing')).rejects.toMatchObject({ status: 404, code: 'NOT_FOUND' });
   });
@@ -116,5 +116,12 @@ describe('endpoints', () => {
     );
     await paths.getPath('a/b');
     expect(seen).toBe('/v1/paths/a%2Fb');
+  });
+});
+
+describe('mock GET /v1/paths status filter', () => {
+  it('returns only paths with the requested status', async () => {
+    await expect(paths.listPaths({ status: 'active' })).resolves.toMatchObject({ items: [{ status: 'active' }] });
+    await expect(paths.listPaths({ status: 'completed' })).resolves.toEqual({ items: [], nextCursor: null });
   });
 });

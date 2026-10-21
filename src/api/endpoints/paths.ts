@@ -1,7 +1,12 @@
 import { api } from '../client';
+import type { operations } from '../schema';
 import type { JobAccepted, Path, PathCreateRequest, PathListResponse } from '../types';
 
+export type PathStatus = NonNullable<NonNullable<operations['pathsList']['parameters']['query']>['status']>;
+
 export interface ListPathsParams {
+  /** Contract 0.1.0: e.g. 'active' for the Today screen. Served from A9. */
+  status?: PathStatus;
   topicId?: string;
   cursor?: string;
   limit?: number;
