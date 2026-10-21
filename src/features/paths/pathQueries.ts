@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { type QueryClient, queryOptions, useQuery } from '@tanstack/react-query';
 import { getPath, listPaths } from '@/api/endpoints/paths';
 import type { ApiError } from '@/api/errors';
 import type { Path, PathStep, PathSummary } from '@/api/types';
@@ -46,3 +46,12 @@ export const currentStep = (path: Path): PathStep | undefined =>
 /** Link to a step; the path id travels in the URL so a reload can load the path (no GET /v1/steps). */
 export const stepHref = (pathId: string, stepId: string) =>
   `/steps/${encodeURIComponent(stepId)}?path=${encodeURIComponent(pathId)}`;
+
+/**
+ * Today's data, started from the route loader so the list request does not wait for the page
+ * chunk, and the detail request follows the list at once (PRD-UI §9 LCP budget).
+ */
+export async function prefetchActivePath(client: QueryClient): Promise<void> {
+  const [summary] = await client.query(activePathsQuery());
+  if (summary) await client.query(pathQuery(summary.id));
+}

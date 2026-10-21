@@ -25,9 +25,13 @@ function TodaySkeleton() {
   );
 }
 
-/** PRD-UI §9: fetch the step screen's code once the browser is idle; Today's next tap goes there. */
-function usePrefetchStepScreen() {
+/**
+ * PRD-UI §9: fetch the step screen's code once Today has rendered and the browser is idle; Today's
+ * next tap goes there. Waiting for the data keeps the chunk off the LCP critical path.
+ */
+function usePrefetchStepScreen(ready: boolean) {
   useEffect(() => {
+    if (!ready) return;
     const load = () => void import('@/features/steps/StepPage');
     if ('requestIdleCallback' in window) {
       const id = window.requestIdleCallback(load);
@@ -39,7 +43,7 @@ function usePrefetchStepScreen() {
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  }, [ready]);
 }
 
 function TodayView({ path }: { path: Path }) {
@@ -122,10 +126,10 @@ function TodayView({ path }: { path: Path }) {
 
 /** US-03 home: the active path's current step and next action (PRD-UI §3). */
 export default function TodayPage() {
-  usePrefetchStepScreen();
   const active = useActivePaths();
   const summary = active.data?.[0];
   const path = usePath(summary?.id);
+  usePrefetchStepScreen(path.isSuccess);
 
   if (active.isSuccess && !summary) {
     return (
