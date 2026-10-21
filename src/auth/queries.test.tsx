@@ -48,12 +48,9 @@ describe('auth mutations', () => {
     });
   });
 
-  it('sign-out clears every cached query and records signed out, even if logout fails', async () => {
-    server.use(
-      http.post('/v1/auth/logout', ({ response }) =>
-        response.untyped(problemResponse(mockProblem(401, 'UNAUTHENTICATED', 'Already out'))),
-      ),
-    );
+  // Contract 0.1.1: logout always answers 204, so the only failure left is the network.
+  it('sign-out clears every cached query and records signed out, even if logout never arrives', async () => {
+    server.use(http.post('/v1/auth/logout', ({ response }) => response.untyped(Response.error())));
     const client = createTestQueryClient();
     client.setQueryData(sessionKeys.me(), mockMe);
     client.setQueryData(['paths', 'list'], { items: [] });
