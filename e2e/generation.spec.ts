@@ -33,14 +33,14 @@ async function mockJobStream(page: Page, plan: (connection: number, lastEventId:
 }
 
 test.describe('generation progress (U7)', () => {
-  test('a dropped stream reconnects with Last-Event-ID, then lands on Today when the path is ready', async ({ page }) => {
+  test('a dropped stream reconnects with Last-Event-ID, then opens the path when it is ready', async ({ page }) => {
     await mockAuth(page, { signedIn: true });
     const lastEventIds = await mockJobStream(page, (n, last, route) =>
       // First connection drops after event 2; the reconnect gets the rest.
       fulfillSse(route, n === 1 ? events.slice(0, 2) : afterId(last)),
     );
     await page.goto('/paths/new/job-1');
-    await expect(page).toHaveURL(/\/today$/);
+    await expect(page).toHaveURL(/\/paths\/path-1$/);
     // exact: Radix also announces toasts in its own live region ("Notifications Your path is ready").
     await expect(page.getByText('Your path is ready', { exact: true })).toBeVisible();
     expect(lastEventIds).toEqual([undefined, '2']);
@@ -86,7 +86,7 @@ test.describe('generation progress (U7)', () => {
     releaseThird();
     release();
 
-    await expect(page).toHaveURL(/\/today$/);
+    await expect(page).toHaveURL(/\/paths\/path-1$/);
     // The first connection started fresh; every later one carried the last id it had seen (3).
     expect(lastEventIds[0]).toBeUndefined();
     expect(lastEventIds.at(-1)).toBe('3');

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mockMe } from '../src/api/mocks/data';
+import { mockMe, mockPath } from '../src/api/mocks/data';
 import { json, mockAuth } from './api';
 
 test.describe('auth', () => {
@@ -29,8 +29,10 @@ test.describe('auth', () => {
 
   test('a signed-out deep link goes through sign-in and lands where it started', async ({ page }) => {
     await mockAuth(page, { signedIn: false });
-    await page.goto('/steps/2');
-    await expect(page).toHaveURL(/\/signin\?next=%2Fsteps%2F2$/);
+    await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [], nextCursor: null }));
+    await page.route('**/v1/paths/path-1', (route) => json(route, 200, mockPath));
+    await page.goto('/steps/step-2?path=path-1');
+    await expect(page).toHaveURL(/\/signin\?next=%2Fsteps%2Fstep-2%3Fpath%3Dpath-1$/);
     await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 
     await page.getByLabel('Email').fill('jane.doe@example.com');
@@ -40,8 +42,8 @@ test.describe('auth', () => {
 
     await page.getByLabel('Password').fill('correct-horse-battery');
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page).toHaveURL(/\/steps\/2$/);
-    await expect(page.getByRole('link', { name: 'Back to Path' })).toBeVisible();
+    await expect(page).toHaveURL(/\/steps\/step-2\?path=path-1$/);
+    await expect(page.getByRole('heading', { level: 1, name: mockPath.steps[1]?.objective })).toBeVisible();
   });
 
   test('signed-in users skip /signin and /signup', async ({ page }) => {
