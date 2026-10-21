@@ -12,6 +12,7 @@ describe('/today', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Continue: Module 1' })).toHaveAttribute('href', '/steps/1');
     await expectNoAxeViolations(container);
   });
 });
