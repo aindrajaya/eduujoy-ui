@@ -210,7 +210,7 @@ export default function StepPage() {
   const [params] = useSearchParams();
   const fromUrl = params.get('path');
   // Without ?path= (old links), fall back to the active path.
-  const active = useActivePaths();
+  const active = useActivePaths(!fromUrl);
   const pathId = fromUrl ?? active.data?.[0]?.id;
   const path = usePath(pathId);
   const noPath = !fromUrl && active.isSuccess && !pathId;
