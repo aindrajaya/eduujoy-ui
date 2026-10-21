@@ -120,3 +120,13 @@ describe('isSnapshot', () => {
     expect(isSnapshot(value)).toBe(expected);
   });
 });
+
+describe('useQuizDraft and other users', () => {
+  it('removes other users’ drafts when this user opens a quiz', () => {
+    writeDraft('someone-else', 'quiz-1', { index: 2 });
+    writeDraft('u1', 'quiz-1', { index: 1 });
+    const { result } = setup('u1');
+    expect(readDraft('someone-else', 'quiz-1')).toBeNull();
+    expect(result.current.state.index).toBe(1);
+  });
+});
