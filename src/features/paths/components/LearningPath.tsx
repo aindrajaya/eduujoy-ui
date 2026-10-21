@@ -21,22 +21,22 @@ export default function LearningPath({
   return (
     <div className="animate-fade-in p-4 md:p-6">
       <header className="mb-6">
-        <p className="text-lg font-semibold text-green-700">Your Learning Path</p>
-        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">{focusArea}</h1>
+        <p className="text-lg font-semibold text-success">Your Learning Path</p>
+        <h1 className="text-2xl font-bold text-text md:text-3xl">{focusArea}</h1>
       </header>
 
       <ActionPlanCard plan={actionPlan} />
 
       <section className="mt-8" aria-labelledby="modules-title">
-        <h2 id="modules-title" className="mb-4 text-lg font-bold text-gray-800 md:text-xl">
+        <h2 id="modules-title" className="mb-4 text-lg font-bold text-text md:text-xl">
           Your Modules
         </h2>
         {modules.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-gray-600">
+          <p className="rounded-xl border border-dashed border-border p-6 text-center text-text-muted">
             No modules yet. Your path will appear here once it is generated.
           </p>
         ) : (
-          <ol className="relative border-l-4 border-dashed border-gray-200 pl-6">
+          <ol className="relative border-l-4 border-dashed border-border pl-6">
             {modules.map((module) => (
               <ModuleNode key={module.number} module={module} to={moduleHref(module)} />
             ))}
