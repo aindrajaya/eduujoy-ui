@@ -32,7 +32,7 @@ export const pathQuery = (id: string) =>
   });
 
 export const usePaths = () => useQuery(pathsQuery());
-export const useActivePaths = () => useQuery(activePathsQuery());
+export const useActivePaths = (enabled = true) => useQuery({ ...activePathsQuery(), enabled });
 export const usePath = (id: string | undefined) => useQuery({ ...pathQuery(id ?? ''), enabled: Boolean(id) });
 
 export const findStep = (path: Path | undefined, stepId: string): PathStep | undefined =>

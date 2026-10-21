@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { mockAuth } from './api';
+import { mockPath, mockProblem } from '../src/api/mocks/data';
+import { json, mockAuth, problem } from './api';
 
 test.describe('session expiry', () => {
   test('a session that expires while /account is open redirects to sign-in on refocus', async ({ page }) => {
@@ -22,6 +23,25 @@ test.describe('session expiry', () => {
     await expect(page).toHaveURL(/\/signin\?next=%2Faccount&expired=1$/);
     await expect(page.getByText(/Your session expired/)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Jane Doe' })).toBeHidden();
+  });
+
+  test('a session that expires before a step save refreshes once, then redirects to sign-in', async ({ page }) => {
+    const auth = await mockAuth(page, { signedIn: true });
+    await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [], nextCursor: null }));
+    await page.route('**/v1/paths/path-1', (route) => json(route, 200, mockPath));
+    await page.route('**/v1/steps/*', (route) => problem(route, mockProblem(401, 'UNAUTHENTICATED', 'Sign in required')));
+    await page.goto('/steps/step-2?path=path-1');
+    const box = page.getByRole('checkbox', { name: /Write a one-page plan/ });
+    await expect(box).toBeVisible();
+
+    // The refresh token is revoked server-side; the next data call gets 401 and the refresh fails.
+    auth.signedIn = false;
+    await box.click();
+
+    await expect(page).toHaveURL(/\/signin\?next=%2Fsteps%2Fstep-2%3Fpath%3Dpath-1&expired=1$/);
+    await expect(page.getByText(/Your session expired/)).toBeVisible();
+    // One refresh for the failed save, one for the auth/me re-check (cold-start rule); no loop.
+    expect(auth.refreshCalls).toBeLessThanOrEqual(2);
   });
 });
 
