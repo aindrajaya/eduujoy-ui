@@ -89,8 +89,8 @@ Passing the top-of-band checkpoint sends the learner back to "Generating path" f
 | Route | Screen | Main data | Real-time | Stories |
 | --- | --- | --- | --- | --- |
 | `/signin`, `/signup` | Email and Google sign-in | `POST /v1/auth/*` | — | FR-23 |
-| `/start` | Topic, goal, weekly hours, formats | `POST /v1/topics/resolve` | — | US-01 |
-| `/diagnostic/:id` | Adaptive diagnostic, 4 items per batch | `POST /v1/diagnostics/:id/answers` | — | US-02 |
+| `/start` | Topic, goal, weekly hours, formats | `POST /v1/topics/resolve`, then `POST /v1/diagnostics` (starts the diagnostic and hands off to `/diagnostic/:id`) | — | US-01 |
+| `/diagnostic/:id` | Adaptive diagnostic, 4 items per batch | `GET /v1/diagnostics/:id` (resume after reload, contract 0.2.0), `POST /v1/diagnostics/:id/answers` | — | US-02 |
 | `/paths/new/:jobId` | Generation progress ("Finding videos… 4 of 6") | SSE `GET /v1/jobs/:id/events` | SSE | US-03 |
 | `/today` (home) | Current step, next action, streak | `GET /v1/paths?status=active` (contract 0.1.0; until A9 serves it, pick `status: 'active'` client-side) | WebSocket | US-03 |
 | `/paths`, `/paths/:id` | Path list and SOP overview | `GET /v1/paths/:id` | WebSocket | US-03, US-06 |
