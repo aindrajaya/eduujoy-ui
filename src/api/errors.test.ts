@@ -97,6 +97,7 @@ describe('toApiError', () => {
     [409, 'CONFLICT'],
     [429, 'RATE_LIMITED'],
     [502, 'INTERNAL'],
+    [503, 'SERVICE_UNAVAILABLE'],
   ] as const)('maps a non-problem %i to %s', (status, code) => {
     const e = toApiError(axiosError({ status, data: '<html>bad gateway</html>', statusText: 'Bad' }));
     expect(e).toMatchObject({ status, code, title: 'Bad', requestId: 'req-sent' });

@@ -24,3 +24,21 @@ test.describe('session expiry', () => {
     await expect(page.getByRole('heading', { name: 'Jane Doe' })).toBeHidden();
   });
 });
+
+test.describe('sign-out', () => {
+  test('works after the access cookie has expired, without a refresh', async ({ page }) => {
+    const auth = await mockAuth(page, { signedIn: true });
+    await page.goto('/account');
+    await expect(page.getByRole('heading', { name: 'Jane Doe' })).toBeVisible();
+
+    auth.accessExpired = true;
+    const refreshesBefore = auth.refreshCalls;
+    await page.getByRole('button', { name: 'Sign out' }).click();
+
+    await expect(page).toHaveURL(/\/signin$/);
+    await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+    expect(auth.logoutCalls).toBe(1);
+    expect(auth.refreshCalls).toBe(refreshesBefore);
+    expect(auth.signedIn).toBe(false);
+  });
+});

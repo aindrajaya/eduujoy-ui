@@ -163,7 +163,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Clear both cookies and revoke the session. */
+        /**
+         * Clear both cookies and revoke the session.
+         * @description Public, so an expired access cookie can't block sign-out; CsrfGuard still applies. Revokes the
+         *     session found by the `ej_rt` hash and, when a valid `ej_at` is sent, the session in its `sid`.
+         *     Always answers 204 and clears both cookies, even when no session matched.
+         */
         post: operations["authLogout"];
         delete?: never;
         options?: never;
@@ -200,6 +205,9 @@ export interface paths {
         /**
          * Rotate the refresh token and issue a new access cookie.
          * @description Reads `ej_rt`. Reuse of a rotated token revokes the whole session family and returns 401.
+         *     A second refresh of the same token within the 10-second grace window (two tabs refreshing at
+         *     once) returns 409 `REFRESH_CONCURRENT` and leaves the cookies untouched: the other request
+         *     already rotated them, so the client replays its original request once instead of signing out.
          */
         post: operations["authRefresh"];
         delete?: never;
@@ -758,7 +766,7 @@ export interface components {
             type: string;
         };
         /** @enum {string} */
-        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "INTERNAL";
+        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "REFRESH_CONCURRENT" | "SERVICE_UNAVAILABLE" | "INTERNAL";
         ProgressHistoryResponse: {
             items: {
                 confidence: number;
@@ -980,6 +988,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description The refresh token was rotated by a concurrent request; cookies are unchanged. Code `REFRESH_CONCURRENT`. */
+        RefreshConcurrent: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Rate limited (code RATE_LIMITED). */
         TooManyRequests: {
             headers: {
@@ -1068,7 +1085,7 @@ export interface operations {
                     "application/json": components["schemas"]["HealthResponse"];
                 };
             };
-            /** @description Not ready. */
+            /** @description Not ready (a dependency check failed). Code `SERVICE_UNAVAILABLE`, type `/problems/not-ready`. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1191,7 +1208,7 @@ export interface operations {
     authGoogleStart: {
         parameters: {
             query?: {
-                /** @description Path on APP_ORIGIN to land on after sign-in. */
+                /** @description Same-site path on APP_ORIGIN to land on after sign-in; unsafe or missing values fall back to /today. */
                 returnTo?: string;
             };
             header?: never;
@@ -1276,7 +1293,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Signed out. */
+            /** @description Signed out (always, including when no session matched). */
             204: {
                 headers: {
                     "Set-Cookie": components["headers"]["SetSessionCookies"];
@@ -1284,7 +1301,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     authMe: {
@@ -1329,6 +1346,7 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["Unauthorized"];
+            409: components["responses"]["RefreshConcurrent"];
         };
     };
     authRegister: {
@@ -1588,6 +1606,8 @@ export interface operations {
             query?: {
                 cursor?: components["parameters"]["Cursor"];
                 limit?: components["parameters"]["Limit"];
+                /** @description Only paths with this status, for example `active` for the Today screen. */
+                status?: "generating" | "active" | "completed" | "failed" | "under_review";
                 topicId?: string;
             };
             header?: {
