@@ -44,6 +44,12 @@ export const routes: RouteObject[] = [
             }),
           },
           {
+            path: 'diagnostic/:id',
+            lazy: async () => ({
+              Component: (await import('./features/diagnostic/DiagnosticPage')).default,
+            }),
+          },
+          {
             path: 'steps/:id',
             lazy: async () => ({ Component: (await import('./features/steps/StepPage')).default }),
           },
