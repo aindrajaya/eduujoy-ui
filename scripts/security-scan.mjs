@@ -77,7 +77,9 @@ for (const file of files) {
     for (const { name: rule, re } of SUSPICIOUS) {
       if (re.test(line)) add(file, n, rule, line);
     }
-    if (isConfig && CONFIG_NETWORK.some((re) => re.test(line))) {
+    // An ESLint no-restricted-imports entry that bans axios names the package without using it.
+    const bansAxiosImport = /^eslint\.config\./.test(name) && /^\s*paths: \[\{ name: 'axios', message: '[^']*' \}\],\s*$/.test(line);
+    if (isConfig && !bansAxiosImport && CONFIG_NETWORK.some((re) => re.test(line))) {
       add(file, n, "network access in build config", line);
     }
     if (CODE_EXT.has(ext) && ENCODED_BLOB.test(line)) {
