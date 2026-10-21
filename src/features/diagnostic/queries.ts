@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { getDiagnostic, submitDiagnosticAnswers } from '@/api/endpoints/diagnostics';
-import { toApiError, type ApiError } from '@/api/errors';
+import type { ApiError } from '@/api/errors';
 import type { DiagnosticAnswer, DiagnosticBatchResponse, DiagnosticItem, Topic } from '@/api/types';
 import type { Answer } from '@/features/quiz/types';
 import { diagnosticKeys } from './keys';
@@ -41,20 +41,11 @@ export function toDiagnosticAnswers(
   });
 }
 
-/**
- * Submits one batch. The contract has no Idempotency-Key here, so a retried batch can be
- * rejected with 409 once the first copy landed; then the current state is fetched instead.
- */
-export async function submitBatch(
+/** Submits one batch with its key (PRD-UI §7); a retry reuses the key, so the API replays it. */
+export const submitBatch = (
   id: string,
   items: readonly DiagnosticItem[],
   answers: Record<string, Answer>,
-): Promise<DiagnosticBatchResponse> {
-  try {
-    return await submitDiagnosticAnswers(id, { answers: toDiagnosticAnswers(items, answers) });
-  } catch (error) {
-    const apiError = toApiError(error);
-    if (apiError.status === 409) return getDiagnostic(id);
-    throw apiError;
-  }
-}
+  idempotencyKey: string,
+): Promise<DiagnosticBatchResponse> =>
+  submitDiagnosticAnswers(id, { answers: toDiagnosticAnswers(items, answers) }, idempotencyKey);

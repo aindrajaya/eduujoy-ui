@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { mockPath } from '../src/api/mocks/data';
+import { mockPath, mockPathSummary } from '../src/api/mocks/data';
 import type { FeedbackRequest, StepPatchRequest } from '../src/api/types';
 import { json, mockAuth } from './api';
 
@@ -11,12 +11,11 @@ const [video, article] = step2?.resources ?? [];
 const whyThis = video?.whyThis;
 const takeaways = video?.keyTakeaways ?? [];
 if (!step2 || !video || !whyThis || takeaways.length === 0 || !article) throw new Error('mockPath step 2 needs a video and an article');
-const summary = Object.fromEntries(Object.entries(mockPath).filter(([key]) => key !== 'steps'));
 
 async function mockPaths(page: Page) {
   const calls = { patches: [] as StepPatchRequest[], feedback: [] as FeedbackRequest[], swaps: 0 };
   await mockAuth(page, { signedIn: true });
-  await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [summary], nextCursor: null }));
+  await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [mockPathSummary], nextCursor: null }));
   await page.route('**/v1/paths/path-1', (route) => json(route, 200, mockPath));
   await page.route('**/v1/steps/*', async (route) => {
     const patch = route.request().postDataJSON() as StepPatchRequest;

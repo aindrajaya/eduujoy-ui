@@ -81,7 +81,7 @@ function BatchQuiz({ id, batch, userId }: { id: string; batch: DiagnosticBatchRe
           allowSkip
           autoSubmit
           submitLabel="Continue"
-          submit={(answers) => submitBatch(id, items, answers)}
+          submit={(answers, idempotencyKey) => submitBatch(id, items, answers, idempotencyKey)}
           onSubmitted={(next) => {
             // Answer responses omit the topic; keep the one from the resumed state.
             client.setQueryData<DiagnosticState>(diagnosticKeys.batch(id), (prev) => ({ ...next, topic: prev?.topic }));

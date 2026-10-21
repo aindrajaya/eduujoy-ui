@@ -19,6 +19,7 @@ import {
   mockLatencyMetrics,
   mockMe,
   mockPathJobEvents,
+  mockPathSummary,
   mockPath,
   mockProblem,
   mockProgress,
@@ -62,7 +63,7 @@ export const handlers = [
   // Paths and steps
   http.get('/v1/paths', ({ request, response }) => {
     const status = new URL(request.url).searchParams.get('status');
-    const items = status ? [mockPath].filter((p) => p.status === status) : [mockPath];
+    const items = status ? [mockPathSummary].filter((p) => p.status === status) : [mockPathSummary];
     return response(200).json({ items, nextCursor: null });
   }),
   http.post('/v1/paths', ({ request, response }) =>

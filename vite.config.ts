@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
-import { mockMe, mockPath, mockProblem } from './src/api/mocks/data';
+import { mockMe, mockPath, mockPathSummary, mockProblem } from './src/api/mocks/data';
 
 /** `vite dev` only: serves MSW's worker from the installed package, so it never ships in dist/. */
 function mswWorker(): Plugin {
@@ -54,9 +54,7 @@ function lighthouseApi(): Plugin {
         } else if (path === '/v1/auth/refresh') {
           send(signedOut ? 401 : 204, signedOut ? unauthorized : undefined);
         } else if (path === '/v1/paths') {
-          // A PathSummary, as the API sends it: the list never carries steps.
-          const summary = Object.fromEntries(Object.entries(mockPath).filter(([key]) => key !== 'steps'));
-          send(200, { items: [summary], nextCursor: null });
+          send(200, { items: [mockPathSummary], nextCursor: null });
         } else if (path === `/v1/paths/${mockPath.id}`) {
           send(200, mockPath);
         } else {
