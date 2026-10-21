@@ -50,9 +50,11 @@ export const handlers = [
   ),
 
   // Paths and steps
-  http.get('/v1/paths', ({ response }) =>
-    response(200).json({ items: [mockPath], nextCursor: null }),
-  ),
+  http.get('/v1/paths', ({ request, response }) => {
+    const status = new URL(request.url).searchParams.get('status');
+    const items = status ? [mockPath].filter((p) => p.status === status) : [mockPath];
+    return response(200).json({ items, nextCursor: null });
+  }),
   http.post('/v1/paths', ({ request, response }) =>
     request.headers.get('Idempotency-Key')
       ? response(202).json(mockJobAccepted)
