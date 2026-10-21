@@ -25,7 +25,11 @@ export const intakeSchema = z.object({
     z.minimum(1, { error: 'Between 1 and 40 hours a week' }),
     z.maximum(40, { error: 'Between 1 and 40 hours a week' }),
   ),
-  formats: z.array(z.enum(['video', 'text', 'papers'])).check(z.maxLength(3)),
+  // Deduplicated (DiagnosticStartRequest.preferredFormats is uniqueItems, max 3).
+  formats: z.pipe(
+    z.array(z.enum(['video', 'text', 'papers'])),
+    z.transform((formats) => [...new Set(formats)]),
+  ),
   years: optionalNumber(0, 50, 'Between 0 and 50 years'),
   projectsShipped: optionalNumber(0, 1000, 'A whole number from 0 to 1000', true),
 });

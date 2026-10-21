@@ -27,6 +27,10 @@ describe('intakeSchema', () => {
     expect(errorsFor({ ...valid, formats: ['audio'] })).toHaveProperty('formats.0');
   });
 
+  it('deduplicates formats', () => {
+    expect(intakeSchema.parse({ ...valid, formats: ['video', 'text', 'video'] }).formats).toEqual(['video', 'text']);
+  });
+
   it('allows no preferred format and no self-report', () => {
     expect(intakeSchema.safeParse({ ...valid, formats: [] }).success).toBe(true);
   });
