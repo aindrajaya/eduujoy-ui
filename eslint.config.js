@@ -57,8 +57,8 @@ export default tseslint.config(
     },
   },
   {
-    // Quiz drafts (PRD-UI §7) are the one sanctioned use of browser storage.
-    files: ['src/lib/storage.ts', 'src/lib/storage.test.ts', 'e2e/**'],
+    // Quiz drafts (PRD-UI §7) are the one sanctioned use of browser storage; tests may inspect it.
+    files: ['src/lib/storage.ts', '**/*.test.{ts,tsx}', 'e2e/**'],
     rules: { 'no-restricted-syntax': 'off' },
   },
   {

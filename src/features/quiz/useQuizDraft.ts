@@ -1,0 +1,38 @@
+import { useEffect, useRef } from 'react';
+import { useQuizDispatch, useQuizState } from './context';
+import { clearDraft, readDraft, writeDraft } from './drafts';
+import { toSnapshot } from './reducer';
+
+export const DRAFT_DEBOUNCE_MS = 1000;
+
+/**
+ * PRD-UI §7: restores the draft on mount, saves it 1 s after the last change, and clears it once
+ * the submit is confirmed. Session expiry keeps it (PRD-UI §6).
+ */
+export function useQuizDraft(userId: string | undefined): void {
+  const state = useQuizState();
+  const dispatch = useQuizDispatch();
+  const restored = useRef(false);
+  const { quizId, status } = state;
+
+  useEffect(() => {
+    if (!userId || restored.current) return;
+    restored.current = true;
+    const snapshot = readDraft(userId, quizId);
+    if (snapshot) dispatch({ type: 'RESTORE', snapshot });
+  }, [dispatch, quizId, userId]);
+
+  useEffect(() => {
+    if (!userId || !restored.current) return;
+    if (status === 'submitted') {
+      clearDraft(userId, quizId);
+      return;
+    }
+    const timer = setTimeout(() => {
+      writeDraft(userId, quizId, toSnapshot(state));
+    }, DRAFT_DEBOUNCE_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [userId, quizId, status, state]);
+}
