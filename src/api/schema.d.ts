@@ -304,6 +304,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/diagnostics/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read my diagnostic so the UI can resume it after a reload (US-02).
+         * @description Owner only. `items` is the batch issued last and not answered yet (empty once completed), so a
+         *     reloaded client continues exactly where it stopped; `placement` is set once `status` is
+         *     `completed`. Another user's diagnostic answers 404, so IDs can't be probed.
+         */
+        get: operations["diagnosticsGet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/diagnostics/{id}/answers": {
         parameters: {
             query?: never;
@@ -589,6 +611,14 @@ export interface components {
             }[];
             /** @description Markdown; may contain KaTeX math. */
             prompt: string;
+        };
+        /** @description GET /v1/diagnostics/{id}. The batch shape plus the topic and timestamps. */
+        DiagnosticResponse: components["schemas"]["DiagnosticBatchResponse"] & {
+            /** Format: date-time */
+            completedAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            topic: components["schemas"]["Topic"];
         };
         DiagnosticStartRequest: {
             goal: string;
@@ -1506,6 +1536,30 @@ export interface operations {
                 };
             };
             400: components["responses"]["ValidationError"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    diagnosticsGet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The diagnostic with its outstanding batch and progress. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticResponse"];
+                };
+            };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
         };
