@@ -21,6 +21,10 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/fixtures/**', 'src/main.tsx', 'src/**/*.d.ts'],
       reporter: ['text-summary', 'html', 'lcov'],
+      // PRD-UI §10: the API error mapper (and the quiz reducer, U5) need 100% branch coverage.
+      thresholds: {
+        'src/api/errors.ts': { branches: 100, functions: 100, lines: 100, statements: 100 },
+      },
     },
   },
 });
