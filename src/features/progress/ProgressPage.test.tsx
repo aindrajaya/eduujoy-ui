@@ -34,7 +34,8 @@ describe('/progress (US-09)', () => {
     server.use(http.get('/v1/progress', ({ response }) => response(200).json({ items: [...mockProgress.items, second] })));
     const { router } = renderRoute('/progress');
     await userEvent.click(await screen.findByRole('button', { name: 'SQL for analysts' }));
-    expect(screen.getByRole('heading', { level: 2, name: 'SQL for analysts' })).toBeInTheDocument();
+    // setSearchParams navigates asynchronously.
+    expect(await screen.findByRole('heading', { level: 2, name: 'SQL for analysts' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'SQL for analysts' })).toHaveAttribute('aria-current', 'true');
     expect(router.state.location.search).toBe('?topic=topic-sql');
     expect(screen.queryByRole('link', { name: /Continue your path/ })).not.toBeInTheDocument();
