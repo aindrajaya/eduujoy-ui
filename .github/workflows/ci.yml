@@ -30,6 +30,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: API types match docs/openapi.json
+        run: pnpm api:types --check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test:coverage
