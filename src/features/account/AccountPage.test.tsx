@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { mockMe } from '@/api/mocks/data';
@@ -39,7 +39,14 @@ describe('/account', () => {
       }),
     );
     const { router } = renderRoute('/account');
-    await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+    const signOutButton = await screen.findByRole('button', { name: 'Sign out' });
+    await waitFor(
+      () => {
+        expect(openedSockets).toHaveLength(1);
+      },
+      { timeout: 3000 },
+    );
+    await userEvent.click(signOutButton);
     await screen.findByRole('heading', { name: 'Welcome back' });
     expect(loggedOut).toBe(true);
     expect(router.state.location.pathname).toBe('/signin');
