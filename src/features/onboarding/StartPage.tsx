@@ -5,5 +5,11 @@ import OnboardingForm from './components/OnboardingForm';
 // U4 replaces this with POST /v1/topics/resolve.
 export default function StartPage() {
   const navigate = useNavigate();
-  return <OnboardingForm onSubmit={() => navigate('/today')} />;
+  return (
+    <OnboardingForm
+      onSubmit={() => {
+        void navigate('/today');
+      }}
+    />
+  );
 }

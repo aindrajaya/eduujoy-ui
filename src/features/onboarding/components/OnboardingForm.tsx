@@ -11,7 +11,7 @@ import {
   TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useState, type ChangeEvent, type SubmitEvent } from 'react';
 import { validateField, type FieldName, type OnboardingValues } from '../validation';
 
 export type { OnboardingValues };
@@ -194,18 +194,28 @@ export default function OnboardingForm({
   const [errors, setErrors] = useState<Errors>({});
 
   useEffect(() => {
-    if (splash === 'shown') {
-      const t = setTimeout(() => setSplash('exiting'), SPLASH_MS);
-      return () => clearTimeout(t);
-    }
-    if (splash === 'exiting') {
-      const t = setTimeout(() => setSplash('done'), SPLASH_EXIT_MS);
-      return () => clearTimeout(t);
-    }
+    if (splash === 'done') return;
+    const next = splash === 'shown' ? 'exiting' : 'done';
+    const t = setTimeout(
+      () => {
+        setSplash(next);
+      },
+      splash === 'shown' ? SPLASH_MS : SPLASH_EXIT_MS,
+    );
+    return () => {
+      clearTimeout(t);
+    };
   }, [splash]);
 
   if (splash !== 'done') {
-    return <Splash exiting={splash === 'exiting'} onStart={() => setSplash('exiting')} />;
+    return (
+      <Splash
+        exiting={splash === 'exiting'}
+        onStart={() => {
+          setSplash('exiting');
+        }}
+      />
+    );
   }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -215,7 +225,7 @@ export default function OnboardingForm({
     setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const next: Errors = {};
     for (const name of fieldOrder) {

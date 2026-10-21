@@ -9,7 +9,7 @@ export const routes: RouteObject[] = [
       {
         // U2 replaces this with a session-aware redirect (/today when signed in).
         index: true,
-        lazy: async () => ({ loader: () => redirect('/start') }),
+        lazy: () => Promise.resolve({ loader: () => redirect('/start') }),
       },
       {
         path: 'start',

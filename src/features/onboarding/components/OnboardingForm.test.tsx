@@ -19,8 +19,12 @@ describe('OnboardingForm', () => {
     vi.useFakeTimers();
     render(<OnboardingForm onSubmit={vi.fn()} />);
     expect(screen.getByRole('heading', { name: /welcome to eduujoy/i })).toBeInTheDocument();
-    act(() => vi.advanceTimersByTime(3000));
-    act(() => vi.advanceTimersByTime(600));
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     expect(screen.getByRole('heading', { name: /let's get started/i })).toBeInTheDocument();
     vi.useRealTimers();
   });

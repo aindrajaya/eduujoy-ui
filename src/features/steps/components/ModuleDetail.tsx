@@ -6,7 +6,7 @@ import {
   Clock,
   Layers,
   MousePointerClick,
-  Youtube,
+  Video,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { ModuleResource, PathModule } from '@/features/paths/types';
@@ -16,7 +16,7 @@ function ResourceIcon({ type }: { type: string }) {
   const props = { className: 'h-5 w-5', 'aria-hidden': true } as const;
   switch (type.toLowerCase()) {
     case 'youtube':
-      return <Youtube {...props} className={`${props.className} text-red-600`} />;
+      return <Video {...props} className={`${props.className} text-red-600`} />;
     case 'course':
       return <BookOpen {...props} className={`${props.className} text-blue-600`} />;
     case 'practice':
