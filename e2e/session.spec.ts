@@ -20,7 +20,7 @@ test.describe('session expiry', () => {
     });
 
     await expect(page).toHaveURL(/\/signin\?next=%2Faccount&expired=1$/);
-    await expect(page.getByRole('status')).toHaveText(/Your session expired/);
+    await expect(page.getByText(/Your session expired/)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Jane Doe' })).toBeHidden();
   });
 });

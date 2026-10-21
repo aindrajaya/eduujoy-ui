@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import { env } from '@/lib/env';
+import { trackActivity } from './activity';
 import { installInterceptors, type InterceptorOptions } from './interceptors';
 import { emitSessionExpired } from './session-events';
 
@@ -18,6 +19,7 @@ export function createApiClient({ baseURL, ...options }: ApiClientOptions): Axio
     timeout: DEFAULT_TIMEOUT_MS,
     headers: { Accept: 'application/json, application/problem+json' },
   });
+  trackActivity(instance);
   installInterceptors(instance, options);
   return instance;
 }
