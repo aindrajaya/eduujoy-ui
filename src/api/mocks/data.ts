@@ -3,6 +3,7 @@ import type {
   CheckpointResult,
   CostMetricsResponse,
   DiagnosticBatchResponse,
+  DiagnosticResponse,
   JobAccepted,
   LatencyMetricsResponse,
   Me,
@@ -256,3 +257,11 @@ export function mockProblem(
     ...extra,
   };
 }
+
+/** GET /v1/diagnostics/{id} for an in-progress diagnostic (contract 0.2.0). */
+export const mockDiagnosticResume: DiagnosticResponse = {
+  ...mockDiagnosticBatch,
+  topic: mockTopic,
+  createdAt: '2026-10-21T08:00:00Z',
+  completedAt: null,
+};

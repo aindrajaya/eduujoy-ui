@@ -11,6 +11,7 @@ import {
   mockCostMetrics,
   mockDiagnosticBatch,
   mockDiagnosticCompleted,
+  mockDiagnosticResume,
   mockJobAccepted,
   mockLatencyMetrics,
   mockMe,
@@ -45,6 +46,11 @@ export const handlers = [
   // Catalog and assessment
   http.post('/v1/topics/resolve', ({ response }) => response(200).json(mockResolveMatched)),
   http.post('/v1/diagnostics', ({ response }) => response(201).json(mockDiagnosticBatch)),
+  http.get('/v1/diagnostics/{id}', ({ params, response }) =>
+    params.id === mockDiagnosticResume.diagnosticId
+      ? response(200).json(mockDiagnosticResume)
+      : response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Diagnostic not found'))),
+  ),
   http.post('/v1/diagnostics/{id}/answers', ({ response }) =>
     response(200).json(mockDiagnosticCompleted),
   ),

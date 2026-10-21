@@ -10,8 +10,6 @@ const NOT_MOCKED = new Set([
   'POST /v1/billing/webhook',
   'GET /ready',
   'GET /v1/jobs/:id/events',
-  // Contract 0.2.0: resume a diagnostic. Its handler lands with the resume work in U6.
-  'GET /v1/diagnostics/:id',
 ]);
 
 const METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
