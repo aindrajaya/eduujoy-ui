@@ -4,7 +4,7 @@ import { mockPath } from '@/api/mocks/data';
 import { http } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { createTestQueryClient, withQueryClient } from '@/test/providers';
-import { currentStep, findStep, stepHref, useActivePaths, usePath, usePaths } from './pathQueries';
+import { currentStep, findStep, pathIdFromRef, stepHref, useActivePaths, usePath, usePaths } from './pathQueries';
 
 const wrapper = () => withQueryClient(createTestQueryClient());
 
@@ -49,5 +49,20 @@ describe('path queries', () => {
     const allDone = { ...mockPath, steps: mockPath.steps.map((s) => ({ ...s, status: 'completed' as const })) };
     expect(currentStep(allDone)).toBeUndefined();
     expect(stepHref('path 1', 'step/2')).toBe('/steps/step%2F2?path=path%201');
+  });
+});
+
+describe('pathIdFromRef', () => {
+  it('reads the id from an API path (contract example) or takes a bare id', () => {
+    expect(pathIdFromRef('/v1/paths/path_19c2')).toBe('path_19c2');
+    expect(pathIdFromRef('/v1/paths/a%20b')).toBe('a b');
+    expect(pathIdFromRef('path-1')).toBe('path-1');
+  });
+
+  it('gives undefined for no ref or anything that is not a path', () => {
+    expect(pathIdFromRef(undefined)).toBeUndefined();
+    expect(pathIdFromRef('')).toBeUndefined();
+    expect(pathIdFromRef('/v1/checkpoints/x')).toBeUndefined();
+    expect(pathIdFromRef('https://evil.example/v1/paths/x')).toBeUndefined();
   });
 });
