@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router';
+import { installSessionExpiry } from './auth/session-expiry';
 import { queryClient } from './query-client';
 import { router } from './router';
 import './index.css';
@@ -15,6 +16,8 @@ if (import.meta.env.DEV && import.meta.env.VITE_API_MOCKS === 'true') {
   const { worker } = await import('./api/mocks/browser');
   await worker.start({ onUnhandledRequest: 'bypass', quiet: true });
 }
+
+installSessionExpiry(router, queryClient);
 
 createRoot(root).render(
   <StrictMode>
