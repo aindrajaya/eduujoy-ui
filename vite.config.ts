@@ -68,7 +68,14 @@ export default defineConfig({
   },
   server: { port: 5173 },
   preview: { port: 4173 },
-  build: { target: 'es2022', sourcemap: false, manifest: true },
+  build: {
+    target: 'es2022',
+    sourcemap: false,
+    manifest: true,
+    // Merge sub-8 KB chunks (icons, tiny shared modules) into their importers: each request costs a
+    // round trip on mobile, which Lighthouse measured as +160 ms LCP on /today (PRD-UI §9).
+    rollupOptions: { output: { experimentalMinChunkSize: 8_000 } },
+  },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
