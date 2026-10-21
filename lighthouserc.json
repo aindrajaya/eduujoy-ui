@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "pnpm exec vite preview --outDir dist-mock --port 4173 --strictPort",
+      "startServerCommand": "pnpm exec vite preview --mode lighthouse --outDir dist-lh --port 4173 --strictPort",
       "startServerReadyPattern": "Local",
       "url": [
         "http://localhost:4173/signin?mock=signed-out",
