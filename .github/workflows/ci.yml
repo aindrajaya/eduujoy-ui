@@ -72,6 +72,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build:mock
-      - name: Lighthouse budgets on /signin, /today, /steps/1 (MSW mock build)
+      - run: pnpm build:lh
+      - name: Lighthouse budgets on /signin, /today, /steps/1 (production bundle, mock API on the preview server)
         run: pnpm lhci
