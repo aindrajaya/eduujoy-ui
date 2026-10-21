@@ -1,7 +1,12 @@
-import type { Socket } from 'socket.io-client';
 import { env } from '@/lib/env';
 
-export type RealtimeSocket = Pick<Socket, 'on' | 'off' | 'connect' | 'disconnect' | 'connected'>;
+/** The part of the Socket.IO client the app uses (a fake implements it in tests). */
+export interface RealtimeSocket {
+  readonly connected: boolean;
+  on(event: string, listener: (...args: never[]) => void): unknown;
+  connect(): unknown;
+  disconnect(): unknown;
+}
 
 /**
  * PRD-UI §5: the Socket.IO client is imported only after sign-in, so no screen's initial JS pays
