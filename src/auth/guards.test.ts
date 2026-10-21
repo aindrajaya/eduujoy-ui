@@ -50,15 +50,38 @@ describe('fetchSession', () => {
 });
 
 describe('safeNext', () => {
+  const origin = 'https://eduujoy.aindrajaya.my.id';
+
   it.each([
     [null, '/today'],
+    [undefined, '/today'],
     ['', '/today'],
     ['https://evil.example', '/today'],
     ['//evil.example', '/today'],
     ['/\\evil.example', '/today'],
-    ['/steps/2?tab=a', '/steps/2?tab=a'],
-  ])('%s → %s', (raw, expected) => {
-    expect(safeNext(raw)).toBe(expected);
+    ['\\\\evil.example', '/today'],
+    ['/\t/evil.example', '/today'],
+    ['/\n/evil.example', '/today'],
+    ['\t//evil.example/path', '/today'],
+    ['javascript:alert(1)', '/today'],
+    [' javascript:alert(1)', '/today'],
+    ['data:text/html,hi', '/today'],
+    ['https://eduujoy.aindrajaya.my.id.evil.example/x', '/today'],
+    ['http://eduujoy.aindrajaya.my.id/x', '/today'],
+    ['https://eduujoy.aindrajaya.my.id/paths?x=1#top', '/paths?x=1#top'],
+    ['/steps/2?tab=a#res', '/steps/2?tab=a#res'],
+    ['steps/2', '/steps/2'],
+  ])('%j → %s', (raw, expected) => {
+    expect(safeNext(raw, origin)).toBe(expected);
+  });
+
+  it('falls back when the value cannot be parsed', () => {
+    expect(safeNext('http://[::1', origin)).toBe('/today');
+  });
+
+  it('defaults to the current origin', () => {
+    expect(safeNext('/progress')).toBe('/progress');
+    expect(safeNext('//evil.example')).toBe('/today');
   });
 });
 
