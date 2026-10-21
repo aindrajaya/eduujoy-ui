@@ -128,4 +128,24 @@ describe('/start (US-01)', () => {
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expect(await screen.findByText(/Could not reach the server/, {}, { timeout: 8000 })).toBeInTheDocument();
   });
+
+  it('says topic search is briefly unavailable when resolve returns 503 (contract 0.4.0)', { timeout: 15_000 }, async () => {
+    const sent = capture();
+    const { user } = await openForm();
+    // The default MSW handler simulates the outage for this topic.
+    await submitIntake(user, 'embedding outage');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Topic search is briefly unavailable, try again');
+    expect(sent.start).toBeUndefined();
+  });
+
+  it('a 503 while starting the diagnostic keeps the generic copy', { timeout: 15_000 }, async () => {
+    server.use(
+      http.post('/v1/diagnostics', ({ response }) =>
+        response.untyped(problemResponse(mockProblem(503, 'SERVICE_UNAVAILABLE', 'Down'))),
+      ),
+    );
+    const { user } = await openForm();
+    await submitIntake(user);
+    expect(await screen.findByRole('alert', {}, { timeout: 8000 })).toHaveTextContent('Something went wrong. Please try again.');
+  });
 });
