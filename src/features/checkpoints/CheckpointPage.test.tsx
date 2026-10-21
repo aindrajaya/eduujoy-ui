@@ -137,7 +137,7 @@ describe('/checkpoints/:id (US-05)', () => {
     renderRoute(URL_STEP_2);
     await answerAll(user);
     await user.click(screen.getByRole('button', { name: 'Submit answers' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Grading is paused for a moment');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Grading has reached today’s limit. Your answers are saved on this device; submit them again in about 5 hours.');
   });
 
   it('explains a grading job that failed and offers a retry when it is retryable', async () => {
@@ -156,7 +156,7 @@ describe('/checkpoints/:id (US-05)', () => {
     );
     renderRoute(`${URL_STEP_2}&job=grade-1`);
     expect(await screen.findByText('We couldn’t grade your answers')).toBeInTheDocument();
-    expect(screen.getByText(/Grading is paused/)).toBeInTheDocument();
+    expect(screen.getByText(/after the daily reset at midnight UTC/)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(await screen.findByText('Question 1 of 3')).toBeInTheDocument();
   });

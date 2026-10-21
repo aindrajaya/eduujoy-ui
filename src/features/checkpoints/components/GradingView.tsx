@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { Link } from 'react-router';
 import type { CheckpointItem, CheckpointResult } from '@/api/types';
 import type { JobView } from '@/realtime/jobView';
+import { formatRetryWait } from '@/lib/time';
 import { useJobStream } from '@/realtime/useJobStream';
 import StateMessage from '@/ui/StateMessage';
 
@@ -48,7 +49,9 @@ export default function GradingView({ jobId, items, stepHref, onGraded, onRetry 
             )
           }
         >
-          {paused ? 'Grading is paused for a moment. Please try again shortly.' : 'Something went wrong while grading.'}
+          {paused
+            ? `Grading has reached today’s limit. Try again ${formatRetryWait(undefined)}.`
+            : 'Something went wrong while grading.'}
         </StateMessage>
       </div>
     );

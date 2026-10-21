@@ -10,6 +10,7 @@ import QuizRunner from '@/features/quiz/QuizRunner';
 import type { QuizQuestion } from '@/features/quiz/types';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
+import { formatRetryWait } from '@/lib/time';
 import StateMessage from '@/ui/StateMessage';
 import PlacementResult from './components/PlacementResult';
 import { diagnosticKeys } from './keys';
@@ -20,7 +21,7 @@ function buildPathError(error: ApiError): string {
     case 'QUOTA_EXCEEDED':
       return 'You have used this month’s paths. Upgrade or buy a credit pack to build another.';
     case 'AI_BUDGET_EXCEEDED':
-      return 'Path building is paused for a moment. Please try again shortly.';
+      return `Path building has reached today’s limit. Try again ${formatRetryWait(error.retryAfterMs)}.`;
     case 'CONFLICT':
       return 'A path is already being built for this placement.';
     case 'NETWORK_ERROR':
