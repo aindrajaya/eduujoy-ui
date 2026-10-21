@@ -76,6 +76,8 @@ function codeForStatus(status: number): ProblemCode {
       return 'CONFLICT';
     case 429:
       return 'RATE_LIMITED';
+    case 503:
+      return 'SERVICE_UNAVAILABLE';
     default:
       return 'INTERNAL';
   }
