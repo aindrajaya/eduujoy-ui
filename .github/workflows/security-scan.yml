@@ -3,7 +3,7 @@ name: Security scan
 on:
   pull_request:
   push:
-    branches: [main, dev-n8n]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -19,7 +19,12 @@ jobs:
         with:
           persist-credentials: false
 
-      # Uses the runner's preinstalled Node. No npm install, no build,
+      # Uses the runner's preinstalled Node. No install, no build,
       # no repository code is executed — only the standalone scanner.
       - name: Scan tracked files
         run: node scripts/security-scan.mjs
+
+      # pnpm audit reads pnpm-lock.yaml only; nothing is installed or run.
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0 (version from packageManager)
+      - name: Audit dependencies
+        run: pnpm audit --audit-level high
