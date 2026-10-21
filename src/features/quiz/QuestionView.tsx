@@ -16,6 +16,8 @@ export interface QuestionViewProps {
   defaultAnswer?: Answer;
   flagged: boolean;
   allowSkip?: boolean;
+  /** Label of the button on the last question. */
+  finalLabel?: string;
   onCommit: (questionId: string, answer: Answer) => void;
   onBack?: () => void;
   onToggleFlag: (questionId: string) => void;
@@ -41,6 +43,7 @@ function QuestionView({
   defaultAnswer,
   flagged,
   allowSkip = false,
+  finalLabel = 'Review answers',
   onCommit,
   onBack,
   onToggleFlag,
@@ -172,7 +175,7 @@ function QuestionView({
           type="submit"
           className="ml-auto min-h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 font-bold text-white shadow-lg"
         >
-          {position === total ? 'Review answers' : 'Next'}
+          {position === total ? finalLabel : 'Next'}
         </button>
       </div>
     </form>
