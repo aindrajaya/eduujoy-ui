@@ -15,6 +15,12 @@ export const routes: RouteObject[] = [
               Component: (await import('./features/paths/TodayPage')).default,
             }),
           },
+          {
+            path: 'account',
+            lazy: async () => ({
+              Component: (await import('./features/account/AccountPage')).default,
+            }),
+          },
         ],
       },
       {
