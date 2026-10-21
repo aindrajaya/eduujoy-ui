@@ -1,19 +1,20 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Mail, User } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
-import { applyFieldErrors } from '@/lib/forms';
+import { applyFieldErrors, lazyResolver } from '@/lib/forms';
 import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
 import GoogleButton from './GoogleButton';
 import { safeNext } from './guards';
 import { useSignUp } from './queries';
-import { signUpSchema, type SignUpValues } from './schemas';
+import type { SignUpValues } from './schemas';
 
 // New accounts start onboarding unless they arrived with a specific destination.
 const NEW_ACCOUNT_HOME = '/start';
+
+const resolver = lazyResolver<SignUpValues>(() => import('./validation').then((m) => m.signUpResolver));
 
 export default function SignUpPage() {
   const [params] = useSearchParams();
@@ -28,7 +29,7 @@ export default function SignUpPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<SignUpValues>({
-    resolver: zodResolver(signUpSchema),
+    resolver,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues: { name: '', email: '', password: '' },
@@ -49,7 +50,7 @@ export default function SignUpPage() {
 
   return (
     <AuthLayout title="Create your account" subtitle="Start a learning path grounded in the best free resources.">
-      <form onSubmit={(e) => void onSubmit(e)} noValidate className="space-y-5">
+      <form onSubmit={(e) => void onSubmit(e)} onFocus={resolver.preload} noValidate className="space-y-5">
         <TextField label="Name (optional)" icon={User} autoComplete="name" error={errors.name?.message} {...register('name')} />
         <TextField
           label="Email"
