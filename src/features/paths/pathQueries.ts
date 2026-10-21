@@ -80,9 +80,9 @@ export const stepHref = (pathId: string, stepId: string) =>
 
 /**
  * Today's data, started from the route loader so the list request does not wait for the page
- * chunk, and the detail request follows the list at once (PRD-UI §9 LCP budget).
+ * chunk. The detail is only needed when the list has no currentStep (before contract 0.3.0).
  */
 export async function prefetchActivePath(client: QueryClient): Promise<void> {
   const [summary] = await client.query(activePathsQuery());
-  if (summary) await client.query(pathQuery(summary.id));
+  if (summary && summary.currentStep === undefined) await client.query(pathQuery(summary.id));
 }

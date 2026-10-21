@@ -1,13 +1,14 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Clock } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'react-router';
-import type { Path } from '@/api/types';
+import type { Path, PathStep, PathSummary } from '@/api/types';
 import { BLOOM_LABEL } from '@/lib/levels';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
 import StateMessage from '@/ui/StateMessage';
 import StickyActionBar from '@/ui/StickyActionBar';
-import { currentStep, stepHref, useActivePaths, usePath } from './pathQueries';
+import { currentStep, pathQuery, stepHref, useActivePaths, usePath } from './pathQueries';
 
 function TodaySkeleton() {
   return (
@@ -26,42 +27,55 @@ function TodaySkeleton() {
 }
 
 /**
- * PRD-UI §9: fetch the step screen's code once Today has rendered and the browser is idle; Today's
- * next tap goes there. Waiting for the data keeps the chunk off the LCP critical path.
+ * PRD-UI §9: once Today has rendered and the browser is idle, fetch the step screen's code and the
+ * path it reads, so Today's next tap opens at once. Both stay off the LCP critical path.
  */
-function usePrefetchStepScreen(ready: boolean) {
+function usePrefetchStepScreen(pathId: string | undefined) {
+  const client = useQueryClient();
   useEffect(() => {
-    if (!ready) return;
-    const load = () => void import('@/features/steps/StepPage');
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(load);
-      return () => {
-        window.cancelIdleCallback(id);
-      };
-    }
-    const timer = setTimeout(load, 2000);
+    if (!pathId) return;
+    const load = () => {
+      void import('@/features/steps/StepPage');
+      void client.query(pathQuery(pathId)).catch(() => undefined);
+    };
+    // Start after the first paint has settled, then wait for idle, so neither request competes
+    // with Today's own render.
+    let idle: number | undefined;
+    const timer = setTimeout(() => {
+      if ('requestIdleCallback' in window) idle = window.requestIdleCallback(load);
+      else load();
+    }, 1000);
     return () => {
       clearTimeout(timer);
+      if (idle !== undefined) window.cancelIdleCallback(idle);
     };
-  }, [ready]);
+  }, [client, pathId]);
 }
 
-function TodayView({ path }: { path: Path }) {
-  const step = currentStep(path);
-  const done = path.stepsDone ?? path.steps.filter((s) => s.status === 'completed').length;
-  const total = path.stepsTotal ?? path.steps.length;
-  const upcoming = step ? path.steps.filter((s) => s.n > step.n).slice(0, 2) : [];
+type CurrentStep = Pick<PathStep, 'id' | 'n' | 'objective' | 'bloom' | 'estMinutes'>;
+
+interface TodayData {
+  summary: PathSummary;
+  /** Undefined while the step is unknown; null when every step is done. */
+  step: CurrentStep | null;
+  /** The full path, only loaded when the list has no currentStep (an API before contract 0.3.0). */
+  path: Path | undefined;
+}
+
+function TodayView({ summary, step, path }: TodayData) {
+  const done = summary.stepsDone ?? path?.steps.filter((s) => s.status === 'completed').length ?? 0;
+  const total = summary.stepsTotal ?? path?.steps.length ?? 0;
 
   return (
     <>
       <div className="animate-fade-in space-y-6 p-4 md:p-6">
         <header className="space-y-2">
           <p className="font-semibold text-success">Today</p>
-          <h1 className="text-2xl font-bold text-text md:text-3xl">{path.topic.canonicalName}</h1>
+          <h1 className="text-2xl font-bold text-text md:text-3xl">{summary.topic.canonicalName}</h1>
           <div>
             <div className="mb-1 flex justify-between text-sm text-text-muted">
               <span>
-                <Link to={`/paths/${encodeURIComponent(path.id)}`} className="font-semibold text-primary underline">
+                <Link to={`/paths/${encodeURIComponent(summary.id)}`} className="font-semibold text-primary underline">
                   See the whole path
                 </Link>
               </span>
@@ -104,22 +118,8 @@ function TodayView({ path }: { path: Path }) {
           <StateMessage title="You finished every step">Pass the final checkpoint to move to the next stage.</StateMessage>
         )}
 
-        {upcoming.length > 0 && (
-          <section aria-labelledby="next-title" className="space-y-2">
-            <h2 id="next-title" className="font-semibold text-text">
-              Coming up
-            </h2>
-            <ol className="space-y-2">
-              {upcoming.map((s) => (
-                <li key={s.id} className="rounded-card border border-border p-3 text-text">
-                  <span className="font-semibold">Step {s.n}:</span> {s.objective}
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
       </div>
-      {step && <StickyActionBar label={`Continue: Step ${step.n}`} to={stepHref(path.id, step.id)} aboveTabs />}
+      {step && <StickyActionBar label={`Continue: Step ${step.n}`} to={stepHref(summary.id, step.id)} aboveTabs />}
     </>
   );
 }
@@ -128,8 +128,8 @@ function TodayView({ path }: { path: Path }) {
 export default function TodayPage() {
   const active = useActivePaths();
   const summary = active.data?.[0];
-  const path = usePath(summary?.id);
-  usePrefetchStepScreen(path.isSuccess);
+  const path = usePath(summary && summary.currentStep === undefined ? summary.id : undefined);
+  usePrefetchStepScreen(summary?.id);
 
   if (active.isSuccess && !summary) {
     return (
@@ -151,19 +151,25 @@ export default function TodayPage() {
     );
   }
 
+  // Contract 0.3.0: the list's currentStep renders Today on its own (PRD-UI §3); an API without
+  // the field falls back to the path detail.
+  const listStep = summary?.currentStep;
+  const step = listStep !== undefined ? listStep : path.data ? (currentStep(path.data) ?? null) : undefined;
+  const data: TodayData | undefined = summary && step !== undefined ? { summary, step, path: path.data } : undefined;
+
   return (
     <AsyncView
       query={{
-        ...path,
-        // A disabled path query (no active path yet) counts as pending; only wait for it once enabled.
-        isPending: active.isPending || (summary !== undefined && path.isPending),
-        error: active.error ?? path.error,
+        data,
+        isPending: active.isPending || (summary !== undefined && step === undefined && path.isPending),
+        error: active.error ?? (step === undefined ? path.error : null),
+        isRefetching: active.isRefetching,
         refetch: () => (active.error ? active.refetch() : path.refetch()),
       }}
       label="today’s step"
       skeleton={<TodaySkeleton />}
     >
-      {(data) => <TodayView path={data} />}
+      {(today) => <TodayView {...today} />}
     </AsyncView>
   );
 }
