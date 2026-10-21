@@ -6,6 +6,7 @@ node_modules
 # build and test output
 dist
 dist-e2e
+dist-mock
 build
 coverage
 .lighthouseci

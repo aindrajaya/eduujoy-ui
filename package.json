@@ -17,7 +17,8 @@
     "api:types": "node scripts/api-types.mjs",
     "api:sync": "node scripts/api-types.mjs --sync",
     "build:e2e": "vite build --outDir dist-e2e",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:mock": "VITE_API_MOCKS=true vite build --mode mock --outDir dist-mock"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
