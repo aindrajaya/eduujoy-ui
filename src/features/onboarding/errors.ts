@@ -1,7 +1,12 @@
 import type { ApiError } from '@/api/errors';
 
+/** The intake call that failed: topic search, or starting the diagnostic. */
+export type IntakeStep = 'resolve' | 'start';
+
 /** Form-level copy for intake failures; field errors are shown on their fields. */
-export function intakeErrorMessage(error: ApiError): string {
+export function intakeErrorMessage(error: ApiError, step: IntakeStep = 'start'): string {
+  // Contract 0.4.0: 503 from topic resolve during an embedding outage (Retry-After 30). User-decided wording.
+  if (step === 'resolve' && error.code === 'SERVICE_UNAVAILABLE') return 'Topic search is briefly unavailable, try again';
   switch (error.code) {
     case 'VALIDATION_FAILED':
       return 'Check the highlighted fields.';
