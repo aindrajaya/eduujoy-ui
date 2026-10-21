@@ -26,6 +26,13 @@ describe('TopicChoices', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('never shows more than three choices', () => {
+    const four = [...choices, { id: 't4', canonicalName: 'Java island travel' }];
+    render(<TopicChoices typed="java" choices={four} onConfirm={vi.fn()} onEditTopic={vi.fn()} />);
+    expect(screen.getAllByRole('radio')).toHaveLength(3);
+    expect(screen.queryByText('Java island travel')).not.toBeInTheDocument();
+  });
+
   it('lets the learner go back and rephrase', async () => {
     const onEditTopic = vi.fn();
     render(<TopicChoices typed="java" choices={choices} onConfirm={vi.fn()} onEditTopic={onEditTopic} />);
