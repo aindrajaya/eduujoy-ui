@@ -51,6 +51,14 @@ describe('installSessionExpiry', () => {
     expect(router.state.historyAction).toBe('REPLACE');
   });
 
+  it('ignores manual writes, so a deliberate sign-out shows no expired notice', async () => {
+    const { router } = renderRoute('/account');
+    await screen.findByRole('heading', { name: 'Jane Doe' });
+    uninstall = installSessionExpiry(router, queryClient);
+    queryClient.setQueryData(sessionKeys.me(), null);
+    expect(router.state.location.pathname).toBe('/account');
+  });
+
   it('does nothing on public pages, where signed out is expected', async () => {
     mockSignedOut();
     const { router } = renderRoute('/signin');

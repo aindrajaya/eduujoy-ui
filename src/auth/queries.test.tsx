@@ -48,7 +48,7 @@ describe('auth mutations', () => {
     });
   });
 
-  it('sign-out clears every cached query, even if logout fails', async () => {
+  it('sign-out clears every cached query and records signed out, even if logout fails', async () => {
     server.use(
       http.post('/v1/auth/logout', ({ response }) =>
         response.untyped(problemResponse(mockProblem(401, 'UNAUTHENTICATED', 'Already out'))),
@@ -64,6 +64,7 @@ describe('auth mutations', () => {
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
-    expect(client.getQueryCache().getAll()).toHaveLength(0);
+    expect(client.getQueryCache().getAll().map((q) => q.queryKey)).toEqual([sessionKeys.me()]);
+    expect(client.getQueryData(sessionKeys.me())).toBeNull();
   });
 });
