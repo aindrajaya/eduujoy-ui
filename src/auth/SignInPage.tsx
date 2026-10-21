@@ -1,16 +1,17 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
-import { applyFieldErrors } from '@/lib/forms';
+import { applyFieldErrors, lazyResolver } from '@/lib/forms';
 import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
 import GoogleButton from './GoogleButton';
 import { safeNext } from './guards';
 import { useSignIn } from './queries';
-import { signInSchema, type SignInValues } from './schemas';
+import type { SignInValues } from './schemas';
+
+const resolver = lazyResolver<SignInValues>(() => import('./validation').then((m) => m.signInResolver));
 
 export default function SignInPage() {
   const [params] = useSearchParams();
@@ -25,7 +26,7 @@ export default function SignInPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<SignInValues>({
-    resolver: zodResolver(signInSchema),
+    resolver,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues: { email: '', password: '' },
@@ -51,7 +52,7 @@ export default function SignInPage() {
           Your session expired. Sign in again to continue.
         </p>
       )}
-      <form onSubmit={(e) => void onSubmit(e)} noValidate className="space-y-5">
+      <form onSubmit={(e) => void onSubmit(e)} onFocus={resolver.preload} noValidate className="space-y-5">
         <TextField
           label="Email"
           icon={Mail}
