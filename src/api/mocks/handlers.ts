@@ -25,6 +25,7 @@ import {
   mockProgress,
   mockProgressHistory,
   mockResolveMatched,
+  mockReviewItems,
   mockReviewQueue,
 } from './data';
 
@@ -145,10 +146,14 @@ export const handlers = [
   ),
 
   // Admin
-  http.get('/v1/admin/review-queue', ({ response }) => response(200).json(mockReviewQueue)),
+  http.get('/v1/admin/review-queue', ({ request, response }) => {
+    const status = new URL(request.url).searchParams.get('status') ?? 'open';
+    const items = mockReviewItems.filter((i) => i.status === status);
+    return response(200).json({ ...mockReviewQueue, items });
+  }),
   http.patch('/v1/admin/review-queue/{id}', async ({ params, request, response }) => {
     const { resolution } = await request.json();
-    const item = mockReviewQueue.items.find((i) => i.id === params.id);
+    const item = mockReviewItems.find((i) => i.id === params.id);
     if (!item) return response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Item not found')));
     return response(200).json({ ...item, status: 'resolved', resolution });
   }),

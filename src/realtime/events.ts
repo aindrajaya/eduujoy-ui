@@ -1,6 +1,14 @@
 import type { QueryClient } from '@tanstack/react-query';
-import type { Me, WsCheckpointGraded, WsEntitlementChanged, WsPathReady, WsStageAdvanced } from '@/api/types';
+import type {
+  Me,
+  WsCheckpointGraded,
+  WsEntitlementChanged,
+  WsPathReady,
+  WsReviewQueueCount,
+  WsStageAdvanced,
+} from '@/api/types';
 import { sessionKeys } from '@/auth/session';
+import { adminKeys } from '@/features/admin/keys';
 import { pathKeys } from '@/features/paths/keys';
 import { progressKeys } from '@/features/progress/keys';
 import { STAGE_LABEL } from '@/lib/levels';
@@ -12,6 +20,8 @@ export interface RealtimeEvents {
   'checkpoint.graded': WsCheckpointGraded;
   'stage.advanced': WsStageAdvanced;
   'entitlement.changed': WsEntitlementChanged;
+  /** Sent to room role:reviewer (U11): the open review queue changed. */
+  'review-queue.count': WsReviewQueueCount;
 }
 
 export type RealtimeEventName = keyof RealtimeEvents;
@@ -20,6 +30,7 @@ export const REALTIME_EVENTS: readonly RealtimeEventName[] = [
   'checkpoint.graded',
   'stage.advanced',
   'entitlement.changed',
+  'review-queue.count',
 ];
 
 export interface RealtimeContext {
@@ -96,6 +107,11 @@ export function applyRealtimeEvent<E extends RealtimeEventName>(
       } else if (before && before.quota.credits < quota.credits) {
         toast({ title: `Credits added: you have ${quota.credits}`, tone: 'success' });
       }
+      return;
+    }
+    case 'review-queue.count': {
+      // Only staff are in that room; refetch the open queue so the list and its count agree.
+      void client.invalidateQueries({ queryKey: adminKeys.queue('open') });
       return;
     }
   }

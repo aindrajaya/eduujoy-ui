@@ -1,8 +1,8 @@
 import { LogOut } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useSignOut, type SignInLocationState } from '@/auth/queries';
-import { useSession } from '@/auth/session';
+import { hasRole, useSession } from '@/auth/session';
 import CheckoutReturnNotice from '@/features/billing/components/CheckoutReturnNotice';
 import PlanCard from '@/features/billing/components/PlanCard';
 import DataSection from './components/DataSection';
@@ -60,6 +60,19 @@ export default function AccountPage() {
         />
       )}
       {me && <PlanCard me={me} />}
+
+      {hasRole(me, ['reviewer', 'admin']) && (
+        <nav aria-label="Staff" className="flex flex-col gap-2 rounded-card border border-border p-4">
+          <Link to="/admin/review" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
+            Review queue
+          </Link>
+          {hasRole(me, ['admin']) && (
+            <Link to="/admin/metrics" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
+              Costs and latency
+            </Link>
+          )}
+        </nav>
+      )}
 
       <DataSection
         confirmDelete={params.get('delete') === '1'}
