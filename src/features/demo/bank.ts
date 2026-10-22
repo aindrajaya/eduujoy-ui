@@ -23,6 +23,10 @@ interface ItemBase {
   explanation: string;
   /** A key into the bank's `sources`. */
   source: string;
+  /** Content reviewed by the user (master PRD golden-set rule); every shipped item is. */
+  reviewed: boolean;
+  /** What the result says when the answer is not correct, instead of a generic line. */
+  notCorrectFeedback?: string;
 }
 
 export type BankItem = ItemBase &

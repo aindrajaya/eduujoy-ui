@@ -3,6 +3,7 @@ import BloomChip from '@/ui/sketch/BloomChip';
 import StageBadge from '@/ui/sketch/StageBadge';
 import { BLOOMS, type Bank } from '../bank';
 import type { Confidence, DemoPlacement, Graded } from '../placement';
+import { goalLine, resourceFor, stepMinutes, timeFitLine, type DemoPrefs } from '../prefs';
 import DemoGrid from './DemoGrid';
 
 const CONFIDENCE: Record<Confidence, string> = {
@@ -11,21 +12,23 @@ const CONFIDENCE: Record<Confidence, string> = {
   low: 'The answers were mixed, so treat this placement as a first guess.',
 };
 
-function status(g: Graded): string {
+function status(g: Graded, notCorrectFeedback?: string): string {
   if (g.correct) return 'Correct';
   // "I don't know yet" is never called wrong (PRD-UI §4b learning rules).
-  return g.skipped ? 'You said you don’t know yet' : 'Not this time';
+  if (g.skipped) return 'You said you don’t know yet';
+  return notCorrectFeedback ?? 'Not this time';
 }
 
 export interface DemoResultProps {
   bank: Bank;
   placement: DemoPlacement;
   graded: readonly Graded[];
+  prefs: DemoPrefs;
   onRetake: () => void;
 }
 
 /** The demo's result (PRD-UI §7b): grid, per-level breakdown, next step, under the hood, Retake. */
-export default function DemoResult({ bank, placement, graded, onRetake }: DemoResultProps) {
+export default function DemoResult({ bank, placement, graded, prefs, onRetake }: DemoResultProps) {
   const { stage, verified, reason, confidence, promoted, levels } = placement;
   const item = (id: string) => bank.items.find((i) => i.id === id);
 
@@ -83,7 +86,7 @@ export default function DemoResult({ bank, placement, graded, onRetake }: DemoRe
                   return (
                     <details key={g.itemId} className="quiz-field p-3">
                       <summary className="cursor-pointer">
-                        <span className="font-semibold">{status(g)}:</span> {it.prompt}
+                        <span className="font-semibold">{status(g, it.notCorrectFeedback)}:</span> {it.prompt}
                       </summary>
                       <p className="mt-2">{it.explanation}</p>
                       {source && (
@@ -111,12 +114,19 @@ export default function DemoResult({ bank, placement, graded, onRetake }: DemoRe
         <h2 id="demo-next" className="sk-display-lg">
           Your next step
         </h2>
+        <p>{goalLine(prefs)}</p>
+        <p>{timeFitLine(prefs, bank.nextSteps[stage].length)}</p>
         <p>The first three steps of a path at the next stage would be:</p>
         <ol className="space-y-3">
-          {bank.nextSteps[stage].map((step) => (
-            <li key={step.title} className="sk-card flex flex-wrap items-center justify-between gap-2">
-              <span className="sk-title">{step.title}</span>
-              <BloomChip bloom={step.bloom} />
+          {bank.nextSteps[stage].map((step, n) => (
+            <li key={step.title} className="sk-card space-y-2">
+              <span className="sk-title block">{step.title}</span>
+              <span className="flex flex-wrap items-center gap-2">
+                <BloomChip bloom={step.bloom} />
+                <span className="sk-label text-sk-text-muted">
+                  {resourceFor(prefs, n)} · about {stepMinutes(prefs)} min
+                </span>
+              </span>
             </li>
           ))}
         </ol>
