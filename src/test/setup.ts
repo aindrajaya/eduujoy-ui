@@ -13,6 +13,19 @@ vi.mock('@/realtime/socket', async () => ({ openRealtimeSocket: (await import('.
 // timeouts of their own; this and testTimeout (vite.config.ts) are the only ones.
 configure({ asyncUtilTimeout: 10_000 });
 
+// jsdom has no modal <dialog>: open/close by the attribute, as browsers do for the a11y tree.
+if (typeof HTMLDialogElement.prototype.showModal !== 'function') {
+  Object.assign(HTMLDialogElement.prototype, {
+    showModal(this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    },
+    close(this: HTMLDialogElement) {
+      this.removeAttribute('open');
+      this.dispatchEvent(new Event('close'));
+    },
+  });
+}
+
 // jsdom has no pointer capture; Radix primitives (toast swipe) call it.
 Object.assign(Element.prototype, {
   hasPointerCapture: () => false,

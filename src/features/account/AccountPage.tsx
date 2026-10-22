@@ -1,8 +1,11 @@
 import { LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useSignOut, type SignInLocationState } from '@/auth/queries';
 import { useSession } from '@/auth/session';
+import CheckoutReturnNotice from '@/features/billing/components/CheckoutReturnNotice';
 import PlanCard from '@/features/billing/components/PlanCard';
+import DataSection from './components/DataSection';
 
 function initials(name: string): string {
   const letters = name
@@ -20,6 +23,9 @@ export default function AccountPage() {
   const { data: me } = useSession();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  // Remembered on arrival, so the confirmation stays after ?checkout=success is dropped.
+  const [checkoutReturn] = useState(() => params.get('checkout') === 'success');
 
   const name = me?.user.name ?? me?.user.email.split('@')[0] ?? '';
 
@@ -45,7 +51,22 @@ export default function AccountPage() {
         <p className="text-base text-text-muted">{me?.user.email}</p>
       </header>
 
+      {me && checkoutReturn && (
+        <CheckoutReturnNotice
+          me={me}
+          onActivated={() => {
+            setParams({}, { replace: true });
+          }}
+        />
+      )}
       {me && <PlanCard me={me} />}
+
+      <DataSection
+        confirmDelete={params.get('delete') === '1'}
+        onDeleteClosed={() => {
+          if (params.has('delete')) setParams({}, { replace: true });
+        }}
+      />
 
       <button
         type="button"
