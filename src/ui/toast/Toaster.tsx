@@ -22,7 +22,7 @@ export default function Toaster({ toasts }: { toasts: readonly Toast[] }) {
             onOpenChange={(open) => {
               if (!open) dismissToast(id);
             }}
-            className="flex w-full items-start gap-3 rounded-card border border-border bg-surface p-4 text-text shadow-xl data-[swipe=move]:translate-y-[var(--radix-toast-swipe-move-y)]"
+            className="flex w-full items-start gap-3 rounded-card border-2 border-ink bg-surface p-4 text-text shadow-lg data-[swipe=move]:translate-y-[var(--radix-toast-swipe-move-y)]"
           >
             <Icon className={`mt-0.5 h-5 w-5 flex-shrink-0 ${className}`} aria-hidden="true" />
             <div className="min-w-0 flex-1">

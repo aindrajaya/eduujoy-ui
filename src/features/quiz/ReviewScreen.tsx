@@ -1,3 +1,4 @@
+import { CircleAlert } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import type { ApiError } from '@/api/errors';
 import { Skeleton } from '@/ui/Skeleton';
@@ -40,7 +41,8 @@ export default function ReviewScreen({
         <ReviewList />
       </Suspense>
       {status === 'error' && error && (
-        <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+        <p role="alert" className="flex items-start gap-2 rounded-lg border-2 border-danger bg-surface p-3 text-sm text-danger">
+          <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           {describeError?.(error) ??
             (error.status === 0
               ? 'Your answers are saved on this device, but we could not reach the server. Try again.'
@@ -54,7 +56,7 @@ export default function ReviewScreen({
         type="button"
         onClick={onSubmit}
         disabled={submitting || status === 'submitted'}
-        className="min-h-11 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
+        className="sk-btn sk-btn-primary w-full"
       >
         {submitting ? 'Submitting…' : status === 'error' ? 'Try again' : submitLabel}
       </button>
