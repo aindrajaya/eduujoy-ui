@@ -34,6 +34,8 @@ export const signOutRetryDelay = (attempt: number) => 500 * 2 ** attempt;
 /** Passed to /signin in router state when logout never reached the server. */
 export interface SignInLocationState {
   signOutFailed?: boolean;
+  /** Set after DELETE /v1/me succeeded (contract 0.6.0). */
+  accountDeleted?: boolean;
 }
 
 /**

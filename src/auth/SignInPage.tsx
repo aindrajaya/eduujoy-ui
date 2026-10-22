@@ -1,6 +1,6 @@
 import { Lock, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
 import { applyFieldErrors, lazyResolver } from '@/lib/forms';
 import TextField from '@/ui/TextField';
@@ -10,7 +10,7 @@ import GoogleButton from './GoogleButton';
 import SignOutFailedNotice from './SignOutFailedNotice';
 import { safeNext } from './guards';
 import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
-import { useSignIn } from './queries';
+import { useSignIn, type SignInLocationState } from './queries';
 import type { SignInValues } from './schemas';
 
 const resolver = lazyResolver<SignInValues>(() => import('./validation').then((m) => m.signInResolver));
@@ -23,6 +23,7 @@ export default function SignInPage() {
   // Contract 0.6.0: a sensitive action (account delete) needs a fresh sign-in, so a signed-in
   // learner sent here with reauth=1 stays on the form instead of being redirected.
   const reauth = params.get('reauth') === '1';
+  const accountDeleted = (useLocation().state as SignInLocationState | null)?.accountDeleted === true;
   const signIn = useSignIn();
   useRedirectIfSignedIn(next, !reauth && (signIn.isIdle || signIn.isError));
 
@@ -54,6 +55,11 @@ export default function SignInPage() {
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue your learning path.">
       <SignOutFailedNotice />
+      {accountDeleted && (
+        <p role="status" className="mb-4 rounded-lg bg-success-soft p-3 text-sm text-success">
+          Your account and personal data have been deleted.
+        </p>
+      )}
       {reauth && (
         <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
           For your security, sign in again to delete your account.
