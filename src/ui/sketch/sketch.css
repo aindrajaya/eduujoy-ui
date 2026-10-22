@@ -145,6 +145,7 @@
   /* Stage badge: a coloured dot plus the stage name in ink (colour never carries it alone). */
   .sk-stage-badge {
     display: inline-flex;
+    white-space: nowrap;
     align-items: center;
     gap: var(--sk-space-2);
     padding: var(--sk-space-1) var(--sk-space-3);
@@ -239,5 +240,31 @@
     .sk-tab-active::before {
       inset: 0;
     }
+  }
+}
+
+@layer components {
+  /* A choice chip (checkbox or radio inside a label): pill, ink; checked thickens to primary and
+     adds a check mark, so the state never rests on colour alone (README "Hatching"). */
+  .sk-chip-option {
+    display: inline-flex;
+    align-items: center;
+    border: var(--sk-stroke-ink) solid var(--sk-text);
+    border-radius: var(--sk-radius-pill);
+    background: var(--sk-surface);
+    color: var(--sk-text);
+  }
+  .sk-chip-option:has(:checked) {
+    border-width: var(--sk-stroke-strong);
+    border-color: var(--sk-primary);
+  }
+  .sk-chip-option:has(:checked)::after {
+    content: '✓';
+    font-weight: 800;
+    color: var(--sk-primary);
+  }
+  .sk-chip-option:has(:focus-visible) {
+    outline: var(--sk-stroke-strong) dashed var(--sk-primary);
+    outline-offset: 3px;
   }
 }
