@@ -1,6 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { createHttpClient, HttpError } from './http';
+import { readBlobText } from '@/test/blob';
+import { createHttpClient, HttpError, isBlobLike } from './http';
 import { server } from './mocks/server';
 
 const BASE = 'http://http.test';
@@ -30,10 +31,21 @@ describe('createHttpClient', () => {
     const client = createHttpClient({ baseURL: BASE });
     expect((await client.delete(`/v1/me`)).data).toBeUndefined();
     expect((await client.get('/text')).data).toBe('plain');
-    expect((await client.get('/file', { responseType: 'blob' })).data).toBeInstanceOf(Blob);
+    // Duck-typed: the response Blob comes from Node's fetch, not jsdom's realm (CI on Node 22).
+    const file = (await client.get('/file', { responseType: 'blob' })).data;
+    expect(isBlobLike(file)).toBe(true);
+    expect(await readBlobText(file as Blob)).toBe('{"user":1}');
     const error = await client.get('/missing').catch((e: unknown) => e);
     expect(error).toBeInstanceOf(HttpError);
     expect(error).toMatchObject({ code: 'ERR_BAD_RESPONSE', response: { status: 404, data: { code: 'NOT_FOUND' } } });
+  });
+
+  it('recognises a Blob from any realm, and nothing else', () => {
+    expect(isBlobLike(new Blob(['x']))).toBe(true);
+    expect(isBlobLike({ size: 1, type: '', slice: () => undefined })).toBe(true);
+    for (const value of [null, 'x', { size: 1 }, { size: '1', type: '', slice: () => undefined }]) {
+      expect(isBlobLike(value)).toBe(false);
+    }
   });
 
   it('tells a timeout, a cancellation and a network failure apart', async () => {

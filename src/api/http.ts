@@ -51,6 +51,18 @@ export class HttpError extends Error {
 
 export const isHttpError = (error: unknown): error is HttpError => error instanceof HttpError;
 
+/**
+ * A Blob from any realm. `instanceof Blob` fails across realms (jsdom's Blob and Node's fetch Blob
+ * in tests, frames in browsers), so a Blob body would be JSON-encoded by mistake. Checks only what
+ * every Blob has (jsdom's has no text() or arrayBuffer()).
+ */
+export const isBlobLike = (value: unknown): value is Blob =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as Blob).size === 'number' &&
+  typeof (value as Blob).type === 'string' &&
+  typeof (value as Blob).slice === 'function';
+
 type Fulfilled<T> = (value: T) => T | Promise<T>;
 type Rejected = (error: unknown) => unknown;
 
@@ -94,7 +106,7 @@ function buildUrl(config: RequestConfig): string {
 function encodeBody(config: RequestConfig): BodyInit | undefined {
   const { data } = config;
   if (data === undefined) return undefined;
-  if (typeof data === 'string' || data instanceof Blob || data instanceof FormData) return data;
+  if (typeof data === 'string' || isBlobLike(data) || data instanceof FormData) return data;
   if (!config.headers.has('Content-Type')) config.headers.set('Content-Type', 'application/json');
   return JSON.stringify(data);
 }
