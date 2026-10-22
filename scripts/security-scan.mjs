@@ -9,7 +9,9 @@ const SELF = "scripts/security-scan.mjs";
 const MAX_LINE_LENGTH = 1000;
 
 // Files that are allowed to have long lines (generated or minified-by-nature).
-const LONG_LINE_EXEMPT = [/^package-lock\.json$/, /\.svg$/i, /\.ico$/i];
+// docs/openapi.json is the generated JSON copy of the frozen API contract (pnpm api:sync);
+// its descriptions are single JSON strings. Pattern rules still apply to it.
+const LONG_LINE_EXEMPT = [/^package-lock\.json$/, /^docs\/openapi\.json$/, /\.svg$/i, /\.ico$/i];
 
 const SUSPICIOUS = [
   { name: "global.i marker", re: /\bglobal\s*(?:\.\s*i|\[\s*["'`]i["'`]\s*\])\s*=/ },
@@ -75,7 +77,9 @@ for (const file of files) {
     for (const { name: rule, re } of SUSPICIOUS) {
       if (re.test(line)) add(file, n, rule, line);
     }
-    if (isConfig && CONFIG_NETWORK.some((re) => re.test(line))) {
+    // An ESLint no-restricted-imports entry that bans axios names the package without using it.
+    const bansAxiosImport = /^eslint\.config\./.test(name) && /^\s*paths: \[\{ name: 'axios', message: '[^']*' \}\],\s*$/.test(line);
+    if (isConfig && !bansAxiosImport && CONFIG_NETWORK.some((re) => re.test(line))) {
       add(file, n, "network access in build config", line);
     }
     if (CODE_EXT.has(ext) && ENCODED_BLOB.test(line)) {
