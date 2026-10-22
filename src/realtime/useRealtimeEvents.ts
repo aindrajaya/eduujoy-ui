@@ -22,6 +22,9 @@ export function isAuthConnectError(error: unknown): boolean {
 /** PRD-UI §5: the socket closes after 5 minutes in a hidden tab and reopens when it is shown. */
 export const HIDDEN_DISCONNECT_MS = 5 * 60_000;
 
+/** After automatic reconnection gave up, a focus or visible tab tries again at most this often. */
+export const GAVE_UP_RETRY_MS = 5 * 60_000;
+
 export interface UseRealtimeEventsOptions {
   open?: () => Promise<RealtimeSocket>;
   hiddenMs?: number;
@@ -55,6 +58,10 @@ export function useRealtimeEvents({ open = openRealtimeSocket, hiddenMs = HIDDEN
     let missedEvents = false;
     // One refresh per connection attempt cycle; a successful connect resets it.
     let refreshedForSocket = false;
+    // Set when Socket.IO stopped reconnecting (e.g. the endpoint is not live yet): retry on focus or
+    // a visible tab, at most once per GAVE_UP_RETRY_MS, never in a loop.
+    let gaveUp = false;
+    let lastManualRetry = Number.NEGATIVE_INFINITY;
 
     const ctx: RealtimeContext = {
       client,
@@ -79,8 +86,12 @@ export function useRealtimeEvents({ open = openRealtimeSocket, hiddenMs = HIDDEN
         opened.on('disconnect', () => {
           missedEvents = true;
         });
+        opened.on('reconnect_failed', () => {
+          gaveUp = true;
+        });
         opened.on('connect', () => {
           refreshedForSocket = false;
+          gaveUp = false;
           if (!missedEvents) return;
           missedEvents = false;
           // A missed entitlement.changed is recovered from auth/me.
@@ -105,20 +116,36 @@ export function useRealtimeEvents({ open = openRealtimeSocket, hiddenMs = HIDDEN
       })
       .catch(() => undefined);
 
+    const reconnectIfNeeded = () => {
+      if (!socket || socket.connected) return;
+      if (gaveUp) {
+        const now = Date.now();
+        if (now - lastManualRetry < GAVE_UP_RETRY_MS) return;
+        lastManualRetry = now;
+        gaveUp = false;
+      }
+      socket.connect();
+    };
     const onVisibility = () => {
       clearTimeout(hiddenTimer);
       if (document.hidden) {
         hiddenTimer = setTimeout(() => socket?.disconnect(), hiddenMs);
-      } else if (socket && !socket.connected) {
-        socket.connect();
+      } else {
+        reconnectIfNeeded();
       }
     };
+    const onFocus = () => {
+      // Focus only matters once reconnection gave up; a merely closed socket reopens on visibility.
+      if (gaveUp) reconnectIfNeeded();
+    };
     document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onFocus);
 
     return () => {
       cancelled = true;
       clearTimeout(hiddenTimer);
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
       socket?.disconnect();
     };
   }, [userId, client, navigate, open, hiddenMs]);

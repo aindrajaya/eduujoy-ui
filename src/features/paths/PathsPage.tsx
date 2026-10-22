@@ -5,6 +5,8 @@ import { STAGE_LABEL } from '@/lib/levels';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton } from '@/ui/Skeleton';
 import StateMessage from '@/ui/StateMessage';
+import PathBuildingSoon from './components/PathBuildingSoon';
+import { isPathBuildingClosed } from './buildingClosed';
 import { usePaths } from './pathQueries';
 
 const STATUS: Record<PathSummary['status'], string> = {
@@ -21,6 +23,9 @@ export default function PathsPage() {
   return (
     <div className="animate-fade-in p-4 md:p-6">
       <h1 className="mb-6 text-2xl font-bold text-text md:text-3xl">Your Paths</h1>
+      {isPathBuildingClosed(query.error) ? (
+        <PathBuildingSoon />
+      ) : (
       <AsyncView
         query={query}
         label="your paths"
@@ -67,6 +72,7 @@ export default function PathsPage() {
           </ul>
         )}
       </AsyncView>
+      )}
     </div>
   );
 }
