@@ -62,7 +62,7 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
   return (
     <figure className="space-y-2">
       {startS !== undefined && (
-        <p className="sk-annotation text-primary">
+        <p className="text-sm font-semibold text-primary">
           Watch {formatTimestamp(startS)}
           {endS !== undefined && endS > startS ? `–${formatTimestamp(endS)}` : ' onwards'}
         </p>
@@ -85,7 +85,7 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
               setPlaying(true);
             }}
             className="group absolute inset-0 h-full w-full"
-            aria-label={`Play video: ${title}`}
+            aria-label={`Play video on YouTube: ${title}`}
           >
             {near && (
               <img
@@ -99,6 +99,10 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
                 className="h-full w-full object-cover"
               />
             )}
+            {/* YouTube is named as the source before the tap (YouTube API services branding). */}
+            <span className="absolute right-2 bottom-2 rounded-chip border-2 border-ink bg-surface px-2 py-0.5 text-xs font-bold text-text">
+              YouTube
+            </span>
             <span className="absolute inset-0 flex items-center justify-center">
               <span className="flex h-14 w-20 items-center justify-center rounded-xl border-2 border-ink bg-surface text-text shadow-lg transition-colors group-hover:bg-primary group-hover:text-on-primary">
                 <Play className="h-7 w-7 fill-current" aria-hidden="true" />
