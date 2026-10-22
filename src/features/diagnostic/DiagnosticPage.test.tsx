@@ -113,7 +113,7 @@ describe('/diagnostic/:id (US-02)', () => {
     const { container } = renderRoute('/diagnostic/diag-1');
     await userEvent.click(await screen.findByRole('button', { name: 'Build my path' }));
     expect(await screen.findByText('Path building is coming soon. Your placement is saved.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'See your progress' })).toHaveAttribute('href', '/progress');
+    expect(screen.queryByRole('link', { name: 'See your progress' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Go to Today' })).toHaveAttribute('href', '/today');
     expect(screen.queryByRole('button', { name: 'Build my path' })).not.toBeInTheDocument();
     expect(posts).toBe(1);
