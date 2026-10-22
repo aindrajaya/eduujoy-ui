@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Eduujoy API",
-    "version": "0.7.0-v0",
+    "version": "0.8.0-v0",
     "summary": "Frozen v0 contract for the Eduujoy MVP.",
-    "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- CORS exposes `X-Request-Id` and `Retry-After` to allow-listed origins, so the UI can read\n  both on cross-origin responses (Retry-After on 429 and on 503 AI_BUDGET_EXCEEDED).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
+    "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- CORS exposes `X-Request-Id`, `Retry-After` and `Content-Disposition` to allow-listed origins,\n  so the UI can read them on cross-origin responses (Retry-After on 429 and 503;\n  Content-Disposition on the data export).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
   },
   "servers": [
     {
@@ -240,6 +240,16 @@
               "maxLength": 512,
               "pattern": "^/"
             }
+          },
+          {
+            "name": "reauth",
+            "in": "query",
+            "required": false,
+            "description": "Re-authentication for a sensitive action (DELETE /v1/me). Google is asked for a fresh\nsign-in (prompt=login, max_age=0), and the API counts the session as freshly signed in\nonly if the ID token's auth_time is within the last 10 minutes; otherwise the sign-in\nsucceeds but DELETE /v1/me still returns REAUTH_REQUIRED.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -338,6 +348,7 @@
             "description": "The export, sent as an attachment (`Content-Disposition`).",
             "headers": {
               "Content-Disposition": {
+                "description": "Attachment file name. Exposed to allow-listed origins via CORS.",
                 "schema": {
                   "type": "string"
                 }
