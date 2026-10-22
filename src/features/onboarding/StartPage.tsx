@@ -77,6 +77,19 @@ export default function StartPage() {
     }
   };
 
+  const handleCreateNew = async (intake: IntakeValues) => {
+    setError(null);
+    setFailedStep('create');
+    try {
+      const result = await resolve.mutateAsync({ text: intake.topic, createNew: true });
+      setFailedStep('start');
+      if (!result.topic) throw new ApiError({ status: 0, code: 'UNKNOWN', title: 'No topic returned' });
+      await startDiagnostic(intake, result.topic);
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error' }));
+    }
+  };
+
   if (step.name === 'splash') return <WelcomeSplash onDone={showForm} />;
 
   if (step.name === 'choices') {
@@ -84,9 +97,10 @@ export default function StartPage() {
       <TopicChoices
         typed={step.values.topic}
         choices={step.choices}
-        submitting={start.isPending}
+        submitting={resolve.isPending || start.isPending}
         errorMessage={error ? intakeErrorMessage(error, failedStep) : undefined}
         onConfirm={(topic) => void handleChoice(step.values, topic)}
+        onCreateNew={() => void handleCreateNew(step.values)}
         onEditTopic={() => {
           setError(null);
           setStep({ name: 'form' });
