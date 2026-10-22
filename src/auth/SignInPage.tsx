@@ -107,7 +107,7 @@ export default function SignInPage() {
         or
         <span className="h-px flex-1 bg-border" />
       </div>
-      <GoogleButton next={next} />
+      <GoogleButton next={next} reauth={reauth} />
 
       <p className="mt-6 text-center text-sm text-text-muted">
         New to Eduujoy?{' '}

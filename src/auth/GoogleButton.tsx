@@ -1,10 +1,10 @@
 import { googleSignInUrl } from '@/api/endpoints/auth';
 
-/** Google sign-in is a full-page redirect to the API (PRD-UI §6). */
-export default function GoogleButton({ next }: { next: string }) {
+/** Google sign-in is a full-page redirect to the API (PRD-UI §6); `reauth` asks for a fresh sign-in. */
+export default function GoogleButton({ next, reauth = false }: { next: string; reauth?: boolean }) {
   return (
     <a
-      href={googleSignInUrl(next)}
+      href={googleSignInUrl(next, reauth)}
       className="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl border-2 border-border bg-surface px-4 py-3 text-base font-semibold text-text transition-colors hover:border-text-muted"
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">

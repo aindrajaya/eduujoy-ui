@@ -67,6 +67,10 @@ describe('router', () => {
   it('lets a signed-in user sign in again when asked to (reauth=1, contract 0.6.0)', async () => {
     const { router } = renderRoute('/signin?next=%2Faccount%3Fdelete%3D1&reauth=1');
     expect(await screen.findByText('For your security, sign in again to delete your account.')).toBeInTheDocument();
+    // Contract 0.8.0: the Google option also asks for a fresh sign-in, returning to the same place.
+    const google = new URL(screen.getByRole('link', { name: /continue with google/i }).getAttribute('href') ?? '');
+    expect(google.searchParams.get('reauth')).toBe('true');
+    expect(google.searchParams.get('returnTo')).toBe('/account?delete=1');
     // Give the session time to resolve signed in; the page must not redirect.
     await screen.findByRole('heading', { name: 'Welcome back' });
     await new Promise((resolve) => setTimeout(resolve, 300));
