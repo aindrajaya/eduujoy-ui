@@ -5,6 +5,7 @@ type Listener = (...args: never[]) => void;
 /** An in-memory stand-in for the Socket.IO client; tests emit server events through it. */
 export class FakeSocket implements RealtimeSocket {
   connected = true;
+  connectCalls = 0;
   private listeners = new Map<string, Set<Listener>>();
 
   on(event: string, listener: Listener) {
@@ -15,6 +16,7 @@ export class FakeSocket implements RealtimeSocket {
   }
 
   connect() {
+    this.connectCalls += 1;
     if (!this.connected) {
       this.connected = true;
       this.serverEmit('connect');
@@ -28,6 +30,12 @@ export class FakeSocket implements RealtimeSocket {
       this.serverEmit('disconnect');
     }
     return this;
+  }
+
+  /** The server rejects the handshake (e.g. an expired access cookie): disconnected plus connect_error. */
+  rejectHandshake(error: unknown) {
+    this.connected = false;
+    this.serverEmit('connect_error', error);
   }
 
   /** Delivers an event as if the server sent it. */
