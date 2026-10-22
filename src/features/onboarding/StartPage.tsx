@@ -7,6 +7,7 @@ import IntakeForm from './components/IntakeForm';
 import TopicChoices from './components/TopicChoices';
 import WelcomeSplash from './components/WelcomeSplash';
 import { intakeErrorMessage, type IntakeStep } from './errors';
+import { selfReportFor } from './experience';
 import { useResolveTopic, useStartDiagnostic } from './queries';
 import type { IntakeValues } from './schema';
 
@@ -35,16 +36,12 @@ export default function StartPage() {
   }, []);
 
   const startDiagnostic = async (intake: IntakeValues, topic: Topic) => {
-    const selfReport =
-      intake.years === undefined && intake.projectsShipped === undefined
-        ? undefined
-        : { years: intake.years, projectsShipped: intake.projectsShipped };
     const batch = await start.mutateAsync({
       topicId: topic.id,
       goal: intake.goal,
       weeklyHours: intake.weeklyHours,
       ...(intake.formats.length > 0 ? { preferredFormats: intake.formats } : {}),
-      ...(selfReport ? { selfReport } : {}),
+      selfReport: selfReportFor(intake.experience),
     });
     await navigate(`/diagnostic/${encodeURIComponent(batch.diagnosticId)}`);
   };
