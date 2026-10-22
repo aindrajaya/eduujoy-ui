@@ -45,7 +45,7 @@ describe('the result adapts to the preference steps (UD v1)', () => {
     const { container } = render(
       <DemoResult bank={bank} placement={place(week, { years: 'none', plannedOthers: false })} graded={week} prefs={combinations[0]!} onRetake={() => undefined} />,
     );
-    expect(screen.getByText("This plan doesn't build in spacing yet:")).toBeInTheDocument();
+    expect(screen.getByText('This plan doesn’t build in spacing yet:')).toBeInTheDocument();
     expect(container).not.toHaveTextContent(/wrong/i);
   });
 
