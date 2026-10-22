@@ -53,6 +53,7 @@ export const routes: RouteObject[] = [
         id: 'protected',
         loader: ({ request }) => requireAuth(request),
         HydrateFallback: BootSplash,
+        lazy: async () => ({ Component: (await import('./app/ProtectedLayout')).default }),
         children: [
           {
             path: 'start',

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { mockMe } from '@/api/mocks/data';
@@ -6,6 +6,7 @@ import { http } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { queryClient } from '@/query-client';
 import { expectNoAxeViolations } from '@/test/axe';
+import { openedSockets } from '@/test/fakeSocket';
 import { renderRoute, mockSignedOut } from '@/test/render';
 
 describe('/account', () => {
@@ -14,6 +15,7 @@ describe('/account', () => {
     expect(await screen.findByRole('heading', { name: 'Jane Doe' })).toBeInTheDocument();
     expect(screen.getByText(mockMe.user.email)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Account' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('region', { name: 'Your plan' })).toHaveTextContent('Free');
     await expectNoAxeViolations(container);
   });
 
@@ -37,12 +39,21 @@ describe('/account', () => {
       }),
     );
     const { router } = renderRoute('/account');
-    await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+    const signOutButton = await screen.findByRole('button', { name: 'Sign out' });
+    await waitFor(
+      () => {
+        expect(openedSockets).toHaveLength(1);
+      },
+      { timeout: 3000 },
+    );
+    await userEvent.click(signOutButton);
     await screen.findByRole('heading', { name: 'Welcome back' });
     expect(loggedOut).toBe(true);
     expect(router.state.location.pathname).toBe('/signin');
     expect(router.state.historyAction).toBe('REPLACE');
     expect(queryClient.getQueryData(['auth', 'me'])).toBeNull();
+    // The realtime socket closes with the signed-in screens.
+    expect(openedSockets.at(-1)?.connected).toBe(false);
   });
 
   it('offline sign-out: clears the cache, says they may still be signed in, and offers a retry', { timeout: 10_000 }, async () => {
