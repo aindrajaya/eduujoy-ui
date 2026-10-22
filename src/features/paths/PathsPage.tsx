@@ -6,7 +6,8 @@ import AsyncView from '@/ui/AsyncView';
 import { Skeleton } from '@/ui/Skeleton';
 import StateMessage from '@/ui/StateMessage';
 import PathBuildingSoon from './components/PathBuildingSoon';
-import { isPathBuildingClosed, usePaths } from './pathQueries';
+import { isPathBuildingClosed } from './buildingClosed';
+import { usePaths } from './pathQueries';
 
 const STATUS: Record<PathSummary['status'], string> = {
   active: 'Active',

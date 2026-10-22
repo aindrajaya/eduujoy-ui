@@ -86,10 +86,3 @@ export async function prefetchActivePath(client: QueryClient): Promise<void> {
   const [summary] = await client.query(activePathsQuery());
   if (summary && summary.currentStep === undefined) await client.query(pathQuery(summary.id));
 }
-
-/**
- * Until path building ships on the API (A9), GET /v1/paths answers 404 NOT_FOUND. That is not a
- * failure the learner can retry, so the path screens say what will happen instead.
- */
-export const isPathBuildingClosed = (error: ApiError | null): boolean =>
-  error?.status === 404 && error.code === 'NOT_FOUND';

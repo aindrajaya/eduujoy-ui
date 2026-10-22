@@ -10,7 +10,8 @@ import { Skeleton, SkeletonText } from '@/ui/Skeleton';
 import StateMessage from '@/ui/StateMessage';
 import StickyActionBar from '@/ui/StickyActionBar';
 import PathBuildingSoon from './components/PathBuildingSoon';
-import { currentStep, isPathBuildingClosed, pathQuery, stepHref, useActivePaths, usePath } from './pathQueries';
+import { isPathBuildingClosed } from './buildingClosed';
+import { currentStep, pathQuery, stepHref, useActivePaths, usePath } from './pathQueries';
 
 function TodaySkeleton() {
   return (
