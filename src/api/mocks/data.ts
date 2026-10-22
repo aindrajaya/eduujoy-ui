@@ -266,20 +266,27 @@ export const mockProgress: ProgressResponse = {
       topic: mockTopic,
       position: { stage: 'advanced_beginner', bloom: 'C3' },
       confidence: 0.78,
-      source: 'diagnostic',
+      source: 'checkpoint',
       activePathId: 'path-1',
       updatedAt: '2026-10-21T08:00:00Z',
     },
   ],
 };
 
+/** Oldest first: the diagnostic placed the learner, then checkpoints moved them up (US-09). */
 export const mockProgressHistory: ProgressHistoryResponse = {
   topicId: 'topic-ux',
   items: [
     {
+      position: { stage: 'advanced_beginner', bloom: 'C2' },
+      confidence: 0.64,
+      source: 'diagnostic',
+      createdAt: '2026-10-14T08:00:00Z',
+    },
+    {
       position: { stage: 'advanced_beginner', bloom: 'C3' },
       confidence: 0.78,
-      source: 'diagnostic',
+      source: 'checkpoint',
       createdAt: '2026-10-21T08:00:00Z',
     },
   ],
