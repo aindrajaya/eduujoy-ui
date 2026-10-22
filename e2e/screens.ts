@@ -1,5 +1,17 @@
 import { expect, type Page } from '@playwright/test';
-import { mockPath, mockPathJobEvents, mockPathSummary, mockProblem, mockProgress, mockProgressHistory } from '../src/api/mocks/data';
+import {
+  mockCheckpointFailed,
+  mockDiagnosticBatch,
+  mockDiagnosticCompleted,
+  mockGradeJobEvents,
+  mockPath,
+  mockPathJobEvents,
+  mockPathSummary,
+  mockProblem,
+  mockProgress,
+  mockProgressHistory,
+  mockTopic,
+} from '../src/api/mocks/data';
 import { toEventStreamText, type MockSseEvent } from '../src/api/mocks/sse';
 import { json, mockAuth, problem } from './api';
 
@@ -57,6 +69,41 @@ async function signedInWithPath(page: Page) {
   await page.route('https://i.ytimg.com/**', (route) =>
     route.fulfill({ status: 200, contentType: 'image/svg+xml', body: THUMBNAIL }),
   );
+}
+
+const sse = (events: readonly MockSseEvent[]) => ({
+  status: 200,
+  headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' },
+  body: `: connected\n\n${toEventStreamText(events)}`,
+});
+
+async function intake(page: Page) {
+  await mockAuth(page, { signedIn: true });
+  await page.route('**/v1/topics/resolve', (route) =>
+    json(route, 200, {
+      status: 'choices',
+      choices: [
+        { id: 'java-lang', canonicalName: 'Java (programming language)', description: 'The JVM language', similarity: 0.84 },
+        { id: 'javascript', canonicalName: 'JavaScript', similarity: 0.81 },
+        { id: 'java-coffee', canonicalName: 'Java coffee', similarity: 0.76 },
+      ],
+    }),
+  );
+}
+
+async function openIntake(page: Page) {
+  await page.getByRole('button', { name: /get started/i }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Let’s get started' })).toBeVisible();
+}
+
+/** A checkpoint graded over SSE; `events` decides how far grading has got. */
+async function checkpointGraded(page: Page, events: readonly MockSseEvent[]) {
+  await signedInWithPath(page);
+  let connections = 0;
+  await page.route('**/v1/jobs/grade-1/events', (route) => {
+    connections += 1;
+    return connections > 1 ? never() : route.fulfill(sse(events));
+  });
 }
 
 const h1 = (name: string | RegExp) => async (page: Page) => {
@@ -204,6 +251,102 @@ export const SCREENS: readonly Screen[] = [
       await page.getByRole('radio').nth(1).check();
       await expect(page.getByRole('radio').nth(1)).toBeChecked();
     },
+  },
+  {
+    name: 'start-welcome',
+    parts: [3],
+    url: '/start',
+    setup: intake,
+    ready: h1('Welcome to Eduujoy'),
+  },
+  { name: 'start-intake', parts: [3], url: '/start', setup: intake, ready: openIntake },
+  {
+    name: 'start-intake-errors',
+    parts: [3],
+    url: '/start',
+    setup: intake,
+    ready: async (page) => {
+      await openIntake(page);
+      await page.getByRole('button', { name: 'Continue' }).click();
+      await expect(page.getByText('Choose the option closest to you.')).toBeVisible();
+    },
+  },
+  {
+    name: 'start-topic-choices',
+    parts: [3],
+    url: '/start',
+    setup: intake,
+    ready: async (page) => {
+      await openIntake(page);
+      await page.getByLabel('What do you want to learn?').fill('java');
+      await page.getByLabel("What's your goal?").fill('Get a backend job');
+      await page.getByRole('radio', { name: 'I’m new to this' }).check();
+      await page.getByRole('button', { name: 'Continue' }).click();
+      await page.getByRole('radio', { name: /^JavaScript/ }).check();
+      await expect(page.getByRole('heading', { level: 1, name: 'Which topic did you mean?' })).toBeVisible();
+    },
+  },
+  {
+    name: 'diagnostic-question',
+    parts: [3],
+    url: '/diagnostic/diag-1',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      await page.route('**/v1/diagnostics/diag-1', (route) =>
+        json(route, 200, { ...mockDiagnosticBatch, topic: mockTopic, createdAt: '2026-10-23T08:00:00Z', completedAt: null }),
+      );
+    },
+    ready: async (page) => {
+      await page.getByRole('radio').nth(1).check();
+      await expect(page.getByRole('progressbar', { name: 'Diagnostic progress' })).toBeVisible();
+    },
+  },
+  {
+    name: 'diagnostic-placement',
+    parts: [3],
+    url: '/diagnostic/diag-1',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      await page.route('**/v1/diagnostics/diag-1', (route) =>
+        json(route, 200, { ...mockDiagnosticCompleted, topic: mockTopic, createdAt: '2026-10-23T08:00:00Z', completedAt: '2026-10-23T08:06:00Z' }),
+      );
+    },
+    ready: async (page) => {
+      await expect(page.getByText('Diagnostic complete')).toBeVisible();
+    },
+  },
+  {
+    name: 'checkpoint-question',
+    parts: [3],
+    url: '/checkpoints/step-2?path=path-1',
+    setup: signedInWithPath,
+    ready: async (page) => {
+      await page.getByRole('radio', { name: 'Interviews' }).check();
+    },
+  },
+  {
+    name: 'checkpoint-grading',
+    parts: [3],
+    url: '/checkpoints/step-2?path=path-1&job=grade-1',
+    setup: (page) => checkpointGraded(page, (mockGradeJobEvents as unknown as MockSseEvent[]).slice(0, 2)),
+    ready: h1('Grading your answers'),
+  },
+  {
+    name: 'checkpoint-passed',
+    parts: [3],
+    url: '/checkpoints/step-2?path=path-1&job=grade-1',
+    setup: (page) => checkpointGraded(page, mockGradeJobEvents),
+    ready: h1('You passed this checkpoint'),
+  },
+  {
+    name: 'checkpoint-not-passed',
+    parts: [3],
+    url: '/checkpoints/step-2?path=path-1&job=grade-1',
+    setup: (page) =>
+      checkpointGraded(page, [
+        { id: '1', event: 'completed', data: { jobId: 'grade-1', resultRef: '/v1/checkpoints/step-2/submissions/sub-2', result: mockCheckpointFailed } },
+      ] as unknown as MockSseEvent[]),
+    ready: h1('Not passed yet'),
   },
   { name: 'progress', parts: [1, 4], url: '/progress', setup: signedInWithPath, ready: h1(/progress/i) },
   {
