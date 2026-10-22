@@ -113,6 +113,10 @@ export function toApiError(error: unknown): ApiError {
     return new ApiError({ status: 0, code: 'CANCELED', title: 'Request canceled' });
   }
 
+  if (isHttpError(error) && error.code === 'ERR_BAD_REQUEST') {
+    return new ApiError({ status: 0, code: 'UNKNOWN', title: 'Request not sent', detail: error.message });
+  }
+
   if (!isHttpError(error)) {
     const detail = error instanceof Error ? error.message : undefined;
     return new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error', detail });

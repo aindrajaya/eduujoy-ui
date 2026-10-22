@@ -108,6 +108,7 @@ describe('toApiError', () => {
 
   it('maps cancellations, plain errors and non-errors', () => {
     expect(toApiError(httpError({ code: 'ERR_CANCELED' })).code).toBe('CANCELED');
+    expect(toApiError(httpError({ code: 'ERR_BAD_REQUEST' }))).toMatchObject({ code: 'UNKNOWN', title: 'Request not sent' });
     expect(toApiError(new Error('oops'))).toMatchObject({ code: 'UNKNOWN', detail: 'oops' });
     expect(toApiError('weird')).toMatchObject({ code: 'UNKNOWN', detail: undefined });
   });

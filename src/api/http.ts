@@ -32,7 +32,7 @@ export interface HttpResponse<T = unknown> {
   config: RequestConfig;
 }
 
-export type HttpErrorCode = 'ERR_BAD_RESPONSE' | 'ERR_NETWORK' | 'ECONNABORTED' | 'ERR_CANCELED';
+export type HttpErrorCode = 'ERR_BAD_RESPONSE' | 'ERR_BAD_REQUEST' | 'ERR_NETWORK' | 'ECONNABORTED' | 'ERR_CANCELED';
 
 /** A failed request: a non-2xx response, a network failure, a timeout or a cancellation. */
 export class HttpError extends Error {
@@ -71,7 +71,16 @@ export interface HttpClient {
 function buildUrl(config: RequestConfig): string {
   const base = config.baseURL ? config.baseURL.replace(/\/$/, '') : '';
   const path = config.url ?? '';
-  const url = /^https?:\/\//.test(path) ? path : `${base}${path}`;
+  const absolute = /^[a-z][a-z\d+.-]*:/i.test(path) || path.startsWith('//');
+  // Every call goes to the API. An absolute URL is allowed only on the API's own origin, so a stray
+  // one can never carry the cookies or the CSRF header anywhere else.
+  if (absolute) {
+    const target = new URL(path, base || undefined);
+    if (!base || target.origin !== new URL(base).origin) {
+      throw new HttpError(`Refusing a request outside the API origin: ${target.origin}`, 'ERR_BAD_REQUEST', config);
+    }
+  }
+  const url = absolute ? path : `${base}${path}`;
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(config.params ?? {}) as [string, unknown][]) {
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
@@ -106,6 +115,7 @@ async function readBody(res: Response, config: RequestConfig): Promise<unknown> 
 async function dispatch(config: RequestConfig): Promise<HttpResponse> {
   // The interceptor chain is async, so the caller may have aborted before the request is sent.
   if (config.signal?.aborted) throw new HttpError('Request canceled', 'ERR_CANCELED', config);
+  const url = buildUrl(config);
   const controller = new AbortController();
   // An object, so TypeScript does not narrow the flag set inside the timer to always false.
   const state = { timedOut: false };
@@ -123,7 +133,7 @@ async function dispatch(config: RequestConfig): Promise<HttpResponse> {
   try {
     let res: Response;
     try {
-      res = await fetch(buildUrl(config), {
+      res = await fetch(url, {
         method: config.method ?? 'GET',
         headers: config.headers,
         body: encodeBody(config),
