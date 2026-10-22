@@ -38,7 +38,8 @@
   outline-offset: 3px;
 }
 
-/* Display type: headings only, never below 18px (README "Type"). */
+/* Display type: the H1 and marked headings only, never below 18px (README "Type"). Quiz prompts
+   (h2 in the shared QuestionView) stay in the body font, because learners read them closely. */
 .sketch h1,
 .sketch .sk-display-xl {
   font-family: var(--sk-font-display);
@@ -46,7 +47,6 @@
   line-height: var(--sk-display-xl-line-height);
   font-weight: var(--sk-display-xl-weight);
 }
-.sketch h2,
 .sketch .sk-display-lg {
   font-family: var(--sk-font-display);
   font-size: var(--sk-display-lg-size);

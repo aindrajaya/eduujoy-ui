@@ -112,8 +112,12 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
   it('reset forgets the attempt, so a retake starts fresh', async () => {
     const port = adapter();
     await port.start(selfReport);
+    window.localStorage.setItem('quiz:demo:demo:x:y', '{}');
+    window.localStorage.setItem('quiz:u1:diagnostic:1', '{}');
     port.reset();
     expect(port.currentId()).toBeNull();
+    expect(window.localStorage.getItem('quiz:demo:demo:x:y')).toBeNull();
+    expect(window.localStorage.getItem('quiz:u1:diagnostic:1')).toBe('{}');
   });
 
   it('counts unanswered items as skipped, never correct', async () => {
