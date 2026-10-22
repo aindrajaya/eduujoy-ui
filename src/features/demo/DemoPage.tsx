@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
+import { loadSketchFonts } from '@/ui/sketch/loadFonts';
 import '@/ui/sketch/sketch.css';
-import { preloadSketchFont } from '@/ui/sketch/preloadFont';
 import { demoAdapter } from './adapter';
 import { learningScience } from './bank';
 import DemoQuiz from './components/DemoQuiz';
@@ -8,9 +8,6 @@ import DemoResult from './components/DemoResult';
 import SelfReportForm from './components/SelfReportForm';
 import type { DemoState, LocalDiagnosticAdapter } from './localAdapter';
 import type { DemoSelfReport } from './placement';
-
-// Starts the body font with the chunk, before the first render (design-system README).
-preloadSketchFont();
 
 type View = { kind: 'intro'; starting: boolean } | { kind: 'resuming' } | { kind: 'attempt'; state: DemoState };
 
@@ -25,6 +22,8 @@ export default function DemoPage({ adapter = demoAdapter }: { adapter?: LocalDia
   const [view, setView] = useState<View>(() =>
     adapter.currentId() ? { kind: 'resuming' } : { kind: 'intro', starting: false },
   );
+
+  useEffect(() => loadSketchFonts(), []);
 
   // A reload resumes this browser's attempt; one that cannot be read starts over.
   useEffect(() => {

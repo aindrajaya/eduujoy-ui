@@ -1,7 +1,9 @@
 // Eduujoy Sketch design tokens (PRD-UI §4b) to CSS. Reads src/ui/sketch/tokens.json, a byte-for-byte
 // copy of ../docs/design-system/tokens.json, so builds never read outside ui/. Writes:
-// - src/ui/sketch/tokens.css: @font-face rules and --sk-* custom properties (light under :root, dark
+// - src/ui/sketch/tokens.css: --sk-* custom properties (light under :root, dark
 //   under [data-theme="dark"], and under prefers-color-scheme: dark when no theme is set);
+// - src/ui/sketch/fonts.css: the @font-face rules (font-display: swap). Screens load it after first
+//   paint: font requests before the first paint put both fonts on /demo's LCP path (+0.45 s measured).
 // - src/ui/sketch/theme.css: the Tailwind theme mapping (bg-sk-surface, rounded-sk-wobble-card, ...).
 // `--check` regenerates in memory and fails when a token has no variable, a generated file is stale,
 // or a contrast pair from the design-system README misses its floor in either theme.
@@ -34,16 +36,19 @@ function variables() {
 const block = (selector, entries, indent = '') =>
   `${indent}${selector} {\n${entries.map(([n, v]) => `${indent}  --sk-${n}: ${v};`).join('\n')}\n${indent}}\n`;
 
-function tokensCss() {
-  const vars = variables();
+function fontsCss() {
   const faces = tokens.type.fonts.map(
     (f) =>
       `@font-face {\n  font-family: '${f.family}';\n  src: url('./${f.file}') format('woff2');\n  font-weight: ${f.weight};\n  font-style: ${f.style};\n  font-display: swap;\n}\n`,
   );
+  return [HEADER, ...faces].join('\n');
+}
+
+function tokensCss() {
+  const vars = variables();
   const dark = [['color-scheme', 'dark'], ...vars.dark];
   return [
     HEADER,
-    ...faces,
     block(':root', [...vars.all, ['color-scheme', 'light'], ...vars.light]),
     // --sk-color-scheme is a plain variable; the scope that uses the tokens sets color-scheme from it.
     block(':root[data-theme="dark"]', dark),
@@ -110,7 +115,11 @@ function contrastFailures() {
   return failures;
 }
 
-const outputs = { [`${DIR}/tokens.css`]: tokensCss(), [`${DIR}/theme.css`]: themeCss() };
+const outputs = {
+  [`${DIR}/tokens.css`]: tokensCss(),
+  [`${DIR}/fonts.css`]: fontsCss(),
+  [`${DIR}/theme.css`]: themeCss(),
+};
 
 if (process.argv.includes('--check')) {
   const problems = [];
