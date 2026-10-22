@@ -7,6 +7,7 @@ import { server } from '@/api/mocks/server';
 import type { CheckoutRequest, Me } from '@/api/types';
 import { expectNoAxeViolations } from '@/test/axe';
 import { createTestQueryClient, withQueryClient } from '@/test/providers';
+import { readCheckoutBaseline } from '../checkoutBaseline';
 import { checkoutUrl } from '../queries';
 import PlanCard from './PlanCard';
 
@@ -41,6 +42,9 @@ describe('PlanCard (FR-23)', () => {
       expect(onCheckoutUrl).toHaveBeenCalledWith('https://eduujoy.lemonsqueezy.com/checkout/abc');
     });
     expect(body).toEqual({ product: 'subscription' });
+    // What the learner had at checkout start, for the return to compare with.
+    expect(readCheckoutBaseline(mockMe.user.id)).toMatchObject({ plan: 'free', credits: 0 });
+    window.sessionStorage.clear();
   });
 
   it('subscribers only see the credit pack', async () => {

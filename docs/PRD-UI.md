@@ -128,6 +128,96 @@ Design at 360 px wide first, then widen; every primary action sits in the thumb 
 | Colour roles | `bg`, `surface`, `text`, `text-muted`, `primary`, `success`, `warning`, `danger`, plus one colour per Dreyfus stage for the progress grid |
 | Motion | 150–200 ms ease-out; all disabled under `prefers-reduced-motion` |
 
+## 4b. Design system: hand-drawn sketch style
+
+The look follows the spirit of Excalidraw: ink lines on paper, slightly wobbly shapes, hand-lettered headings and a few marker colours. The sketch lives in the chrome (cards, buttons, badges, illustrations); content stays plain and readable, because learners spend most of their time reading SOP text and answering questions. Decided 22 Oct 2026; it replaces the existing app's visual tokens while keeping its screens.
+
+**Principles**
+
+- Sketch the frame, not the content: SOP text, quiz options, inputs, numbers and tables use the body font and straight edges.
+- Ink and paper first; colour only carries meaning (primary action, status, Dreyfus stage).
+- Zero runtime cost for the default style: borders, radii, shadows and hatching are pure CSS; `roughjs` draws only inside lazy chunks.
+- Dark mode swaps paper and ink and keeps every shape.
+- A reference, not a copy: no Excalidraw name, logo or brand colour anywhere in Eduujoy.
+
+**Typography**
+
+| Role | Font | Rules |
+| --- | --- | --- |
+| Display: H1–H3, logo wordmark, empty-state captions, annotations | Excalifont (OFL-1.1), self-hosted Latin subset | Never below 18 px; never for body, inputs, quiz options or numbers |
+| Body, UI, badges, inputs, quiz options | Nunito variable (OFL-1.1), self-hosted Latin subset | 16 px minimum; SOP prose at line height 1.6 and max width 68ch |
+| Code and typed math answers | System monospace stack | No web font in the MVP |
+
+**Colour tokens** (starting values; ratios measured against `bg`)
+
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| `bg` (paper) | `#FDFBF7` | `#121212` | Page background |
+| `surface` | `#FFFFFF` | `#1E1E1E` | Cards, sheets, dialogs |
+| `text` (ink) | `#1E1E1E` (16.1:1) | `#E9ECEF` (15.8:1) | Text, borders, shadows |
+| `text-muted` | `#5C5F66` (6.2:1) | `#ADB5BD` (9.0:1) | Secondary text |
+| `primary` | `#1971C2` (4.9:1) | `#74C0FC` (9.5:1) | Primary action, links, focus ring |
+| `success` | `#237A36` (5.2:1) | `#69DB7C` (10.7:1) | Passed, done |
+| `warning` | `#B35900` (4.7:1) | `#FFA94D` (9.8:1) | Needs attention |
+| `danger` | `#C92A2A` (5.3:1) | `#FF8787` (8.1:1) | Errors only |
+
+Button label on `primary`: white on `#1971C2` is 5.0:1; in dark mode, `#121212` on `#74C0FC` is 9.5:1.
+
+**Dreyfus stage colours** (strokes, fills and hatching only; the stage name is always written in ink beside the colour)
+
+| Stage | Light | Dark |
+| --- | --- | --- |
+| Novice | `#0C8599` (4.2:1) | `#3BC9DB` |
+| Advanced beginner | `#5C940D` (3.6:1) | `#A9E34B` |
+| Competent | `#D9480F` (4.2:1) | `#FF922B` |
+| Proficient | `#C2255C` (5.5:1) | `#F783AC` |
+| Expert | `#6741D9` (6.1:1) | `#9775FA` |
+
+Every stage colour meets the 3:1 non-text minimum (WCAG 1.4.11); the dark values range from 5.6:1 to 12.3:1 on `#121212`. None is used as text colour.
+
+**Shapes and depth**
+
+| Element | Spec |
+| --- | --- |
+| Stroke | 2 px ink; round caps on SVG lines |
+| Wobbly radius | Asymmetric elliptical `border-radius`, e.g. `255px 15px 225px 15px / 15px 225px 15px 255px` for cards; a tighter set for buttons and inputs; chips stay pill-shaped |
+| Shadow | Hard offset, no blur: `3px 3px 0 var(--text)`; the pressed state moves 2 px and drops the shadow |
+| Completed or selected | Diagonal hatching (`repeating-linear-gradient`) plus a check mark, so state never depends on colour alone |
+| Focus ring | 3 px dashed `primary`, 3 px offset, on every interactive element |
+| Icons | Stroke icons at 2 px to match the borders (e.g. Lucide) |
+
+**Where rough.js is allowed**
+
+- `roughjs` 4.6.x is about 9 KB gzip (measured on its ESM bundle). It loads only in lazy chunks: the progress grid and empty-state or onboarding illustrations.
+- Every rough shape gets a fixed `seed`, so it draws the same on every render and in screenshot tests.
+- Never for text, inputs, buttons or rows in a scrolling list. No SVG displacement filters (`feTurbulence`) on scrolling content: they are costly to paint on mid-range Android.
+
+**Components** (built in slice U12a, shown on a dev-only `/dev/ui` gallery; slice UD first builds only the ones /demo needs)
+
+`Button` (primary, secondary, ghost) · `Card` · `ResourceCard` (source label, duration, Bloom chip, "why this") · `StageBadge` · `BloomChip` (C1–C6 with its verb, e.g. "C3 Apply") · `StickyActionBar` · `BottomTabBar` and `SideRail` · `Skeleton` (same wobbly outlines; pulse off under reduced motion) · `Toast` · `EmptyState` (sketch illustration plus one action) · `QuizOption` · `YouTubeFacade` frame · `ProgressGrid`
+
+**Learning UX rules**
+
+- Diagnostic: low-stakes framing ("This sets your starting point; it is not a test"), set progress ("Set 2 of about 4"), and an "I don't know yet" option on every item so learners do not guess.
+- Steps show their Bloom chip and an estimated time; Today shows how the current step fits the learner's weekly hours.
+- A failed checkpoint reads as the next move: first what was solid, then the remedial step as the primary action. No full-screen red state.
+- SOP reading view: 68ch max width, line height 1.6, numbered actions with checkboxes, code and math blocks full width with horizontal scroll.
+- Every screen has four designed states: loading (skeleton), empty, error and success. Today also has a designed first-visit state.
+- Motion stays at 150–200 ms; sketch shapes never wiggle or redraw as decoration.
+
+**Screen designs** (Claude Design; 360 px first, then 1024 px)
+
+| Screen | States to design | Design |
+| --- | --- | --- |
+| `/steps/:id` | SOP view, video facade, resources, "why this", video unavailable | Pending |
+| `/today` | First visit, mid-path, streak | Pending |
+| `/diagnostic/:id` | Question, "I don't know yet", set progress | Pending |
+| `/paths/new/:jobId` | Staged progress, server waking up, failure | Pending |
+| `/checkpoints/:id` result | Pass, fail to remedial step, grading in progress | Pending |
+| `/progress` | Dreyfus × Bloom grid, empty, several topics | Pending |
+
+Source of truth: the [Eduujoy Sketch design system](https://claude.ai/artifact/MKjvYYMSnrR6e5AtxMWzrk) (tokens, fonts, 14 components with live previews, namespace `window.Eduujoy`). Claude Code pulls it with `/design-sync` run from `eduujoy/ui/`; slice U12a ports its tokens and primitives into `src/ui`.
+
 ## 5. Data layer
 
 Components never call the HTTP client: they call typed functions in `src/api/endpoints`, wrapped by TanStack Query hooks in each feature's `queries.ts`. Real-time events update the same query cache, so every screen reads from one source.
@@ -238,6 +328,69 @@ type QuizAction =
 - Auto-graded results come back in the response; open answers return a `jobId`, and the result screen streams the grade over SSE.
 - The submit button is disabled while `submitting`; a second tap cannot create a second attempt because the key is reused.
 
+## 7b. Public demo: Dreyfus × Bloom diagnostic
+
+/demo lets anyone take a 5-minute diagnostic without signing up and see where they sit on the Dreyfus × Bloom grid. It runs entirely in the browser on the real quiz engine, so it is both the product's first public screen and a portfolio piece (FR-26, slice UD).
+
+**Scope**
+
+- Public route outside RequireAuth: no API calls, no cookies, no third-party scripts, no model cost.
+- One topic: "Learning science for exam prep" (retrieval practice, spacing, interleaving, metacognition). It is non-clinical, evidence-based and relevant to any exam candidate. The item format is topic-agnostic, so a second topic is one more JSON file.
+- Reuses the existing quiz engine from Section 7 (built in U5, U6 and U9: QuizProvider, reducer, drafts, idempotency key) behind `DiagnosticPort`, and the Section 4b primitives. Demo-only code is limited to the item bank, the adaptive selector, placement and the result screen.
+- A `DiagnosticPort` interface with two adapters: `LocalDiagnosticAdapter` (demo; in-browser, same idempotency semantics, 300–600 ms simulated latency) and `ApiDiagnosticAdapter` (U6; `POST /v1/diagnostics/:id/answers`). Switching adapters changes no screen.
+
+**Item bank** (`src/features/demo/data/learning-science.json`)
+
+- 18 items, 3 per Bloom level. Each has `id`, `bloom`, `type`, `prompt`, `options`, `answer`, a one-line `explanation` and a `source`.
+- Every item offers "I don't know yet". It scores as not correct, and the copy never calls it wrong (Section 4b learning rules).
+- Items are hand-reviewed before shipping, following the master PRD's golden-set rule.
+
+| Bloom | Item type | Example |
+| --- | --- | --- |
+| C1 Remember | Single choice | Which definition matches retrieval practice? |
+| C2 Understand | Single choice | Why does spaced study beat one long session? |
+| C3 Apply | Scenario, single choice | Mock exam in 6 days, 2 hours a day: what do you do today? |
+| C4 Analyse | Case, single choice | A learner's log shows high scores on day 1 and low on day 7: what causes it? |
+| C5 Evaluate | Two linked single-choice questions | Pick the better of two study plans, then the reason; both must be right |
+| C6 Create | Order blocks | Arrange 8 study blocks into a 7-day plan; graded by rules: spacing gaps, interleaved topics, a retrieval session before the mock |
+
+**Adaptive flow** (8–12 items, 4 per batch, median ≤ 5 min, as US-02 requires)
+
+1. Self-report (not scored): years studying this way (none, under 1, 1–3, 3+) and whether they have ever planned someone else's study.
+2. Batch 1: one item each at C1, C2, C3 and C4.
+3. Batch 2: let b be the highest level passed in batch 1 (0 if none). Ask items at b, b+1, b+1 and b+2, clamped to C1–C6, never repeating an item.
+4. Batch 3, only when confidence is low after batch 2: up to 4 items at the unsettled levels. The total never exceeds 12.
+
+**Placement** (pure function `place(answers, selfReport)`, table-tested in Vitest)
+
+- Verified Bloom is the highest level L whose accuracy is at least 2/3 (or 1/1 when one item was asked), with every lower level that was asked at least 1/2. When nothing is verified, the result reads "Start at C1".
+- The stage comes from the master PRD Section 5 bands: L maps to the lowest stage whose band contains it, and the self-report promotes it by at most one stage.
+
+| Verified Bloom | Base stage | Promoted to | Promotion rule |
+| --- | --- | --- | --- |
+| C1 | Novice | — | — |
+| C2 | Novice | Advanced Beginner | 1+ years |
+| C3 | Advanced Beginner | Competent | 1+ years |
+| C4 | Competent | Proficient | 3+ years |
+| C5 | Proficient | Expert | 3+ years and has planned others' study |
+| C6 | Expert | — | — |
+
+- Confidence is high when the boundary level had 2 or more items and no level was passed above a failed one. It is medium with one such inversion, and low otherwise; low triggers batch 3.
+- The reason line names the evidence: "You got 3 of 3 Apply items and 1 of 3 Analyse items."
+
+**Result screen**
+
+- ProgressGrid with the visitor's cell hatched and labelled; the stage name is written in text beside its colour.
+- A per-level breakdown (asked and correct for C1–C6). Each item expands to its explanation and source.
+- "Your next step": the first 3 steps a path at the next stage would contain (static, from the JSON), each with its Bloom chip.
+- "Under the hood" (collapsed): a short architecture summary of the reducer, draft restore, idempotent submit and the adapter seam. No repository link: both repos are private (user decision, 22 Oct 2026).
+- One primary action, Retake, which starts a new attempt with a new idempotency key.
+
+**Done when**
+
+- A full run takes 8–12 items. A reload mid-quiz returns to the same question with its answers. A double tap on submit yields one result. A keyboard-only run passes and axe reports no violations.
+- The /demo route chunk is at most 60 KB gzip, with roughjs and the grid in their own lazy chunk. LCP is at most 2.5 s on /demo (Lighthouse mobile).
+
 ## 8. Video: embed, don't build a player
 
 Eduujoy owns no video, so the MVP builds no player abstraction, no content security and no watch-time tracking. It ships one lightweight YouTube embed component; the checkpoint, not minutes watched, is the progress signal.
@@ -309,7 +462,7 @@ WCAG 2.2 AA is a merge gate, and every user story in the master PRD has at least
 
 ## 11. Build plan for Claude Code
 
-Thirteen slices, worked one at a time. Each slice builds against MSW mocks generated from `openapi.json`, so UI work never waits for the matching API slice; the "Pairs with" column says when to switch a slice to the real API.
+Fourteen slices, worked one at a time. Each slice builds against MSW mocks generated from `openapi.json`, so UI work never waits for the matching API slice; the "Pairs with" column says when to switch a slice to the real API.
 
 | ID | Slice | Pairs with | Done when | Verify |
 | --- | --- | --- | --- | --- |
@@ -326,6 +479,7 @@ Thirteen slices, worked one at a time. Each slice builds against MSW mocks gener
 | U9 | Checkpoints: submission, results, remedial step UX, SSE grading | A10 | US-05 passes, including offline submit | Playwright `checkpoint.spec.ts` |
 | U10 | Progress grid, realtime socket, account and Lemon Squeezy checkout | A11, A12 | US-09 passes; second tab updates live | Playwright `progress.spec.ts` |
 | U11 | Admin: review queue and cost dashboard (lazy chunk) | A13 | Reviewer can resolve an item; learners cannot load the chunk | Playwright `admin.spec.ts` |
+| UD | Public demo (Section 7b): reuses the U5/U6 quiz engine behind DiagnosticPort with a LocalDiagnosticAdapter; first ships U12a's token and font foundation on /demo; item bank, adaptive selector, placement, result screen | — (no API) | A visitor finishes /demo in 8–12 items and lands on the grid; reload restores the attempt; a double tap on submit yields one result; keyboard-only run passes | vitest src/features/demo (selector and placement tables); Playwright demo.spec.ts with axe; size-limit; Lighthouse CI on /demo |
 
 **Starter `CLAUDE.md` for the UI repo**
 
@@ -335,7 +489,7 @@ Specs: ../docs/PRD-MASTER.md (product, wins on conflict) and docs/PRD-UI.md (imp
 API shapes come only from docs/openapi.json; refresh it with `pnpm api:sync` (copies ../api/openapi.json, regenerates types).
 - Implement exactly one slice from PRD-UI Section 11 per session; branch slice/U<n>-<name>; commit prefix `ui:`.
 - Run git, pnpm and tests from inside ui/ (separate repo).
-- Components call feature hooks in queries.ts, never axios directly.
+- Components call feature hooks in queries.ts, never call fetch directly; always use src/api.
 - No tokens or session data in localStorage; auth state comes from /v1/auth/me only.
 - Keep every route lazy; run size-limit before finishing.
 - Run the slice's Verify commands; if the PRD is ambiguous, stop and list the question.
@@ -345,7 +499,7 @@ API shapes come only from docs/openapi.json; refresh it with `pnpm api:sync` (co
 
 - [x] Build tool: the codebase is Next.js 16; it migrates to a Vite SPA in U0a (decided 21 Oct 2026).
 - [x] What to keep and what to replace: see the migration note in Section 2.
-- [ ] Brand assets (logo, colours, font) for the tokens in Section 4, or start from the existing app's design?
+- [x] Brand style: hand-drawn sketch style in the spirit of Excalidraw, restyling the existing screens (decided 22 Oct 2026); see Section 4b.
 
 ## Sources
 

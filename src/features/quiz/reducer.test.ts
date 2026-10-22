@@ -20,6 +20,15 @@ describe('COMMIT', () => {
     expect(s.answers).toEqual({ a: { optionIds: ['x'] } });
   });
 
+  it('keeps an ordered answer (C6 order blocks) and a linked pair (C5) exactly as committed', () => {
+    const s = run(
+      base(),
+      { type: 'COMMIT', questionId: 'a', answer: { optionIds: ['z', 'x', 'y'] } },
+      { type: 'COMMIT', questionId: 'b', answer: { optionIds: ['b-2', 'r-1'] } },
+    );
+    expect(s.answers).toEqual({ a: { optionIds: ['z', 'x', 'y'] }, b: { optionIds: ['b-2', 'r-1'] } });
+  });
+
   it('on the last question opens review instead of advancing', () => {
     const s = run(base(), { type: 'GO_TO', index: 2 }, { type: 'COMMIT', questionId: 'c', answer: { text: 'hi' } });
     expect(s).toMatchObject({ index: 2, status: 'reviewing' });

@@ -43,6 +43,7 @@ test.describe('onboarding (US-01)', () => {
 
     await page.getByLabel('What do you want to learn?').fill('UX research');
     await page.getByLabel("What's your goal?").fill('Run usability studies at my startup');
+    await page.getByRole('radio', { name: /^Comfortable/ }).check();
     await page.getByLabel('Hours per week').fill('6');
     await page.getByRole('checkbox', { name: 'Research papers' }).check();
     await page.getByRole('button', { name: 'Continue' }).click();
@@ -56,6 +57,7 @@ test.describe('onboarding (US-01)', () => {
         goal: 'Run usability studies at my startup',
         weeklyHours: 6,
         preferredFormats: ['video', 'text', 'papers'],
+        selfReport: { years: 3, projectsShipped: 3 },
       },
     ]);
   });
@@ -67,6 +69,7 @@ test.describe('onboarding (US-01)', () => {
 
     await page.getByLabel('What do you want to learn?').fill('java');
     await page.getByLabel("What's your goal?").fill('Get a backend job');
+    await page.getByRole('radio', { name: 'I’m new to this' }).check();
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(page.getByRole('heading', { name: 'Which topic did you mean?' })).toBeVisible();
@@ -87,6 +90,7 @@ test.describe('onboarding (US-01)', () => {
 
     await page.getByLabel('What do you want to learn?').fill('ux');
     await page.getByLabel("What's your goal?").fill('Get better');
+    await page.getByRole('radio', { name: 'I’m new to this' }).check();
     await page.getByLabel('Hours per week').fill('60');
     await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page.getByText('Between 1 and 40 hours a week')).toBeVisible();

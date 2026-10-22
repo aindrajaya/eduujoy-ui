@@ -1,14 +1,7 @@
 // zod/mini, loaded on demand by the intake form (lazyResolver). Bounds mirror the contract:
 // TopicResolveRequest.text and DiagnosticStartRequest (goal, weeklyHours, formats, selfReport).
 import { z } from 'zod/mini';
-
-const optionalNumber = (min: number, max: number, message: string, integer = false) =>
-  z.optional(
-    (integer ? z.int() : z.number()).check(
-      z.minimum(min, { error: message }),
-      z.maximum(max, { error: message }),
-    ),
-  );
+import { EXPERIENCE_VALUES } from './experience';
 
 export const intakeSchema = z.object({
   topic: z.string().check(
@@ -30,8 +23,8 @@ export const intakeSchema = z.object({
     z.array(z.enum(['video', 'text', 'papers'])),
     z.transform((formats) => [...new Set(formats)]),
   ),
-  years: optionalNumber(0, 50, 'Between 0 and 50 years'),
-  projectsShipped: optionalNumber(0, 1000, 'A whole number from 0 to 1000', true),
+  // Required single choice; it maps to DiagnosticStartRequest.selfReport (experience.ts).
+  experience: z.enum(EXPERIENCE_VALUES, { error: 'Choose the option closest to you.' }),
 });
 
 export type IntakeValues = z.infer<typeof intakeSchema>;

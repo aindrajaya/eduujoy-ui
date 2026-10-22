@@ -108,7 +108,7 @@ test.describe('account data and checkout (contract 0.6.0, 0.7.0)', () => {
     await expect(page.getByText('Payment received, activating…')).toBeVisible();
     await socket.connected;
     socket.emit('entitlement.changed', { plan: 'subscription', quota: { ...mockMe.quota, monthlyPaths: 10 } });
-    await expect(page.getByText('Payment confirmed. Your plan is updated.')).toBeVisible();
+    await expect(page.getByText('Payment confirmed: your subscription is active.')).toBeVisible();
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByRole('region', { name: 'Your plan' })).toContainText('Subscription');
   });
