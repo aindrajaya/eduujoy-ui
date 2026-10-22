@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '@/test/axe';
@@ -39,7 +39,7 @@ describe('QuizRunner', () => {
     expect(await screen.findByRole('heading', { name: 'Review your answers' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Submit answers' }));
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(onSubmitted).toHaveBeenCalledWith({ graded: true });
     });
     expect(submit).toHaveBeenCalledWith({ q1: { optionIds: ['b'] }, q2: { text: 'Because users' } }, 'key-1');
@@ -60,7 +60,7 @@ describe('QuizRunner autoSubmit', () => {
     await user.type(screen.getByRole('textbox', { name: 'Your answer' }), 'Short');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expect(screen.queryByRole('heading', { name: 'Review your answers' })).not.toBeInTheDocument();
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(submit).toHaveBeenCalledOnce();
     });
   });
