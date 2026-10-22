@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "size": "size-limit",
+    "check:chunks": "node scripts/check-staff-chunks.mjs",
     "lhci": "pnpm dlx @lhci/cli@0.15.1 autorun",
     "api:types": "node scripts/api-types.mjs",
     "api:sync": "node scripts/api-types.mjs --sync",
