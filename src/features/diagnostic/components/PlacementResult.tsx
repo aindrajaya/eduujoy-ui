@@ -69,9 +69,7 @@ export default function PlacementResult({
         <div role="status" className="space-y-3 rounded-card border-2 border-primary bg-surface p-4 text-text">
           <p className="font-semibold">Path building is coming soon. Your placement is saved.</p>
           <div className="flex flex-wrap gap-4">
-            <Link to="/progress" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
-              See your progress
-            </Link>
+            {/* "See your progress" (to /progress) returns with A11: until then /progress is empty. */}
             <Link to="/today" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
               Go to Today
             </Link>
