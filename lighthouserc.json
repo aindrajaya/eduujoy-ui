@@ -1,0 +1,71 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "pnpm exec vite preview --mode lighthouse --outDir dist-lh --port 4173 --strictPort",
+      "startServerReadyPattern": "Local",
+      "url": [
+        "http://localhost:4173/signin?mock=signed-out",
+        "http://localhost:4173/today",
+        "http://localhost:4173/steps/step-2?path=path-1"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "perf",
+        "formFactor": "mobile",
+        "throttlingMethod": "simulate",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 360,
+          "height": 740,
+          "deviceScaleFactor": 2
+        },
+        "onlyCategories": [
+          "performance",
+          "accessibility",
+          "best-practices"
+        ]
+      }
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 2500,
+            "aggregationMethod": "median"
+          }
+        ],
+        "cumulative-layout-shift": [
+          "error",
+          {
+            "maxNumericValue": 0.1,
+            "aggregationMethod": "median"
+          }
+        ],
+        "total-blocking-time": [
+          "error",
+          {
+            "maxNumericValue": 200,
+            "aggregationMethod": "median"
+          }
+        ],
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 0.95
+          }
+        ],
+        "third-party-summary": [
+          "warn",
+          {
+            "maxLength": 0
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    }
+  }
+}

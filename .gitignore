@@ -1,43 +1,32 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
+# build and test output
+dist
+dist-e2e
+dist-lh
+dist-mock
+build
+coverage
+.lighthouseci
+playwright-report
+test-results
+*.tsbuildinfo
 
-# next.js
-/.next/
-/out/
+# env files (never commit; .env.example holds public names only)
+.env
+.env.*
+!.env.example
 
-# production
-/build
+# lockfiles from other package managers
+package-lock.json
+yarn.lock
 
 # misc
 .DS_Store
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
+*.log
 .vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-/lib/generated/prisma
+.claude/settings.local.json
