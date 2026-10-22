@@ -61,6 +61,46 @@ test.describe('account data and checkout (contract 0.6.0, 0.7.0)', () => {
     expect(deleted).toBe(true);
   });
 
+  test('a Google learner deletes after a fresh Google sign-in (contract 0.8.0)', async ({ page }) => {
+    // Since the API's a3932cf, a normal Google sign-in never counts as fresh, so the first delete is
+    // always REAUTH_REQUIRED; only a reauth=true round trip (prompt=login) makes it succeed.
+    const auth = await mockAuth(page, { signedIn: true });
+    let freshGoogleSignIn = false;
+    const googleRequests: URL[] = [];
+    await page.route('**/v1/auth/google?*', (route) => {
+      const url = new URL(route.request().url());
+      googleRequests.push(url);
+      if (url.searchParams.get('reauth') === 'true') freshGoogleSignIn = true;
+      // The API (and Google) send the browser back to returnTo.
+      return route.fulfill({ status: 302, headers: { Location: url.searchParams.get('returnTo') ?? '/today' } });
+    });
+    let deletes = 0;
+    await page.route('**/v1/me', (route) => {
+      if (route.request().method() !== 'DELETE') return route.fallback();
+      deletes += 1;
+      if (!freshGoogleSignIn) return problem(route, mockProblem(401, 'REAUTH_REQUIRED', 'Sign in again'));
+      return route.fulfill({ status: 204 });
+    });
+
+    await page.goto('/account');
+    await page.getByRole('button', { name: 'Delete my account' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Delete your account?' });
+    await dialog.getByRole('button', { name: 'Delete my account' }).click();
+    await expect(page).toHaveURL(/\/signin\?next=%2Faccount%3Fdelete%3D1&reauth=1$/);
+
+    await page.getByRole('link', { name: /continue with google/i }).click();
+    await expect(page).toHaveURL(/\/account\?delete=1$/);
+    expect(googleRequests).toHaveLength(1);
+    expect(googleRequests[0]?.searchParams.get('reauth')).toBe('true');
+    expect(googleRequests[0]?.searchParams.get('returnTo')).toBe('/account?delete=1');
+
+    await expect(dialog.getByText('You signed in again. Confirm to delete your account.')).toBeVisible();
+    await dialog.getByRole('button', { name: 'Delete my account' }).click();
+    await expect(page.getByText('Your account and personal data have been deleted.')).toBeVisible();
+    expect(deletes).toBe(2);
+    expect(auth.refreshCalls).toBe(0);
+  });
+
   test('back from Lemon Squeezy, the payment shows as activating until the plan changes', async ({ page }) => {
     await mockAuth(page, { signedIn: true });
     const socket = await mockRealtime(page);
