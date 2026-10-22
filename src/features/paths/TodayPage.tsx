@@ -63,8 +63,8 @@ function TodayView({ summary, step, path }: TodayData) {
     <>
       <div className="animate-fade-in space-y-6 p-4 md:p-6">
         <header className="space-y-2">
-          <p className="font-semibold text-success">Today</p>
-          <h1 className="text-2xl font-bold text-text md:text-3xl">{summary.topic.canonicalName}</h1>
+          <p className="font-semibold text-text-muted">Today</p>
+          <h1 className="text-text md:text-3xl">{summary.topic.canonicalName}</h1>
           <div>
             <div className="mb-1 flex justify-between text-sm text-text-muted">
               <span>
@@ -82,22 +82,22 @@ function TodayView({ summary, step, path }: TodayData) {
               aria-valuemin={0}
               aria-valuemax={total}
               aria-valuenow={done}
-              className="h-2 overflow-hidden rounded-chip bg-surface-muted"
+              className="sk-meter"
             >
-              <div className="h-full bg-success" style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
+              <div style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
             </div>
           </div>
         </header>
 
         {step ? (
-          <section aria-labelledby="now-title" className="space-y-3 rounded-card bg-gradient-to-br from-indigo-600 to-indigo-800 p-5 text-white shadow-xl">
-            <p className="text-sm font-semibold text-indigo-100 uppercase">
+          <section aria-labelledby="now-title" className="sk-card space-y-3 p-5 text-text">
+            <p className="sk-label text-text-muted">
               Step {step.n} of {total}
             </p>
-            <h2 id="now-title" className="text-xl font-bold">
+            <h2 id="now-title" className="sk-display-md">
               {step.objective}
             </h2>
-            <p className="flex flex-wrap gap-3 text-sm text-indigo-100">
+            <p className="flex flex-wrap gap-3 text-sm text-text-muted">
               <span>
                 {step.bloom} · {BLOOM_LABEL[step.bloom]}
               </span>
@@ -119,7 +119,7 @@ function TodayView({ summary, step, path }: TodayData) {
 
 /** The screen's h1 while there is no path to title it (loading, empty, error). */
 function TodayTitle() {
-  return <h1 className="px-6 pt-6 text-2xl font-bold text-text md:text-3xl">Today</h1>;
+  return <h1 className="px-6 pt-6 text-text md:text-3xl">Today</h1>;
 }
 
 /** US-03 home: the active path's current step and next action (PRD-UI §3). */
@@ -150,7 +150,7 @@ export default function TodayPage() {
             action={
               <Link
                 to="/start"
-                className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 font-semibold text-on-primary"
+                className="sk-btn sk-btn-primary"
               >
                 Start a learning path
               </Link>

@@ -3,7 +3,8 @@
 // - Tailwind palette colours (bg-indigo-600, text-white, from-purple-700, ...);
 // - raw colours (#hex, rgb(), hsl()) outside the generated token files;
 // - arbitrary lengths in class names (p-[13px], min-w-[20rem]), except calc()/env()/var();
-// - the display font (Excalifont) next to a size below 18px (text-xs, text-sm, text-base).
+// - the display font (Excalifont: h1, font-display, sk-display-*, sk-annotation) below 18px, or on an
+//   element whose content holds numbers (digits, or a count, step number, minutes, score...).
 // The scope grows with each U12a part; at the end it is all of src/.
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,6 +17,9 @@ const SCOPE = [
   'src/ui',
   'src/features/quiz',
   'src/features/demo',
+  // U12a-2: Today, Paths, steps (and path generation).
+  'src/features/paths',
+  'src/features/steps',
 ];
 
 // Generated from tokens.json, or brand marks that must keep their own colours.
@@ -27,7 +31,27 @@ const PALETTE =
   /\b(?:bg|text|border|from|via|to|ring|fill|stroke|shadow|outline|accent|divide|placeholder|decoration|caret)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?\b/;
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/;
 const ARBITRARY_LENGTH = /-\[(?![^\]]*(?:calc|env|var)\()[^\]]*\d(?:px|rem|em)[^\]]*\]/;
-const SMALL_DISPLAY = /font-display[^"'`]*\btext-(?:xs|sm|base)\b|\btext-(?:xs|sm|base)\b[^"'`]*font-display/;
+const DISPLAY_CLASS = /\b(?:font-display|sk-display-(?:xl|lg|md)|sk-annotation)\b/;
+const SMALL_SIZE = /\btext-(?:xs|sm|base)\b/;
+// An opening tag set in the display font: any h1 (index.css), or a tag with a display class.
+const DISPLAY_TAG = /<(h1)\b[^>]*>|<([a-z][a-z0-9]*)\b[^>]*className=["'`{][^>]*\b(?:font-display|sk-display-(?:xl|lg|md)|sk-annotation)\b[^>]*>/g;
+// Numbers in the content: a digit in the text, or an expression that is a count, number or time.
+const NUMERIC = /(?:^|>|\s)[^<{]*\d|\{[^}]*\b(?:n|count|total|done|answered|minutes|estMinutes|score|percent|progress|length)\b[^}]*\}/;
+
+/** Display-font elements below 18px or holding numbers, found per tag (content up to its close). */
+function displayProblems(file, text) {
+  const found = [];
+  for (const match of text.matchAll(DISPLAY_TAG)) {
+    const tag = match[1] ?? match[2] ?? '';
+    const start = (match.index ?? 0) + match[0].length;
+    const end = text.indexOf(`</${tag}>`, start);
+    const content = end === -1 ? '' : text.slice(start, end);
+    const line = text.slice(0, match.index).split('\n').length;
+    if (SMALL_SIZE.test(match[0])) found.push(`${file}:${String(line)}: display font below 18px`);
+    if (NUMERIC.test(content)) found.push(`${file}:${String(line)}: display font on numbers`);
+  }
+  return found;
+}
 
 const files = (path) => {
   if (statSync(path).isFile()) return [path];
@@ -47,8 +71,11 @@ for (const file of SCOPE.flatMap(files)) {
       if (/\.tsx$|\.html$/.test(file) && ARBITRARY_LENGTH.test(line)) {
         problems.push(`${where}: raw length ${line.match(ARBITRARY_LENGTH)?.[0] ?? ''}`);
       }
-      if (SMALL_DISPLAY.test(line)) problems.push(`${where}: display font below 18px`);
+      if (DISPLAY_CLASS.test(line) && SMALL_SIZE.test(line) && !/<h1\b/.test(line)) {
+        problems.push(`${where}: display font below 18px`);
+      }
     });
+  if (/\.tsx$/.test(file)) problems.push(...displayProblems(file, readFileSync(file, 'utf8')));
 }
 
 if (problems.length) {
