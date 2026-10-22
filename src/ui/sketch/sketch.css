@@ -1,0 +1,250 @@
+/*
+ * Eduujoy Sketch primitives (PRD-UI §4b), scoped to `.sketch`. UD ships them on /demo only; the rest
+ * of the app keeps its current styles until U12a. Values come from tokens.css (generated).
+ *
+ * This file is unlayered, so its rules win over Tailwind's layered utilities: shared components
+ * (the quiz engine's QuestionView) take the sketch look inside `.sketch` without changing elsewhere.
+ */
+@import './tokens.css';
+
+.sketch {
+  color-scheme: var(--sk-color-scheme);
+  /* The app's own tokens (src/ui/tokens.css), remapped so shared components read sketch values. */
+  --bg: var(--sk-bg);
+  --surface: var(--sk-surface);
+  --surface-muted: var(--sk-surface-sunken);
+  --border: var(--sk-text);
+  --text: var(--sk-text);
+  --text-muted: var(--sk-text-muted);
+  --primary: var(--sk-primary);
+  --primary-soft: var(--sk-surface);
+  --on-primary: var(--sk-on-primary);
+  --success: var(--sk-success);
+  --warning: var(--sk-warning);
+  --warning-soft: var(--sk-surface);
+  --danger: var(--sk-danger);
+  --focus: var(--sk-primary);
+
+  min-height: 100dvh;
+  background: var(--sk-bg);
+  color: var(--sk-text);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-body-size);
+  line-height: var(--sk-body-line-height);
+}
+
+.sketch :focus-visible {
+  outline: var(--sk-stroke-strong) dashed var(--sk-primary);
+  outline-offset: 3px;
+}
+
+/* Display type: the H1 and marked headings only, never below 18px (README "Type"). Quiz prompts
+   (h2 in the shared QuestionView) stay in the body font, because learners read them closely. */
+.sketch h1,
+.sketch .sk-display-xl {
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-display-xl-size);
+  line-height: var(--sk-display-xl-line-height);
+  font-weight: var(--sk-display-xl-weight);
+}
+.sketch .sk-display-lg {
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-display-lg-size);
+  line-height: var(--sk-display-lg-line-height);
+  font-weight: var(--sk-display-lg-weight);
+}
+.sketch .sk-display-md {
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-display-md-size);
+  line-height: var(--sk-display-md-line-height);
+  font-weight: var(--sk-display-md-weight);
+}
+.sketch .sk-annotation {
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-annotation-size);
+  line-height: var(--sk-annotation-line-height);
+}
+.sketch .sk-title {
+  font-size: var(--sk-title-size);
+  line-height: var(--sk-title-line-height);
+  font-weight: var(--sk-title-weight);
+}
+.sketch .sk-label {
+  font-size: var(--sk-label-size);
+  line-height: var(--sk-label-line-height);
+  font-weight: var(--sk-label-weight);
+}
+.sketch .sk-caption {
+  font-size: var(--sk-caption-size);
+  line-height: var(--sk-caption-line-height);
+  font-weight: var(--sk-caption-weight);
+  letter-spacing: var(--sk-caption-letter-spacing);
+}
+.sketch .sk-prose {
+  max-width: 68ch;
+  line-height: var(--sk-prose-line-height);
+}
+
+/* Card */
+.sketch .sk-card {
+  background: var(--sk-surface);
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-wobble-card);
+  box-shadow: var(--sk-shadow-sketch);
+  padding: var(--sk-space-4);
+}
+
+/* Buttons: primary, secondary, ghost. 44px tap target; pressed moves 2px and drops the shadow. */
+.sketch .sk-btn,
+.sketch .quiz-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-space-2);
+  padding: 0 var(--sk-space-6);
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-wobble-control);
+  background: var(--sk-surface);
+  color: var(--sk-text);
+  font-size: var(--sk-button-size);
+  line-height: var(--sk-button-line-height);
+  font-weight: var(--sk-button-weight);
+  box-shadow: var(--sk-shadow-sketch-sm);
+  cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.sketch .sk-btn-primary,
+.sketch .quiz-action-primary {
+  background: var(--sk-primary);
+  color: var(--sk-on-primary);
+  box-shadow: var(--sk-shadow-sketch);
+}
+.sketch .sk-btn-ghost,
+.sketch .quiz-action-ghost {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.sketch .sk-btn:active,
+.sketch .quiz-action:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+.sketch .sk-btn:disabled {
+  cursor: not-allowed;
+  border-color: var(--sk-text-muted);
+  color: var(--sk-text-muted);
+  box-shadow: none;
+}
+
+/* Quiz option (native radio or checkbox inside a label). Selected: thicker stroke, hatching, check. */
+.sketch .quiz-option {
+  position: relative;
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-wobble-control);
+  background: var(--sk-surface);
+  box-shadow: var(--sk-shadow-sketch-sm);
+}
+.sketch .quiz-option:has(:checked) {
+  border-width: var(--sk-stroke-strong);
+  border-color: var(--sk-primary);
+  background: var(--sk-surface);
+}
+.sketch .quiz-option:has(:checked)::after {
+  content: '✓';
+  margin-left: auto;
+  font-weight: 800;
+  color: var(--sk-primary);
+}
+.sketch .quiz-option:has(:focus-visible) {
+  outline: var(--sk-stroke-strong) dashed var(--sk-primary);
+  outline-offset: 3px;
+}
+
+/* Text inputs and the ordering list rows share the control shape. */
+.sketch .quiz-field {
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-wobble-control);
+  background: var(--sk-surface);
+}
+
+/* Stage badge: a coloured dot plus the stage name in ink (colour never carries it alone). */
+.sketch .sk-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  padding: var(--sk-space-1) var(--sk-space-3);
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface);
+}
+.sketch .sk-stage-dot {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-radius-dot);
+  background: var(--stage);
+}
+
+/* Bloom chip: "C3 Apply". */
+.sketch .sk-bloom-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-1);
+  padding: 0 var(--sk-space-2);
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-radius-pill);
+  white-space: nowrap;
+}
+
+/* Dreyfus × Bloom grid: CSS hatching until rough.js (U12b). Hatching never sits under text. */
+.sketch .sk-grid-cell {
+  height: 40px;
+  border: var(--sk-stroke-ink) solid var(--sk-text-muted);
+  border-radius: var(--sk-wobble-control);
+}
+.sketch .sk-grid-cell[data-here] {
+  border-width: var(--sk-stroke-strong);
+  border-color: var(--sk-text);
+  background: repeating-linear-gradient(45deg, var(--stage) 0 2px, transparent 2px var(--sk-space-2));
+}
+
+/* The H1 progress bar on the quiz. */
+.sketch .sk-meter {
+  height: 12px;
+  overflow: hidden;
+  border: var(--sk-stroke-ink) solid var(--sk-text);
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface);
+}
+.sketch .sk-meter > div {
+  height: 100%;
+  background: repeating-linear-gradient(45deg, var(--sk-primary) 0 2px, transparent 2px var(--sk-space-2));
+}
+
+.sketch [data-stage='novice'] {
+  --stage: var(--sk-stage-novice);
+}
+.sketch [data-stage='advanced_beginner'] {
+  --stage: var(--sk-stage-advanced-beginner);
+}
+.sketch [data-stage='competent'] {
+  --stage: var(--sk-stage-competent);
+}
+.sketch [data-stage='proficient'] {
+  --stage: var(--sk-stage-proficient);
+}
+.sketch [data-stage='expert'] {
+  --stage: var(--sk-stage-expert);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sketch .sk-btn,
+  .sketch .quiz-action {
+    transition: none;
+  }
+}

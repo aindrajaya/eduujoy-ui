@@ -2,6 +2,8 @@ import type { ApiError } from '@/api/errors';
 import type { Me } from '@/api/types';
 import { formatRetryWait } from '@/lib/time';
 import { useId, useState } from 'react';
+import { saveCheckoutBaseline } from '../checkoutBaseline';
+import { planSummary } from '../planSummary';
 import { MAX_CREDIT_PACKS, useCheckout, type CheckoutProduct } from '../queries';
 
 // Billing periods end at a UTC instant; show that day, not the viewer's local one.
@@ -50,6 +52,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
           {plan === 'subscription' ? 'Subscription' : 'Free'}
         </span>
       </div>
+      <p className="font-semibold text-text">{planSummary(plan, quota.credits)}</p>
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg bg-surface-muted p-3">
           <dt className="text-text-muted">Paths left this month</dt>
@@ -69,6 +72,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
           <button
             type="button"
             onClick={() => {
+              saveCheckoutBaseline(me);
               checkout.mutate({ product: 'subscription' });
             }}
             disabled={checkout.isPending}
@@ -102,6 +106,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
           <button
             type="button"
             onClick={() => {
+              saveCheckoutBaseline(me);
               checkout.mutate({ product: 'credit_pack', quantity: packs });
             }}
             disabled={checkout.isPending}

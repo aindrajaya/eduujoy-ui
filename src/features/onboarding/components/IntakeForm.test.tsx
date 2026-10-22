@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/api/errors';
@@ -39,14 +39,36 @@ describe('IntakeForm', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('submits typed values, formats and optional experience', async () => {
+  it('cannot be submitted without an experience choice; the group explains why', async () => {
+    const onSubmit = vi.fn();
+    const { container } = render(<IntakeForm onSubmit={onSubmit} />);
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('What do you want to learn?'), 'SQL');
+    await user.type(screen.getByLabelText("What's your goal?"), 'Write my own reports');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    const group = screen.getByRole('group', { name: 'How much have you worked with SQL?' });
+    await waitFor(() => {
+      expect(group).toHaveAccessibleDescription(
+        'This only sets where the questions start; your answers decide your level. Choose the option closest to you.',
+      );
+    });
+    expect(onSubmit).not.toHaveBeenCalled();
+    // The new-to-this option comes first; arrow keys move within the group.
+    const radios = within(group).getAllByRole('radio');
+    expect(radios[0]).toHaveAccessibleName('I’m new to this');
+    radios[0]?.focus();
+    await user.keyboard('{ArrowDown}');
+    expect(radios[1]).toBeChecked();
+    await expectNoAxeViolations(container);
+  });
+
+  it('submits typed values, formats and the experience choice', async () => {
     const onSubmit = vi.fn();
     render(<IntakeForm onSubmit={onSubmit} />);
     const user = await fillValid();
     await user.click(screen.getByRole('checkbox', { name: 'Videos' }));
     await user.click(screen.getByRole('checkbox', { name: 'Research papers' }));
-    await user.click(screen.getByText('Add your experience (optional)'));
-    await user.type(screen.getByLabelText('Years of experience'), '2');
+    await user.click(screen.getByRole('radio', { name: 'Comfortable: a few years or several projects' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledOnce();
@@ -56,8 +78,7 @@ describe('IntakeForm', () => {
       goal: 'Run usability studies',
       weeklyHours: 3,
       formats: ['text', 'papers'],
-      years: 2,
-      projectsShipped: undefined,
+      experience: 'comfortable',
     });
   });
 

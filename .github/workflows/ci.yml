@@ -32,6 +32,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: API types match docs/openapi.json
         run: pnpm api:types --check
+      - name: Design tokens are generated, covered and meet contrast (PRD-UI §4b)
+        run: pnpm check:tokens
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test:coverage
