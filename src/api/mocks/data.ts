@@ -14,6 +14,7 @@ import type {
   ProblemCode,
   ProgressHistoryResponse,
   ProgressResponse,
+  ReviewItem,
   ReviewQueueResponse,
   Topic,
   TopicResolveResponse,
@@ -292,20 +293,52 @@ export const mockProgressHistory: ProgressHistoryResponse = {
   ],
 };
 
+/** Open items of each kind, newest first, plus one already resolved (FR-24). */
+export const mockReviewItems: ReviewItem[] = [
+  {
+    id: 'review-1',
+    kind: 'resource',
+    targetId: 'res-2-yt',
+    reason: 'Learner flagged: video is region-locked',
+    detail: { title: 'User research methods explained', url: 'https://www.youtube.com/watch?v=Fj-2tVw0d1g' },
+    status: 'open',
+    resolution: null,
+    createdAt: '2026-10-21T09:00:00Z',
+  },
+  {
+    id: 'review-2',
+    kind: 'diagnostic_item',
+    targetId: 'q-17',
+    reason: 'Low confidence: 41% of learners at C3 missed it',
+    detail: { prompt: 'Which method answers "why" questions best?', bloom: 'C3' },
+    status: 'open',
+    resolution: null,
+    createdAt: '2026-10-21T08:30:00Z',
+  },
+  {
+    id: 'review-3',
+    kind: 'learner_report',
+    targetId: 'path-1',
+    reason: 'Step 4 repeats step 2',
+    status: 'open',
+    resolution: null,
+    createdAt: '2026-10-20T17:10:00Z',
+  },
+  {
+    id: 'review-0',
+    kind: 'path',
+    targetId: 'path-0',
+    reason: 'Validator: two steps share a resource',
+    status: 'resolved',
+    resolution: 'approved',
+    createdAt: '2026-10-19T10:00:00Z',
+  },
+];
+
 export const mockReviewQueue: ReviewQueueResponse = {
-  openCount: 1,
+  openCount: mockReviewItems.filter((i) => i.status === 'open').length,
   nextCursor: null,
-  items: [
-    {
-      id: 'review-1',
-      kind: 'resource',
-      targetId: 'res-2-yt',
-      reason: 'Learner flagged: video is region-locked',
-      status: 'open',
-      resolution: null,
-      createdAt: '2026-10-21T09:00:00Z',
-    },
-  ],
+  items: mockReviewItems.filter((i) => i.status === 'open'),
 };
 
 export const mockCostMetrics: CostMetricsResponse = {
@@ -338,7 +371,10 @@ export const mockCostMetrics: CostMetricsResponse = {
 export const mockLatencyMetrics: LatencyMetricsResponse = {
   from: '2026-10-01',
   to: '2026-10-21',
-  rows: [{ stage: 'design', model: 'claude-sonnet-5-5', count: 40, p50Ms: 8_200, p95Ms: 19_500 }],
+  rows: [
+    { stage: 'design', model: 'claude-sonnet-5-5', count: 40, p50Ms: 8_200, p95Ms: 19_500, errorRate: 0.025 },
+    { stage: 'discover', model: 'gemini-embedding', count: 200, p50Ms: 310, p95Ms: 900, errorRate: 0 },
+  ],
 };
 
 /** Builds a problem+json body the way the API's filter does. */
