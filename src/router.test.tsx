@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { mockProblem } from './api/mocks/data';
 import { http, problemResponse } from './api/mocks/handlers';
@@ -61,6 +62,22 @@ describe('router', () => {
     release();
     mockSignedOut();
     await screen.findByRole('heading', { name: 'Welcome back' });
+  });
+
+  it('lets a signed-in user sign in again when asked to (reauth=1, contract 0.6.0)', async () => {
+    const { router } = renderRoute('/signin?next=%2Faccount%3Fdelete%3D1&reauth=1');
+    expect(await screen.findByText('For your security, sign in again to delete your account.')).toBeInTheDocument();
+    // Give the session time to resolve signed in; the page must not redirect.
+    await screen.findByRole('heading', { name: 'Welcome back' });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(router.state.location.pathname).toBe('/signin');
+
+    await userEvent.type(screen.getByLabelText('Email'), 'jane.doe@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'correct-horse-battery');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname + router.state.location.search).toBe('/account?delete=1');
+    });
   });
 
   it('keeps signed-in users away from /signin', async () => {

@@ -96,6 +96,11 @@ export function installInterceptors(instance: AxiosInstance, options: Intercepto
 
     if (error.response?.status !== 401 || skipsRefresh(original.url)) throw toApiError(error);
 
+    // Contract 0.6.0: REAUTH_REQUIRED (DELETE /v1/me) asks for a fresh sign-in. A refresh would keep
+    // the old sign-in time and could never satisfy it, so the caller sends the learner to /signin.
+    const problem = toApiError(error);
+    if (problem.code === 'REAUTH_REQUIRED') throw problem;
+
     // A 401 on the replay after a refresh means the session is gone: treat it as signed out.
     if (original._retried) {
       const apiError = toApiError(error);

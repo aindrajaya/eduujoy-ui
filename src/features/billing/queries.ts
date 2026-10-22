@@ -34,9 +34,19 @@ const leaveFor = (url: string) => {
   window.location.assign(url);
 };
 
+/** Contract 0.7.0: credit packs can be bought 1–10 at a time. */
+export const MAX_CREDIT_PACKS = 10;
+
+export interface CheckoutVars {
+  product: CheckoutProduct;
+  /** Credit packs only; never sent with a subscription (the API answers 400). */
+  quantity?: number;
+}
+
 export function useCheckout(go: (url: string) => void = leaveFor) {
-  return useMutation<string, ApiError, CheckoutProduct>({
-    mutationFn: async (product) => checkoutUrl((await createCheckout({ product })).url),
+  return useMutation<string, ApiError, CheckoutVars>({
+    mutationFn: async ({ product, quantity }) =>
+      checkoutUrl((await createCheckout(product === 'credit_pack' && quantity ? { product, quantity } : { product })).url),
     onSuccess: (url) => {
       go(url);
     },
