@@ -25,9 +25,30 @@ const THUMBNAIL = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="2
 <rect x="250" y="70" width="190" height="20" fill="#c9d3dc"/><rect x="250" y="110" width="150" height="14" fill="#c9d3dc"/>
 <rect x="250" y="140" width="170" height="14" fill="#c9d3dc"/></svg>`;
 
+/** The paths list: the active mock path, a completed one and one being checked. */
+const PATH_LIST = [
+  mockPathSummary,
+  {
+    ...mockPathSummary,
+    id: 'path-2',
+    status: 'completed' as const,
+    topic: { ...mockPathSummary.topic, id: 'sql-basics', canonicalName: 'SQL for analysts' },
+    stepsDone: 6,
+    stepsTotal: 6,
+  },
+  {
+    ...mockPathSummary,
+    id: 'path-3',
+    status: 'under_review' as const,
+    topic: { ...mockPathSummary.topic, id: 'public-speaking', canonicalName: 'Public speaking' },
+    stepsDone: 0,
+  },
+];
+
 async function signedInWithPath(page: Page) {
   await mockAuth(page, { signedIn: true });
   await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [mockPathSummary], nextCursor: null }));
+  await page.route('**/v1/paths', (route) => json(route, 200, { items: PATH_LIST, nextCursor: null }));
   await page.route('**/v1/paths/path-1', (route) => json(route, 200, mockPath));
   await page.route('**/v1/steps/*', (route) => json(route, 200, mockPath.steps[1]));
   await page.route('**/v1/progress', (route) => json(route, 200, mockProgress));
@@ -91,8 +112,37 @@ export const SCREENS: readonly Screen[] = [
       await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
     },
   },
-  { name: 'paths', parts: [1, 2], url: '/paths', setup: signedInWithPath, ready: h1(/paths/i) },
-  { name: 'path', parts: [2], url: '/paths/path-1', setup: signedInWithPath, ready: h1(mockPath.topic.canonicalName) },
+  {
+    name: 'paths',
+    parts: [1, 2],
+    url: '/paths',
+    setup: signedInWithPath,
+    ready: async (page) => {
+      await expect(page.getByRole('link', { name: /Public speaking/ })).toBeVisible();
+    },
+  },
+  {
+    name: 'paths-empty',
+    parts: [2],
+    url: '/paths',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      await page.route('**/v1/paths', (route) => json(route, 200, { items: [], nextCursor: null }));
+    },
+    ready: async (page) => {
+      await expect(page.getByText('No paths yet')).toBeVisible();
+    },
+  },
+  {
+    name: 'path',
+    parts: [2],
+    url: '/paths/path-1',
+    setup: signedInWithPath,
+    ready: async (page) => {
+      await expect(page.getByRole('heading', { level: 1, name: mockPath.topic.canonicalName })).toBeVisible();
+      await expect(page.getByRole('region', { name: 'Steps' }).getByRole('listitem')).toHaveCount(6);
+    },
+  },
   {
     name: 'today-empty',
     parts: [2],
