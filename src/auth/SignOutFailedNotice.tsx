@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router';
+import Notice from '@/ui/Notice';
 import { useSignOut, type SignInLocationState } from './queries';
 
 /**
@@ -13,14 +14,14 @@ export default function SignOutFailedNotice() {
 
   if (signOut.isSuccess) {
     return (
-      <p role="status" className="mb-4 rounded-lg bg-success-soft p-3 text-sm text-success">
+      <Notice tone="success" role="status" className="mb-4">
         You are signed out.
-      </p>
+      </Notice>
     );
   }
 
   return (
-    <div role="alert" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
+    <Notice tone="warning" role="alert" className="mb-4">
       <p>We couldn&apos;t reach the server. You may still be signed in on this device.</p>
       <button
         type="button"
@@ -32,6 +33,6 @@ export default function SignOutFailedNotice() {
       >
         {signOut.isPending ? 'Signing out…' : 'Try signing out again'}
       </button>
-    </div>
+    </Notice>
   );
 }
