@@ -1,5 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -63,6 +63,26 @@ describe('SignInPage', () => {
     expect(await screen.findByText('Enter your email address')).toBeInTheDocument();
     expect(screen.getByText('Enter your password')).toBeInTheDocument();
     await expectNoAxeViolations(container);
+  });
+
+  it('focuses the first invalid field, then re-validates while typing', async () => {
+    renderSignIn();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    const email = screen.getByLabelText('Email');
+    await waitFor(() => {
+      expect(email).toHaveFocus();
+    });
+    expect(email).toHaveAccessibleDescription('Enter your email address');
+    await user.type(email, 'not-an-email');
+    await waitFor(() => {
+      expect(email).toHaveAccessibleDescription('Enter a valid email address');
+    });
+    await user.type(email, '@example.com');
+    await waitFor(() => {
+      expect(email).not.toHaveAccessibleDescription();
+    });
+    expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Enter your password');
   });
 
   it('signs in, caches the session and goes to next', async () => {

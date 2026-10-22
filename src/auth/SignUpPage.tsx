@@ -1,8 +1,6 @@
 import { Lock, Mail, User } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
-import { applyFieldErrors, lazyResolver } from '@/lib/forms';
 import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
@@ -11,11 +9,13 @@ import { HOME, safeNext } from './guards';
 import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
 import { useSignUp } from './queries';
 import type { SignUpValues } from './schemas';
+import { useAuthForm } from './useAuthForm';
 
 // New accounts start onboarding unless they arrived with a specific destination.
 const NEW_ACCOUNT_HOME = '/start';
 
-const resolver = lazyResolver<SignUpValues>(() => import('./validation').then((m) => m.signUpResolver));
+const FIELDS = ['name', 'email', 'password'] as const;
+const loadValidator = () => import('./validation').then((m) => m.validateSignUp);
 
 export default function SignUpPage() {
   const [params] = useSearchParams();
@@ -26,43 +26,33 @@ export default function SignUpPage() {
   // Already signed in: go to next or Today. A fresh account goes to `next` or onboarding instead.
   useRedirectIfSignedIn(rawNext ? next : HOME, signUp.isIdle || signUp.isError);
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<SignUpValues>({
-    resolver,
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
-    defaultValues: { name: '', email: '', password: '' },
-  });
+  const form = useAuthForm<SignUpValues>(FIELDS, loadValidator);
 
-  const onSubmit = handleSubmit(async ({ name, ...rest }) => {
+  const onSubmit = form.handleSubmit(async ({ name, ...rest }) => {
     try {
       await signUp.mutateAsync(name ? { ...rest, name } : rest);
       await navigate(next, { replace: true });
     } catch (error) {
-      applyFieldErrors(error as ApiError, ['name', 'email', 'password'], setError);
+      form.applyServerErrors(error as ApiError);
     }
   });
 
   const formError = signUp.error && authErrorMessage(signUp.error, 'signup');
-  const busy = isSubmitting || signUp.isPending;
+  const busy = form.submitting || signUp.isPending;
   const query = rawNext ? `?next=${encodeURIComponent(next)}` : '';
 
   return (
     <AuthLayout title="Create your account" subtitle="Start a learning path grounded in the best free resources.">
-      <form onSubmit={(e) => void onSubmit(e)} onFocus={resolver.preload} noValidate className="space-y-5">
-        <TextField label="Name (optional)" icon={User} autoComplete="name" error={errors.name?.message} {...register('name')} />
+      <form onSubmit={(e) => void onSubmit(e)} onFocus={form.preload} noValidate className="space-y-5">
+        <TextField label="Name (optional)" icon={User} autoComplete="name" error={form.errors.name} {...form.field('name')} />
         <TextField
           label="Email"
           icon={Mail}
           type="email"
           autoComplete="email"
           inputMode="email"
-          error={errors.email?.message}
-          {...register('email')}
+          error={form.errors.email}
+          {...form.field('email')}
         />
         <TextField
           label="Password"
@@ -70,8 +60,8 @@ export default function SignUpPage() {
           type="password"
           autoComplete="new-password"
           hint="At least 10 characters."
-          error={errors.password?.message}
-          {...register('password')}
+          error={form.errors.password}
+          {...form.field('password')}
         />
         {formError && (
           <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">

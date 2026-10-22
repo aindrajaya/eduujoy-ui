@@ -1,8 +1,6 @@
 import { Lock, Mail } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
-import { applyFieldErrors, lazyResolver } from '@/lib/forms';
 import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
@@ -12,8 +10,10 @@ import { safeNext } from './guards';
 import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
 import { useSignIn, type SignInLocationState } from './queries';
 import type { SignInValues } from './schemas';
+import { useAuthForm } from './useAuthForm';
 
-const resolver = lazyResolver<SignInValues>(() => import('./validation').then((m) => m.signInResolver));
+const FIELDS = ['email', 'password'] as const;
+const loadValidator = () => import('./validation').then((m) => m.validateSignIn);
 
 export default function SignInPage() {
   const [params] = useSearchParams();
@@ -27,29 +27,19 @@ export default function SignInPage() {
   const signIn = useSignIn();
   useRedirectIfSignedIn(next, !reauth && (signIn.isIdle || signIn.isError));
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<SignInValues>({
-    resolver,
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
-    defaultValues: { email: '', password: '' },
-  });
+  const form = useAuthForm<SignInValues>(FIELDS, loadValidator);
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit = form.handleSubmit(async (values) => {
     try {
       await signIn.mutateAsync(values);
       await navigate(next, { replace: true });
     } catch (error) {
-      applyFieldErrors(error as ApiError, ['email', 'password'], setError);
+      form.applyServerErrors(error as ApiError);
     }
   });
 
   const formError = signIn.error && authErrorMessage(signIn.error, 'signin');
-  const busy = isSubmitting || signIn.isPending;
+  const busy = form.submitting || signIn.isPending;
   const query = params.get('next') ? `?next=${encodeURIComponent(next)}` : '';
 
   return (
@@ -70,23 +60,23 @@ export default function SignInPage() {
           Your session expired. Sign in again to continue.
         </p>
       )}
-      <form onSubmit={(e) => void onSubmit(e)} onFocus={resolver.preload} noValidate className="space-y-5">
+      <form onSubmit={(e) => void onSubmit(e)} onFocus={form.preload} noValidate className="space-y-5">
         <TextField
           label="Email"
           icon={Mail}
           type="email"
           autoComplete="email"
           inputMode="email"
-          error={errors.email?.message}
-          {...register('email')}
+          error={form.errors.email}
+          {...form.field('email')}
         />
         <TextField
           label="Password"
           icon={Lock}
           type="password"
           autoComplete="current-password"
-          error={errors.password?.message}
-          {...register('password')}
+          error={form.errors.password}
+          {...form.field('password')}
         />
         {formError && (
           <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
