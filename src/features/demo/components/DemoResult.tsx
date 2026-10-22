@@ -12,10 +12,11 @@ const CONFIDENCE: Record<Confidence, string> = {
   low: 'The answers were mixed, so treat this placement as a first guess.',
 };
 
-function status(g: Graded): string {
+function status(g: Graded, notCorrectFeedback?: string): string {
   if (g.correct) return 'Correct';
   // "I don't know yet" is never called wrong (PRD-UI §4b learning rules).
-  return g.skipped ? 'You said you don’t know yet' : 'Not this time';
+  if (g.skipped) return 'You said you don’t know yet';
+  return notCorrectFeedback ?? 'Not this time';
 }
 
 export interface DemoResultProps {
@@ -85,7 +86,7 @@ export default function DemoResult({ bank, placement, graded, prefs, onRetake }:
                   return (
                     <details key={g.itemId} className="quiz-field p-3">
                       <summary className="cursor-pointer">
-                        <span className="font-semibold">{status(g)}:</span> {it.prompt}
+                        <span className="font-semibold">{status(g, it.notCorrectFeedback)}:</span> {it.prompt}
                       </summary>
                       <p className="mt-2">{it.explanation}</p>
                       {source && (

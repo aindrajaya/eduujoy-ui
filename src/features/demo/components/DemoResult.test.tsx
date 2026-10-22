@@ -40,6 +40,15 @@ describe('the result adapts to the preference steps (UD v1)', () => {
     unmount();
   });
 
+  it('a C6 week plan that is not correct gets the spacing feedback, never "wrong"', () => {
+    const week: Graded[] = [...graded, { itemId: 'c6-week-plan', bloom: 'C6', correct: false, skipped: false }];
+    const { container } = render(
+      <DemoResult bank={bank} placement={place(week, { years: 'none', plannedOthers: false })} graded={week} prefs={combinations[0]!} onRetake={() => undefined} />,
+    );
+    expect(screen.getByText('This plan doesn’t build in spacing yet:')).toBeInTheDocument();
+    expect(container).not.toHaveTextContent(/wrong/i);
+  });
+
   it('has no axe violations', async () => {
     const { container } = render(
       <DemoResult bank={bank} placement={placement} graded={graded} prefs={combinations[0]!} onRetake={() => undefined} />,
