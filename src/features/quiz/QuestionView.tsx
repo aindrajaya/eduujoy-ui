@@ -119,7 +119,7 @@ function QuestionView({
           onClick={() => {
             onToggleFlag(question.id);
           }}
-          className={`quiz-action quiz-action-ghost flex min-h-11 items-center gap-2 rounded-control px-3 text-sm font-semibold ${
+          className={`sk-btn sk-btn-ghost px-3 text-sm ${
             flagged ? 'bg-warning-soft text-warning' : 'text-text-muted hover:text-text'
           }`}
         >
@@ -142,7 +142,7 @@ function QuestionView({
               {part.options.map((option) => (
                 <label
                   key={option.id}
-                  className="quiz-option flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-border p-4 has-checked:border-primary has-checked:bg-primary-soft"
+                  className="quiz-option flex min-h-11 cursor-pointer items-center gap-3 p-4"
                 >
                   <input type="radio" value={option.id} className="h-4 w-4 accent-primary" {...register(`parts.${i}`)} />
                   <span className="text-base text-text">{option.label}</span>
@@ -157,7 +157,7 @@ function QuestionView({
             {(question.options ?? []).map((option) => (
               <label
                 key={option.id}
-                className="quiz-option flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-border p-4 has-checked:border-primary has-checked:bg-primary-soft"
+                className="quiz-option flex min-h-11 cursor-pointer items-center gap-3 p-4"
               >
                 <input
                   type={multi ? 'checkbox' : 'radio'}
@@ -180,7 +180,7 @@ function QuestionView({
             rows={question.kind === 'open' ? 8 : 4}
             onKeyDown={onTextKeyDown}
             aria-describedby={error ? errorId : `${promptId}-hint`}
-            className="quiz-field w-full rounded-xl border-2 border-border bg-surface p-4 text-base text-text focus:border-primary focus:ring-2 focus:ring-focus/40 focus:outline-none"
+            className="quiz-field w-full p-4 text-base text-text"
             {...register('text')}
           />
           <p id={`${promptId}-hint`} className="mt-1 text-sm text-text-muted">
@@ -200,7 +200,7 @@ function QuestionView({
           <button
             type="button"
             onClick={onBack}
-            className="quiz-action min-h-11 rounded-xl border-2 border-border px-5 font-semibold text-text"
+            className="sk-btn"
           >
             Back
           </button>
@@ -211,14 +211,14 @@ function QuestionView({
             onClick={() => {
               onCommit(question.id, { skipped: true });
             }}
-            className="quiz-action quiz-action-ghost min-h-11 rounded-xl px-5 font-semibold text-text-muted hover:text-text"
+            className="sk-btn sk-btn-ghost text-text-muted hover:text-text"
           >
             {skipLabel}
           </button>
         )}
         <button
           type="submit"
-          className="quiz-action quiz-action-primary ml-auto min-h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 font-bold text-white shadow-lg"
+          className="sk-btn sk-btn-primary ml-auto"
         >
           {position === total ? finalLabel : 'Next'}
         </button>

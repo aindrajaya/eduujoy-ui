@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { loadSketchFonts } from '@/ui/sketch/loadFonts';
-import '@/ui/sketch/sketch.css';
 import { demoAdapter } from './adapter';
 import { learningScience } from './bank';
 import DemoQuiz from './components/DemoQuiz';

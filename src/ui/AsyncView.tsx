@@ -44,7 +44,7 @@ export default function AsyncView<T>({ query, label, skeleton, isEmpty, empty, c
             type="button"
             disabled={query.isRefetching}
             onClick={() => void query.refetch()}
-            className="min-h-11 rounded-xl bg-primary px-5 font-semibold text-on-primary disabled:opacity-60"
+            className="sk-btn sk-btn-primary"
           >
             {query.isRefetching ? 'Retrying…' : 'Try again'}
           </button>

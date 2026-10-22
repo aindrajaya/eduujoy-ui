@@ -19,7 +19,7 @@ describe('YouTubeEmbed', () => {
 
   it('a tap loads the nocookie player at the segment with a limited allow list', async () => {
     const { container } = render(<YouTubeEmbed videoId="Fj-2tVw0d1g" title="User research methods" start="4:10" end="7:45" />);
-    await userEvent.click(screen.getByRole('button', { name: 'Play video: User research methods' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Play video on YouTube: User research methods' }));
     const iframe = container.querySelector('iframe');
     expect(iframe).not.toBeNull();
     const src = new URL(iframe?.getAttribute('src') ?? '');
@@ -57,7 +57,7 @@ describe('YouTubeEmbed', () => {
       const { container } = render(<YouTubeEmbed videoId="Fj-2tVw0d1g" title="User research methods" />);
       expect(observe).toHaveBeenCalledOnce();
       expect(container.querySelector('img')).toBeNull();
-      expect(screen.getByRole('button', { name: 'Play video: User research methods' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Play video on YouTube: User research methods' })).toBeInTheDocument();
       act(() => {
         notify([{ isIntersecting: true }]);
       });
