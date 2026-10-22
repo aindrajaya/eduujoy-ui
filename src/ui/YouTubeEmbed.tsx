@@ -1,5 +1,5 @@
 import { Play } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { formatTimestamp, parseTimestamp } from '@/lib/time';
 
 export interface YouTubeEmbedProps {
@@ -14,12 +14,42 @@ export interface YouTubeEmbedProps {
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 
 /**
+ * True once the element is within `margin` of the viewport. The thumbnail is YouTube's image, so
+ * a page whose video sits below the fold makes no request to Google until the learner scrolls
+ * near it (Lighthouse third-party-summary; less data on mobile). Without IntersectionObserver,
+ * it is true at once.
+ */
+function useNearViewport(ref: RefObject<Element | null>, margin = '200px'): boolean {
+  const [near, setNear] = useState(() => typeof IntersectionObserver === 'undefined');
+  useEffect(() => {
+    const element = ref.current;
+    if (near || !element) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: margin },
+    );
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [margin, near, ref]);
+  return near;
+}
+
+/**
  * PRD-UI §8 facade: the unaltered thumbnail and title until the learner taps; only then the
  * youtube-nocookie iframe loads (no third-party script at page load), starting playback at the
  * SOP segment. The player's own controls are never covered.
  */
 export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbedProps) {
   const [playing, setPlaying] = useState(false);
+  const frame = useRef<HTMLDivElement>(null);
+  const near = useNearViewport(frame);
   if (!VIDEO_ID.test(videoId)) return null;
 
   const startS = parseTimestamp(start);
@@ -37,7 +67,7 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
           {endS !== undefined && endS > startS ? `–${formatTimestamp(endS)}` : ' onwards'}
         </p>
       )}
-      <div className="relative aspect-video w-full overflow-hidden rounded-card bg-black">
+      <div ref={frame} className="relative aspect-video w-full overflow-hidden rounded-card bg-black">
         {playing ? (
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`}
@@ -57,16 +87,18 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
             className="group absolute inset-0 h-full w-full"
             aria-label={`Play video: ${title}`}
           >
-            <img
-              src={thumb('hqdefault')}
-              srcSet={`${thumb('mqdefault')} 320w, ${thumb('hqdefault')} 480w, ${thumb('sddefault')} 640w`}
-              sizes="(min-width: 768px) 640px, 100vw"
-              width={480}
-              height={360}
-              loading="lazy"
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            {near && (
+              <img
+                src={thumb('hqdefault')}
+                srcSet={`${thumb('mqdefault')} 320w, ${thumb('hqdefault')} 480w, ${thumb('sddefault')} 640w`}
+                sizes="(min-width: 768px) 640px, 100vw"
+                width={480}
+                height={360}
+                loading="lazy"
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            )}
             <span className="absolute inset-0 flex items-center justify-center">
               <span className="flex h-14 w-20 items-center justify-center rounded-xl bg-black/75 transition-colors group-hover:bg-red-600">
                 <Play className="h-7 w-7 fill-white text-white" aria-hidden="true" />
