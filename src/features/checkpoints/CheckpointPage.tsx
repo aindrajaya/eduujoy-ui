@@ -89,11 +89,11 @@ function CheckpointFlow({ path, step, jobId, onJob }: FlowProps) {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <header className="space-y-2">
-        <p className="text-sm font-semibold text-primary">
+        <p className="text-sm font-semibold text-text-muted">
           Step {step.n} checkpoint
           {checkpoint.attempts ? ` · attempt ${checkpoint.attempts + 1}` : ''}
         </p>
-        <h1 className="text-2xl font-bold text-text">{step.objective}</h1>
+        <h1 className="text-text md:text-3xl">{step.objective}</h1>
         <p className="text-text-muted">
           {checkpoint.items.length} {checkpoint.items.length === 1 ? 'question' : 'questions'} · pass mark{' '}
           {checkpoint.passScore}%
@@ -103,8 +103,8 @@ function CheckpointFlow({ path, step, jobId, onJob }: FlowProps) {
         </p>
       </header>
       {hasOpen && checkpoint.rubric && checkpoint.rubric.length > 0 && (
-        <section aria-labelledby="rubric-title" className="space-y-2 rounded-card bg-surface-muted p-4">
-          <h2 id="rubric-title" className="font-semibold text-text">
+        <section aria-labelledby="rubric-title" className="space-y-2 rounded-card border-2 border-ink bg-surface-muted p-4">
+          <h2 id="rubric-title" className="sk-title text-text">
             A good written answer
           </h2>
           <ul className="list-disc space-y-1 pl-5 text-sm text-text">
