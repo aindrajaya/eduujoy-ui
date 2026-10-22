@@ -335,7 +335,7 @@ Specs: ../docs/PRD-MASTER.md (product, wins on conflict) and docs/PRD-UI.md (imp
 API shapes come only from docs/openapi.json; refresh it with `pnpm api:sync` (copies ../api/openapi.json, regenerates types).
 - Implement exactly one slice from PRD-UI Section 11 per session; branch slice/U<n>-<name>; commit prefix `ui:`.
 - Run git, pnpm and tests from inside ui/ (separate repo).
-- Components call feature hooks in queries.ts, never axios directly.
+- Components call feature hooks in queries.ts, never call fetch directly; always use src/api.
 - No tokens or session data in localStorage; auth state comes from /v1/auth/me only.
 - Keep every route lazy; run size-limit before finishing.
 - Run the slice's Verify commands; if the PRD is ambiguous, stop and list the question.
