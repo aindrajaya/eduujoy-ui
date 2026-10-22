@@ -1,7 +1,9 @@
-import { redirect, type RouteObject } from 'react-router';
+import { redirect, type LoaderFunctionArgs, type RouteObject } from 'react-router';
+import type { Role } from './api/types';
 import BootSplash from './app/BootSplash';
 import RouteError from './app/RouteError';
-import { HOME, loadSession, requireAuth } from './auth/guards';
+import { HOME, loadSession, requireAuth, requireRole } from './auth/guards';
+import { hasRole } from './auth/session';
 import { queryClient } from './query-client';
 
 /**
@@ -18,6 +20,39 @@ function prefetchPathData(pathId: string | null): null {
     })
     .catch(() => undefined);
   return null;
+}
+
+const STAFF: readonly Role[] = ['reviewer', 'admin'];
+const ADMIN: readonly Role[] = ['admin'];
+
+/**
+ * U11: an admin screen whose code only loads for the right role. React Router runs a route's
+ * lazy() alongside the loaders, so a plain role loader would still download the chunk for a
+ * learner. Instead lazy() checks the session first and, without the role, returns only a guard
+ * loader (redirect to /signin, or 403). React Router caches that result for the session, so if
+ * the role is there by the time the guard runs again (another account signed in on this tab), it
+ * reloads the page to get a fresh router. With the role, the guard stays as the route's loader.
+ */
+function roleLazy(roles: readonly Role[], load: () => Promise<{ default: NonNullable<RouteObject['Component']> }>) {
+  return async () => {
+    const me = await loadSession().catch(() => null);
+    if (!hasRole(me, roles)) {
+      return {
+        loader: async ({ request }: LoaderFunctionArgs) => {
+          const current = await requireAuth(request);
+          if (hasRole(current, roles)) {
+            window.location.assign(request.url);
+            return null;
+          }
+          throw new Response('You do not have access to this page.', { status: 403 });
+        },
+      };
+    }
+    return {
+      loader: ({ request }: LoaderFunctionArgs) => requireRole(request, roles),
+      Component: (await load()).default,
+    };
+  };
 }
 
 // Every screen is a lazy chunk. The shell holds only the boot splash, the error boundary and the
@@ -88,6 +123,14 @@ export const routes: RouteObject[] = [
             lazy: async () => ({
               Component: (await import('./features/checkpoints/CheckpointPage')).default,
             }),
+          },
+          {
+            path: 'admin',
+            children: [
+              { index: true, loader: () => redirect('/admin/review') },
+              { path: 'review', lazy: roleLazy(STAFF, () => import('./features/admin/ReviewQueuePage')) },
+              { path: 'metrics', lazy: roleLazy(ADMIN, () => import('./features/admin/MetricsPage')) },
+            ],
           },
           {
             path: 'steps/:id',
