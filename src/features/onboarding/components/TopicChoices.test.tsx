@@ -15,7 +15,7 @@ describe('TopicChoices', () => {
   it('lists up to three choices and needs a pick before continuing', async () => {
     const onConfirm = vi.fn();
     const { container } = render(
-      <TopicChoices typed="java" choices={choices} onConfirm={onConfirm} onEditTopic={vi.fn()} />,
+      <TopicChoices typed="java" choices={choices} onConfirm={onConfirm} onEditTopic={vi.fn()} onCreateNew={vi.fn()} />,
     );
     expect(screen.getByRole('heading', { name: 'Which topic did you mean?' })).toBeInTheDocument();
     expect(screen.getAllByRole('radio')).toHaveLength(3);
@@ -28,23 +28,35 @@ describe('TopicChoices', () => {
 
   it('never shows more than three choices', () => {
     const four = [...choices, { id: 't4', canonicalName: 'Java island travel' }];
-    render(<TopicChoices typed="java" choices={four} onConfirm={vi.fn()} onEditTopic={vi.fn()} />);
+    render(<TopicChoices typed="java" choices={four} onConfirm={vi.fn()} onEditTopic={vi.fn()} onCreateNew={vi.fn()} />);
     expect(screen.getAllByRole('radio')).toHaveLength(3);
     expect(screen.queryByText('Java island travel')).not.toBeInTheDocument();
   });
 
   it('lets the learner go back and rephrase', async () => {
     const onEditTopic = vi.fn();
-    render(<TopicChoices typed="java" choices={choices} onConfirm={vi.fn()} onEditTopic={onEditTopic} />);
+    render(<TopicChoices typed="java" choices={choices} onConfirm={vi.fn()} onEditTopic={onEditTopic} onCreateNew={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'None of these, change my topic' }));
     expect(onEditTopic).toHaveBeenCalledOnce();
   });
 
   it('shows submitting and error states', () => {
     render(
-      <TopicChoices typed="java" choices={choices} onConfirm={vi.fn()} onEditTopic={vi.fn()} submitting errorMessage="Try again." />,
+      <TopicChoices typed="java" choices={choices} onConfirm={vi.fn()} onEditTopic={vi.fn()}
+        onCreateNew={vi.fn()}
+        submitting
+        errorMessage="Try again."
+      />,
     );
     expect(screen.getByRole('alert')).toHaveTextContent('Try again.');
     expect(screen.getByRole('button', { name: 'Starting…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Create “java” as a new topic' })).toBeDisabled();
+  });
+
+  it('offers to create the typed topic when none fits (contract 0.5.0)', async () => {
+    const onCreateNew = vi.fn();
+    render(<TopicChoices typed="java" choices={choices} onConfirm={vi.fn()} onEditTopic={vi.fn()} onCreateNew={onCreateNew} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Create “java” as a new topic' }));
+    expect(onCreateNew).toHaveBeenCalledOnce();
   });
 });

@@ -6,14 +6,24 @@ export interface TopicChoicesProps {
   /** At most three, from POST /v1/topics/resolve with status `choices` (US-01). */
   choices: Topic[];
   onConfirm: (topic: Topic) => void;
-  /** "None of these": back to the form to rephrase (the contract has no force-create). */
+  /** "None of these": back to the form to rephrase. */
   onEditTopic: () => void;
+  /** Contract 0.5.0: none fits, so create a topic from what was typed. */
+  onCreateNew: () => void;
   submitting?: boolean;
   errorMessage?: string;
 }
 
 /** Disambiguation: the learner confirms which canonical topic they meant. */
-export default function TopicChoices({ typed, choices, onConfirm, onEditTopic, submitting = false, errorMessage }: TopicChoicesProps) {
+export default function TopicChoices({
+  typed,
+  choices,
+  onConfirm,
+  onEditTopic,
+  onCreateNew,
+  submitting = false,
+  errorMessage,
+}: TopicChoicesProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const titleId = useId();
   // US-01 allows at most three; the contract caps it too, but never show more.
@@ -86,6 +96,17 @@ export default function TopicChoices({ typed, choices, onConfirm, onEditTopic, s
               None of these, change my topic
             </button>
           </div>
+          <p className="text-center text-sm text-text-muted">
+            Not listed?{' '}
+            <button
+              type="button"
+              onClick={onCreateNew}
+              disabled={submitting}
+              className="inline-flex min-h-11 items-center font-semibold text-primary underline disabled:opacity-60"
+            >
+              Create “{typed}” as a new topic
+            </button>
+          </p>
         </form>
       </div>
     </main>
