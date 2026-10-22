@@ -43,6 +43,23 @@ describe('item bank (PRD-UI §7b)', () => {
     expect(toQuestion(item('c5-two-plans')).parts).toHaveLength(2);
   });
 
+  it('every item is reviewed and cites a source in the reference list, with a DOI except the one book chapter', () => {
+    for (const i of bank.items) {
+      expect(i.reviewed, i.id).toBe(true);
+      const source = bank.sources[i.source];
+      expect(source, i.id).toBeDefined();
+      // Bjork (1994) is a chapter in an MIT Press book and has no DOI.
+      if (i.source !== 'bjork1994') expect(source?.url, i.id).toMatch(/^https:\/\/doi\.org\/10\.\d+\//);
+    }
+  });
+
+  it('no explanation or feedback calls an answer wrong', () => {
+    for (const i of bank.items) {
+      expect(i.explanation, i.id).not.toMatch(/wrong/i);
+      expect(i.notCorrectFeedback ?? '', i.id).not.toMatch(/wrong/i);
+    }
+  });
+
   it('the starting order of every C6 item is not already correct', () => {
     for (const i of bank.items.filter((x) => x.type === 'order')) {
       expect(isCorrect(i, { optionIds: toQuestion(i).options?.map((o) => o.id) }), i.id).toBe(false);
@@ -64,7 +81,9 @@ describe('isCorrect', () => {
     // Week plan: learn, come back after a gap, mix, mixed self-test right before the mock.
     ['c6-week-plan', { optionIds: ['a-learn', 'b-learn', 'a-test', 'c-learn', 'b-test', 'c-test', 'mixed', 'mock'] }, true],
     ['c6-week-plan', { optionIds: ['a-learn', 'a-test', 'b-learn', 'c-learn', 'b-test', 'c-test', 'mixed', 'mock'] }, false],
+    // The mixed self-test must come after all topic tests (user decision, 22 Oct 2026).
     ['c6-week-plan', { optionIds: ['a-learn', 'b-learn', 'a-test', 'c-learn', 'b-test', 'mixed', 'c-test', 'mock'] }, false],
+    ['c6-week-plan', { optionIds: ['b-learn', 'a-learn', 'c-learn', 'b-test', 'a-test', 'c-test', 'mixed', 'mock'] }, true],
     ['c6-week-plan', { optionIds: ['a-learn', 'b-learn', 'a-test', 'c-learn', 'b-test', 'c-test', 'mock', 'mixed'] }, false],
     ['c6-week-plan', { optionIds: ['a-learn', 'b-learn', 'a-test'] }, false],
     ['c6-self-test-session', { optionIds: ['close', 'write', 'answer', 'check', 'mark', 'plan'] }, true],
