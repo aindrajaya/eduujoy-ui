@@ -32,7 +32,7 @@ async function mockIntakeApi(page: Page) {
 async function openIntake(page: Page) {
   await page.goto('/start');
   await page.getByRole('button', { name: /get started/i }).click();
-  await expect(page.getByRole('heading', { name: "Let's Get Started!" })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Let’s get started' })).toBeVisible();
 }
 
 test.describe('onboarding (US-01)', () => {

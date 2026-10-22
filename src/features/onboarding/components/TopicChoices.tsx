@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import type { Topic } from '@/api/types';
+import ErrorNote from '@/ui/ErrorNote';
 
 export interface TopicChoicesProps {
   typed: string;
@@ -32,8 +33,8 @@ export default function TopicChoices({
 
   return (
     <main aria-labelledby={titleId} className="flex min-h-dvh items-center justify-center bg-bg p-4">
-      <div className="w-full max-w-xl animate-fade-in rounded-2xl border border-border bg-surface p-6 shadow-2xl md:p-10">
-        <h1 id={titleId} className="text-2xl font-bold text-text">
+      <div className="sk-card w-full max-w-xl animate-fade-in p-6 md:p-10">
+        <h1 id={titleId} className="text-text">
           Which topic did you mean?
         </h1>
         <p className="mt-2 text-text-muted">
@@ -53,7 +54,7 @@ export default function TopicChoices({
               {shown.map((topic) => (
                 <label
                   key={topic.id}
-                  className="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border-2 border-border p-4 has-checked:border-primary has-checked:bg-primary-soft"
+                  className="quiz-option flex min-h-11 cursor-pointer items-start gap-3 p-4"
                 >
                   <input
                     type="radio"
@@ -66,7 +67,7 @@ export default function TopicChoices({
                     className="mt-1 h-4 w-4 accent-primary"
                   />
                   <span>
-                    <span className="block font-semibold text-text">{topic.canonicalName}</span>
+                    <span className="sk-title block text-text">{topic.canonicalName}</span>
                     {topic.description && <span className="block text-sm text-text-muted">{topic.description}</span>}
                   </span>
                 </label>
@@ -75,23 +76,23 @@ export default function TopicChoices({
           </fieldset>
 
           {errorMessage && (
-            <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+            <ErrorNote>
               {errorMessage}
-            </p>
+            </ErrorNote>
           )}
 
           <div className="flex flex-col gap-3 sm:flex-row-reverse">
             <button
               type="submit"
               disabled={!selected || submitting}
-              className="min-h-11 flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-3 font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+              className="sk-btn sk-btn-primary flex-1"
             >
               {submitting ? 'Starting…' : 'Continue with this topic'}
             </button>
             <button
               type="button"
               onClick={onEditTopic}
-              className="min-h-11 flex-1 rounded-xl border-2 border-border px-6 py-3 font-semibold text-text"
+              className="sk-btn flex-1"
             >
               None of these, change my topic
             </button>

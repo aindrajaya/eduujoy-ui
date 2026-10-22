@@ -71,11 +71,12 @@ function BatchQuiz({ id, batch, userId }: { id: string; batch: DiagnosticBatchRe
           aria-valuemin={0}
           aria-valuemax={estimatedTotal}
           aria-valuenow={answered}
-          className="h-2 overflow-hidden rounded-chip bg-surface-muted"
+          className="sk-meter"
         >
-          <div className="h-full bg-primary" style={{ width: `${Math.min(100, (answered / Math.max(1, estimatedTotal)) * 100)}%` }} />
+          <div style={{ width: `${Math.min(100, (answered / Math.max(1, estimatedTotal)) * 100)}%` }} />
         </div>
       </div>
+      <div className="sk-card">
       <QuizProvider key={quizId} quizId={quizId} questions={questions}>
         <QuizRunner
           userId={userId}
@@ -89,6 +90,7 @@ function BatchQuiz({ id, batch, userId }: { id: string; batch: DiagnosticBatchRe
           }}
         />
       </QuizProvider>
+      </div>
     </div>
   );
 }
