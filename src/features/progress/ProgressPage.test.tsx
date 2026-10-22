@@ -1,8 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { mockProgress } from '@/api/mocks/data';
-import { http } from '@/api/mocks/handlers';
+import { mockProblem, mockProgress } from '@/api/mocks/data';
+import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { expectNoAxeViolations } from '@/test/axe';
 import { renderRoute } from '@/test/render';
@@ -46,5 +46,30 @@ describe('/progress (US-09)', () => {
     renderRoute('/progress');
     expect(await screen.findByText('No progress yet')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Start a learning path' })).toHaveAttribute('href', '/start');
+  });
+
+  it('until the API serves progress (A11), a 404 says when the grid appears instead of an error', async () => {
+    let calls = 0;
+    server.use(
+      http.get('/v1/progress', ({ response }) => {
+        calls += 1;
+        return response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Not Found')));
+      }),
+    );
+    const { container } = renderRoute('/progress');
+    expect(await screen.findByText('Your progress grid appears after your first path')).toBeInTheDocument();
+    expect(screen.queryByText('Could not load your progress')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    expect(calls).toBe(1);
+    await expectNoAxeViolations(container);
+  });
+
+  it('any other failure keeps the error and its retry', async () => {
+    server.use(
+      http.get('/v1/progress', ({ response }) => response.untyped(problemResponse(mockProblem(500, 'INTERNAL', 'Boom')))),
+    );
+    renderRoute('/progress');
+    expect(await screen.findByText('Could not load your progress')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 });

@@ -141,9 +141,9 @@ describe('SignInPage', () => {
     );
   });
 
-  it('shows the session-expired notice', () => {
+  it('shows the session-expired notice', async () => {
     renderSignIn('/signin?expired=1&next=%2Ftoday');
-    expect(screen.getByRole('status')).toHaveTextContent('Your session expired.');
+    expect(await screen.findByRole('status')).toHaveTextContent('Your session expired.');
   });
 
   it('renders the form at once, before auth/me answers', async () => {

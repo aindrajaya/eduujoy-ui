@@ -66,7 +66,7 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
             aria-valuetext={`${result.score}%, pass mark ${passScore}%`}
             className="relative h-3 overflow-hidden rounded-chip border-2 border-ink bg-surface"
           >
-            <div className={`h-full ${result.passed ? 'bg-success' : 'bg-danger'}`} style={{ width: `${result.score}%` }} />
+            <div className={`h-full ${result.passed ? 'bg-success' : 'sk-hatch'}`} style={{ width: `${result.score}%` }} />
             <div className="absolute inset-y-0 w-0.5 bg-text" style={{ left: `${passScore}%` }} aria-hidden="true" />
           </div>
           {result.passed && result.stageAdvanced && (
@@ -94,7 +94,7 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
           </h2>
           <ol className="space-y-3">
             {result.items.map((item, i) => (
-              <li key={item.itemId} className="sk-card space-y-1">
+              <li key={item.itemId} className="sk-card min-w-0 space-y-1 break-words">
                 <p className="flex justify-between gap-3 text-sm text-text-muted">
                   <span>Question {i + 1}</span>
                   <span className="font-semibold text-text">{item.score}%</span>

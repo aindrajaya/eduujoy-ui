@@ -55,7 +55,7 @@ describe('/today (US-03 home)', () => {
     server.use(http.get('/v1/paths', ({ response }) => response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Not Found')))));
     const { container } = renderRoute('/today');
     expect(await screen.findByText('Your first path will appear here once path building opens')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'See your placement' })).toHaveAttribute('href', '/progress');
+    expect(screen.queryByRole('link', { name: 'See your placement' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
@@ -80,7 +80,7 @@ describe('/paths', () => {
     const { container } = renderRoute('/paths');
     const link = await screen.findByRole('link', { name: /Product Design \(UI\/UX\)/ });
     expect(link).toHaveAttribute('href', '/paths/path-1');
-    expect(link).toHaveTextContent('Active · Advanced beginner → Competent · 1 of 6 steps');
+    expect(link).toHaveTextContent('ActiveAdvanced beginner → Competent · 1 of 6 steps');
     await expectNoAxeViolations(container);
   });
 

@@ -30,7 +30,7 @@ describe('installSessionExpiry', () => {
     mockSignedOut();
     await expect(getPath('path-1')).rejects.toMatchObject({ status: 401 });
 
-    expect(await screen.findByText(/Your session expired/)).toHaveAttribute('role', 'status');
+    expect((await screen.findByText(/Your session expired/)).closest('[role="status"]')).not.toBeNull();
     expect(router.state.location.pathname).toBe('/signin');
     expect(new URLSearchParams(router.state.location.search).get('next')).toBe('/steps/step-2?path=path-1&tab=resources');
     expect(router.state.historyAction).toBe('REPLACE');
@@ -45,7 +45,7 @@ describe('installSessionExpiry', () => {
     mockSignedOut();
     await queryClient.refetchQueries({ queryKey: sessionKeys.me() });
 
-    expect(await screen.findByText(/Your session expired/)).toHaveAttribute('role', 'status');
+    expect((await screen.findByText(/Your session expired/)).closest('[role="status"]')).not.toBeNull();
     expect(router.state.location.pathname).toBe('/signin');
     expect(new URLSearchParams(router.state.location.search).get('next')).toBe('/account#plan');
     expect(router.state.historyAction).toBe('REPLACE');

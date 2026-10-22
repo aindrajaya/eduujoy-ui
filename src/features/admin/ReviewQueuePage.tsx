@@ -24,7 +24,7 @@ function QueueSkeleton() {
   return (
     <div className="space-y-3">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="space-y-3 rounded-card border border-border p-4">
+        <div key={i} className="space-y-3 rounded-card border-2 border-ink p-4">
           <Skeleton className="h-4 w-32" />
           <SkeletonText lines={2} />
         </div>
@@ -45,12 +45,12 @@ function ReviewCard({ item }: { item: ReviewItem }) {
   const detail = Object.entries(item.detail ?? {});
 
   return (
-    <article aria-labelledby={titleId} className="space-y-3 rounded-card border border-border p-4">
+    <article aria-labelledby={titleId} className="sk-card space-y-3">
       <p className="flex flex-wrap items-center justify-between gap-2 text-sm text-text-muted">
-        <span className="rounded-chip bg-surface-muted px-3 py-1 font-semibold text-text">{KIND_LABEL[item.kind]}</span>
+        <span className="rounded-chip border-2 border-ink bg-surface px-3 py-1 font-semibold text-text">{KIND_LABEL[item.kind]}</span>
         <time dateTime={item.createdAt}>{when(item.createdAt)}</time>
       </p>
-      <h2 id={titleId} className="font-semibold text-text">
+      <h2 id={titleId} className="sk-title text-text">
         {item.reason}
       </h2>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
@@ -77,7 +77,7 @@ function ReviewCard({ item }: { item: ReviewItem }) {
                 setNote(e.target.value);
               }}
               rows={2}
-              className="mt-1 w-full rounded-lg border-2 border-border bg-surface p-2 text-sm text-text"
+              className="quiz-field mt-1 w-full p-2 text-sm text-text"
             />
           </div>
           <div className="flex gap-2">
@@ -87,7 +87,7 @@ function ReviewCard({ item }: { item: ReviewItem }) {
               onClick={() => {
                 act('approved');
               }}
-              className="min-h-11 flex-1 rounded-xl bg-primary px-4 font-semibold text-on-primary disabled:opacity-60"
+              className="sk-btn sk-btn-primary flex-1"
             >
               Approve
             </button>
@@ -97,7 +97,7 @@ function ReviewCard({ item }: { item: ReviewItem }) {
               onClick={() => {
                 act('rejected');
               }}
-              className="min-h-11 flex-1 rounded-xl border-2 border-danger bg-surface px-4 font-semibold text-danger disabled:opacity-60"
+              className="sk-btn flex-1"
             >
               Reject
             </button>
@@ -128,7 +128,7 @@ export default function ReviewQueuePage() {
     <main>
       <AdminNav openCount={status === 'open' ? openCount : undefined} />
       <div className="space-y-4 p-4 md:p-6">
-        <h1 className="text-2xl font-bold text-text">Review queue</h1>
+        <h1 className="text-text">Review queue</h1>
         <div className="flex flex-wrap items-end gap-3">
           <div role="group" aria-label="Status" className="flex gap-2">
             {(['open', 'resolved'] as const).map((s) => (
@@ -140,7 +140,7 @@ export default function ReviewQueuePage() {
                   setParams(s === 'open' ? {} : { status: s }, { replace: true });
                 }}
                 className={`min-h-11 rounded-chip border-2 px-4 font-semibold ${
-                  status === s ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text'
+                  status === s ? 'border-primary border-[length:var(--sk-stroke-strong)] bg-surface text-primary' : 'border-ink bg-surface text-text'
                 }`}
               >
                 {s === 'open' ? 'Open' : 'Resolved'}
@@ -159,7 +159,7 @@ export default function ReviewQueuePage() {
                 setFilter(e.target.value);
               }}
               placeholder="Reason or target"
-              className="mt-1 min-h-11 w-full rounded-lg border-2 border-border bg-surface px-3 text-text"
+              className="quiz-field mt-1 min-h-11 w-full px-3 text-text"
             />
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function ReviewQueuePage() {
                     type="button"
                     disabled={queue.isFetchingNextPage}
                     onClick={() => void queue.fetchNextPage()}
-                    className="min-h-11 w-full rounded-xl border-2 border-border font-semibold text-text disabled:opacity-60"
+                    className="sk-btn w-full"
                   >
                     {queue.isFetchingNextPage ? 'Loading…' : 'Load more'}
                   </button>

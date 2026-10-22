@@ -1,6 +1,7 @@
 import { Lock, Mail, User } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
+import ErrorNote from '@/ui/ErrorNote';
 import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
@@ -64,14 +65,14 @@ export default function SignUpPage() {
           {...form.field('password')}
         />
         {formError && (
-          <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+          <ErrorNote>
             {formError}
-          </p>
+          </ErrorNote>
         )}
         <button
           type="submit"
           disabled={busy}
-          className="flex min-h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-3 text-base font-bold text-white shadow-lg transition-shadow hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-75"
+          className="sk-btn sk-btn-primary w-full"
         >
           {busy ? 'Creating account…' : 'Create account'}
         </button>

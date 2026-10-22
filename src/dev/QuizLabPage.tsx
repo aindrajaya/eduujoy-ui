@@ -21,7 +21,7 @@ export default function QuizLabPage() {
   const [result, setResult] = useState<string | null>(null);
   return (
     <main className="mx-auto max-w-2xl p-4 md:p-6">
-      <h1 className="mb-6 text-2xl font-bold text-text">Quiz lab</h1>
+      <h1 className="mb-6 text-text">Quiz lab</h1>
       {result ? (
         <p role="status">{result}</p>
       ) : (
