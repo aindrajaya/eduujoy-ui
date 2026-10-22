@@ -344,7 +344,7 @@
         { "type": "gapBefore", "first": "c-learn", "then": "c-test" }
       ],
       "explanation": "A plan that works: learn each topic, come back to test it after a gap, and take the mixed self-test after all the topic tests. Mixing topics in one session (interleaving) helps you tell them apart (Rohrer & Taylor, 2007).",
-      "notCorrectFeedback": "This plan doesn't build in spacing yet",
+      "notCorrectFeedback": "This plan doesn’t build in spacing yet",
       "source": "dunlosky2013",
       "reviewed": true
     },
