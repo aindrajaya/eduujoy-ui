@@ -1,4 +1,4 @@
-import { isAxiosError, isCancel } from 'axios';
+import { isHttpError } from './http';
 import type { Problem, ProblemCode } from './types';
 
 /** Client-side failures that never reach the API's problem+json filter. */
@@ -99,35 +99,30 @@ export function parseRetryAfter(value: unknown, now = Date.now()): number | unde
   return Number.isNaN(date) ? undefined : Math.max(0, date - now);
 }
 
-function header(headers: unknown, name: string): unknown {
-  if (typeof headers !== 'object' || headers === null) return undefined;
-  return (headers as Record<string, unknown>)[name];
-}
-
 function toFieldErrors(problem: Problem): Record<string, string> {
   const out: Record<string, string> = {};
   for (const { field, message } of problem.errors ?? []) out[field] ??= message;
   return out;
 }
 
-/** Maps anything thrown by Axios (or our own code) to an ApiError. */
+/** Maps anything thrown by the HTTP client (or our own code) to an ApiError. */
 export function toApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error;
 
-  if (isCancel(error)) {
+  if (isHttpError(error) && error.code === 'ERR_CANCELED') {
     return new ApiError({ status: 0, code: 'CANCELED', title: 'Request canceled' });
   }
 
-  if (!isAxiosError(error)) {
+  if (!isHttpError(error)) {
     const detail = error instanceof Error ? error.message : undefined;
     return new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error', detail });
   }
 
-  const sentRequestId = header(error.config?.headers, 'X-Request-Id');
+  const sentRequestId = error.config.headers.get('X-Request-Id') ?? undefined;
   const response = error.response;
 
   if (!response) {
-    const timedOut = error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT';
+    const timedOut = error.code === 'ECONNABORTED';
     return new ApiError({
       status: 0,
       code: timedOut ? 'TIMEOUT' : 'NETWORK_ERROR',
@@ -136,8 +131,8 @@ export function toApiError(error: unknown): ApiError {
     });
   }
 
-  const retryAfterMs = parseRetryAfter(header(response.headers, 'retry-after'));
-  const responseRequestId = header(response.headers, 'x-request-id');
+  const retryAfterMs = parseRetryAfter(response.headers['retry-after']);
+  const responseRequestId = response.headers['x-request-id'];
   const fallbackRequestId =
     typeof responseRequestId === 'string'
       ? responseRequestId

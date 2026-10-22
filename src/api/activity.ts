@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios';
+import type { HttpClient } from './http';
 
 // In-flight request tracking for the "Waking up the server…" state (PRD-UI §4). The API sleeps
 // when idle, so the first request after a quiet spell can take many seconds.
@@ -44,11 +44,11 @@ export function resetActivity(): void {
 }
 
 /**
- * Counts each request pass on an Axios instance. Install before the auth interceptors so the
+ * Counts each request pass on the HTTP client. Install before the auth interceptors so the
  * count drops as soon as a response arrives, even when that response triggers a refresh replay
  * (the replay is its own pass).
  */
-export function trackActivity(instance: AxiosInstance): void {
+export function trackActivity(instance: HttpClient): void {
   instance.interceptors.request.use((config) => {
     requestStarted();
     return config;
@@ -58,10 +58,10 @@ export function trackActivity(instance: AxiosInstance): void {
       requestFinished();
       return response;
     },
-    // Axios rejects with AxiosError (an Error); the auth interceptors map it next.
-    (error: Error) => {
+    // The client rejects with HttpError (an Error); the auth interceptors map it next.
+    (error: unknown) => {
       requestFinished();
-      return Promise.reject(error);
+      return Promise.reject(error instanceof Error ? error : new Error(String(error)));
     },
   );
 }

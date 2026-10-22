@@ -51,6 +51,7 @@ export default tseslint.config(
           paths: [{ name: 'axios', message: 'Use the endpoint functions in src/api/endpoints.' }],
           patterns: [
             { group: ['@/api/client', '**/api/client'], message: 'Use src/api/endpoints instead.' },
+            { group: ['@/api/http', '**/api/http'], message: 'Use src/api/endpoints instead.' },
           ],
         },
       ],
