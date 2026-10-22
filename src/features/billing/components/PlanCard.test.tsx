@@ -56,8 +56,51 @@ describe('PlanCard (FR-23)', () => {
     expect(screen.queryByRole('button', { name: 'Upgrade to subscription' })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Buy a credit pack' }));
     await waitFor(() => {
-      expect(body).toEqual({ product: 'credit_pack' });
+      expect(body).toEqual({ product: 'credit_pack', quantity: 1 });
     });
+  });
+
+  it('buys 1-10 credit packs, sending quantity only with credit_pack (contract 0.7.0)', async () => {
+    const bodies: CheckoutRequest[] = [];
+    server.use(
+      http.post('/v1/billing/checkout', async ({ request, response }) => {
+        bodies.push(await request.json());
+        return response(200).json({ url: 'https://eduujoy.lemonsqueezy.com/checkout/x' });
+      }),
+    );
+    renderPlan();
+    const picker = screen.getByRole('combobox', { name: 'Credit packs' });
+    expect(screen.getAllByRole('option')).toHaveLength(10);
+    await userEvent.selectOptions(picker, '3');
+    await userEvent.click(screen.getByRole('button', { name: 'Buy 3 credit packs' }));
+    await waitFor(() => {
+      expect(bodies).toHaveLength(1);
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Upgrade to subscription' }));
+    await waitFor(() => {
+      expect(bodies).toHaveLength(2);
+    });
+    expect(bodies).toEqual([{ product: 'credit_pack', quantity: 3 }, { product: 'subscription' }]);
+  });
+
+  it('shows a 400 on quantity as a field error on the picker', async () => {
+    server.use(
+      http.post('/v1/billing/checkout', ({ response }) =>
+        response.untyped(
+          problemResponse(
+            mockProblem(400, 'VALIDATION_FAILED', 'Invalid', { errors: [{ field: 'quantity', message: 'Choose 1 to 10 packs' }] }),
+          ),
+        ),
+      ),
+    );
+    renderPlan();
+    await userEvent.click(screen.getByRole('button', { name: 'Buy a credit pack' }));
+    const picker = screen.getByRole('combobox', { name: 'Credit packs' });
+    await waitFor(() => {
+      expect(picker).toHaveAccessibleDescription('Choose 1 to 10 packs');
+    });
+    expect(picker).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('never leaves for a non-https link, and says nothing was charged when checkout fails', async () => {

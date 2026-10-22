@@ -1,5 +1,6 @@
 import type { Me } from '@/api/types';
-import { useCheckout, type CheckoutProduct } from '../queries';
+import { useId, useState } from 'react';
+import { MAX_CREDIT_PACKS, useCheckout, type CheckoutProduct } from '../queries';
 
 // Billing periods end at a UTC instant; show that day, not the viewer's local one.
 const periodDate = (iso: string) =>
@@ -15,7 +16,12 @@ export interface PlanCardProps {
 export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
   const checkout = useCheckout(onCheckoutUrl);
   const { plan, quota } = me;
-  const pending = (product: CheckoutProduct) => checkout.isPending && checkout.variables === product;
+  const pending = (product: CheckoutProduct) => checkout.isPending && checkout.variables.product === product;
+  const [packs, setPacks] = useState(1);
+  const packsId = useId();
+  const packsErrorId = useId();
+  // Contract 0.7.0: a 400 on quantity is a field error on the picker.
+  const packsError = checkout.error?.status === 400 ? checkout.error.fieldErrors.quantity : undefined;
   const left = Math.max(0, quota.monthlyPaths - quota.usedPaths);
 
   return (
@@ -47,7 +53,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
           <button
             type="button"
             onClick={() => {
-              checkout.mutate('subscription');
+              checkout.mutate({ product: 'subscription' });
             }}
             disabled={checkout.isPending}
             className="min-h-11 flex-1 rounded-xl bg-primary px-5 font-semibold text-on-primary disabled:opacity-60"
@@ -55,19 +61,47 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
             {pending('subscription') ? 'Opening checkout…' : 'Upgrade to subscription'}
           </button>
         )}
-        <button
-          type="button"
-          onClick={() => {
-            checkout.mutate('credit_pack');
-          }}
-          disabled={checkout.isPending}
-          className="min-h-11 flex-1 rounded-xl border-2 border-primary px-5 font-semibold text-primary disabled:opacity-60"
-        >
-          {pending('credit_pack') ? 'Opening checkout…' : 'Buy a credit pack'}
-        </button>
+        <div className="flex flex-1 items-stretch gap-2">
+          <div className="flex flex-col">
+            <label htmlFor={packsId} className="sr-only">
+              Credit packs
+            </label>
+            <select
+              id={packsId}
+              value={packs}
+              onChange={(e) => {
+                setPacks(Number(e.target.value));
+              }}
+              aria-invalid={packsError ? true : undefined}
+              aria-describedby={packsError ? packsErrorId : undefined}
+              className="min-h-11 rounded-xl border-2 border-border bg-surface px-3 font-semibold text-text"
+            >
+              {Array.from({ length: MAX_CREDIT_PACKS }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? 'pack' : 'packs'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              checkout.mutate({ product: 'credit_pack', quantity: packs });
+            }}
+            disabled={checkout.isPending}
+            className="min-h-11 flex-1 rounded-xl border-2 border-primary px-5 font-semibold text-primary disabled:opacity-60"
+          >
+            {pending('credit_pack') ? 'Opening checkout…' : packs === 1 ? 'Buy a credit pack' : `Buy ${packs} credit packs`}
+          </button>
+        </div>
       </div>
+      {packsError && (
+        <p id={packsErrorId} className="text-sm text-danger">
+          {packsError}
+        </p>
+      )}
       <p className="text-xs text-text-muted">Payments are handled by Lemon Squeezy. You will leave Eduujoy to pay.</p>
-      {checkout.error && (
+      {checkout.error && !packsError && (
         <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
           {checkout.error.status === 0 && checkout.error.code !== 'INTERNAL'
             ? 'We could not reach the server. Check your connection and try again. Nothing was charged.'
