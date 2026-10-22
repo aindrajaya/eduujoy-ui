@@ -5,9 +5,10 @@ import { demoAdapter } from './adapter';
 import { learningScience } from './bank';
 import DemoQuiz from './components/DemoQuiz';
 import DemoResult from './components/DemoResult';
-import SelfReportForm from './components/SelfReportForm';
+import DemoSetup from './components/DemoSetup';
 import type { DemoState, LocalDiagnosticAdapter } from './localAdapter';
 import type { DemoSelfReport } from './placement';
+import type { DemoPrefs } from './prefs';
 
 type View = { kind: 'intro'; starting: boolean } | { kind: 'resuming' } | { kind: 'attempt'; state: DemoState };
 
@@ -43,9 +44,9 @@ export default function DemoPage({ adapter = demoAdapter }: { adapter?: LocalDia
     };
   }, [adapter, view.kind]);
 
-  const start = (selfReport: DemoSelfReport) => {
+  const start = (selfReport: DemoSelfReport, prefs: DemoPrefs) => {
     setView({ kind: 'intro', starting: true });
-    void adapter.start(selfReport).then((state) => {
+    void adapter.start(selfReport, prefs).then((state) => {
       setView({ kind: 'attempt', state });
     });
   };
@@ -73,7 +74,7 @@ export default function DemoPage({ adapter = demoAdapter }: { adapter?: LocalDia
               A 5-minute diagnostic on studying for exams: retrieval practice, spacing, interleaving and knowing what you
               know. It runs entirely in your browser. This sets your starting point; it is not a test.
             </p>
-            <SelfReportForm starting={view.starting} onStart={start} />
+            <DemoSetup starting={view.starting} onStart={start} />
           </>
         )}
         {view.kind === 'resuming' && (
@@ -85,7 +86,13 @@ export default function DemoPage({ adapter = demoAdapter }: { adapter?: LocalDia
         {state && placement && (
           <>
             <h1>Your starting point</h1>
-            <DemoResult bank={learningScience} placement={placement} graded={state.graded} onRetake={retake} />
+            <DemoResult
+              bank={learningScience}
+              placement={placement}
+              graded={state.graded}
+              prefs={state.prefs}
+              onRetake={retake}
+            />
           </>
         )}
         {state && !placement && (

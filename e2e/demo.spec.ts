@@ -27,8 +27,22 @@ async function expectNoAxeViolations(page: Page) {
   expect(violations).toEqual([]);
 }
 
-/** Self-report by keyboard: focus the first radio of each group, arrow to a choice, Enter on Start. */
+/**
+ * The setup by keyboard: goal, weekly time and format (one screen each), then the self-report.
+ * Each step: focus the first radio card, arrow to a choice, Enter on the step's button.
+ */
 async function selfReportByKeyboard(page: Page) {
+  for (const [first, step] of [
+    ['Pass an exam', 'Step 2 of 4: Weekly time'],
+    ['1–2 h', 'Step 3 of 4: Format'],
+    ['Videos', 'Step 4 of 4: About you'],
+  ] as const) {
+    await page.getByRole('radio', { name: first }).focus();
+    await page.keyboard.press('ArrowDown');
+    await page.getByRole('button', { name: 'Continue' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 2, name: step })).toBeFocused();
+  }
   await page.getByRole('radio', { name: 'Not yet' }).focus();
   await page.keyboard.press('ArrowDown'); // Under a year
   await page.getByRole('radio', { name: 'Yes' }).focus();
@@ -86,6 +100,10 @@ test.describe('public demo (UD)', () => {
     expect(answered).toBeLessThanOrEqual(12);
     await expect(page.getByRole('table', { name: /Your demo placement/ })).toContainText('You are here');
     await expect(page.getByText(/This is a demo placement/)).toBeVisible();
+    // The setup shaped the result: "Use it at work", 3–5 h, Reading.
+    await expect(page.getByText(/Aimed at work/)).toBeVisible();
+    await expect(page.getByText(/each step takes about 45 minutes/)).toBeVisible();
+    await expect(page.getByText('Article · about 45 min')).toHaveCount(3);
 
     // Retake starts a fresh attempt.
     await page.getByRole('button', { name: 'Retake' }).focus();

@@ -32,10 +32,6 @@
       "label": "Kornell (2009). Optimising learning using flashcards: Spacing is more effective than cramming. Applied Cognitive Psychology, 23(9), 1297–1317.",
       "url": "https://doi.org/10.1002/acp.1537"
     },
-    "karpicke2011": {
-      "label": "Karpicke & Blunt (2011). Retrieval practice produces more learning than elaborative studying with concept mapping. Science, 331(6018), 772–775.",
-      "url": "https://doi.org/10.1126/science.1199327"
-    },
     "rawson2011": {
       "label": "Rawson & Dunlosky (2011). Optimizing schedules of retrieval practice for durable and efficient learning: How much is enough? Journal of Experimental Psychology: General, 140(3), 283–302.",
       "url": "https://doi.org/10.1037/a0023956"
@@ -55,7 +51,8 @@
       ],
       "answer": "b",
       "explanation": "Retrieval practice means pulling information out of memory, such as self-testing. Recalling strengthens later recall more than rereading the same material.",
-      "source": "roediger2006"
+      "source": "roediger2006",
+      "reviewed": true
     },
     {
       "id": "c1-spacing",
@@ -70,7 +67,8 @@
       ],
       "answer": "c",
       "explanation": "The same total study time, spread across separate sessions, produces better retention later than massing it into one session.",
-      "source": "cepeda2006"
+      "source": "cepeda2006",
+      "reviewed": true
     },
     {
       "id": "c1-interleaving",
@@ -85,7 +83,8 @@
       ],
       "answer": "d",
       "explanation": "Interleaving mixes problem types in one session, so you practise choosing the right method as well as applying it.",
-      "source": "rohrer2007"
+      "source": "rohrer2007",
+      "reviewed": true
     },
     {
       "id": "c2-why-spacing",
@@ -100,7 +99,8 @@
       ],
       "answer": "b",
       "explanation": "One leading account: a gap lets some forgetting happen, so the next session takes more effort to recall, and that ‘desirable difficulty’ makes learning last.",
-      "source": "bjork1994"
+      "source": "bjork1994",
+      "reviewed": true
     },
     {
       "id": "c2-familiarity",
@@ -115,7 +115,8 @@
       ],
       "answer": "a",
       "explanation": "Judging what you know while the answer is in view overestimates what you can recall later, when it is not.",
-      "source": "koriat2005"
+      "source": "koriat2005",
+      "reviewed": true
     },
     {
       "id": "c2-why-interleave",
@@ -130,7 +131,8 @@
       ],
       "answer": "c",
       "explanation": "Blocked practice tells you the method in advance. Mixed practice makes you choose it, which is what a mixed exam asks for.",
-      "source": "rohrer2007"
+      "source": "rohrer2007",
+      "reviewed": true
     },
     {
       "id": "c3-mock-in-6-days",
@@ -145,7 +147,8 @@
       ],
       "answer": "d",
       "explanation": "This plan combines retrieval practice, spacing and mixing topics, the techniques rated most useful in a large review.",
-      "source": "dunlosky2013"
+      "source": "dunlosky2013",
+      "reviewed": true
     },
     {
       "id": "c3-after-practice-set",
@@ -160,7 +163,8 @@
       ],
       "answer": "a",
       "explanation": "Feedback after a test corrects errors, and retrying after a gap turns the fix into durable learning; instant repeats mostly measure short-term memory.",
-      "source": "butler2008"
+      "source": "butler2008",
+      "reviewed": true
     },
     {
       "id": "c3-flashcards",
@@ -175,7 +179,8 @@
       ],
       "answer": "b",
       "explanation": "One large deck spaces the repetitions of each card further apart, which beat small, crammed piles in a flashcard study.",
-      "source": "kornell2009"
+      "source": "kornell2009",
+      "reviewed": true
     },
     {
       "id": "c4-score-drop",
@@ -190,7 +195,8 @@
       ],
       "answer": "c",
       "explanation": "In a classic study, rereading did better on a test after 5 minutes, but self-testing did better a week later. Immediate scores can mislead.",
-      "source": "roediger2006"
+      "source": "roediger2006",
+      "reviewed": true
     },
     {
       "id": "c4-two-students",
@@ -204,8 +210,9 @@
         { "id": "d", "label": "A will probably score higher, because spaced retrieval slows forgetting" }
       ],
       "answer": "d",
-      "explanation": "Equal scores soon after study can hide different rates of forgetting. Spacing and self-testing both reduce forgetting over the following days.",
-      "source": "cepeda2006"
+      "explanation": "Equal scores soon after study can hide different rates of forgetting. In a classic study, rereading did better on a test 5 minutes later, but self-testing did better a week later.",
+      "source": "roediger2006",
+      "reviewed": true
     },
     {
       "id": "c4-blocked-vs-mixed",
@@ -220,7 +227,8 @@
       ],
       "answer": "a",
       "explanation": "This pattern, worse during practice and better on the later test, is what interleaving studies with maths problems found.",
-      "source": "rohrer2007"
+      "source": "rohrer2007",
+      "reviewed": true
     },
     {
       "id": "c5-two-plans",
@@ -250,7 +258,8 @@
       ],
       "answer": ["which-a", "why-spaced"],
       "explanation": "Both plans use 8 hours. Plan A spreads them out and tests memory each time; rereading and highlighting rate low in the evidence.",
-      "source": "dunlosky2013"
+      "source": "dunlosky2013",
+      "reviewed": true
     },
     {
       "id": "c5-confidence-claim",
@@ -278,7 +287,8 @@
       ],
       "answer": ["evidence-no", "why-familiar"],
       "explanation": "Confidence during study often overestimates later recall, because familiar material feels known. The claim needs a test of recall days later.",
-      "source": "koriat2005"
+      "source": "koriat2005",
+      "reviewed": true
     },
     {
       "id": "c5-test-at-end",
@@ -305,8 +315,9 @@
         }
       ],
       "answer": ["sound-no", "why-learning"],
-      "explanation": "Retrieval practice produced more learning than elaborative study, even when the task was to build understanding, so it belongs throughout study, not only at the end.",
-      "source": "karpicke2011"
+      "explanation": "A large review rated practice testing among the most useful study techniques, used throughout study rather than saved for the end. Low-stakes tests help you learn, not only measure what you know.",
+      "source": "dunlosky2013",
+      "reviewed": true
     },
     {
       "id": "c6-week-plan",
@@ -325,13 +336,17 @@
       ],
       "rules": [
         { "type": "last", "block": "mock" },
-        { "type": "immediatelyBefore", "first": "mixed", "then": "mock" },
+        { "type": "before", "first": "a-test", "then": "mixed" },
+        { "type": "before", "first": "b-test", "then": "mixed" },
+        { "type": "before", "first": "c-test", "then": "mixed" },
         { "type": "gapBefore", "first": "a-learn", "then": "a-test" },
         { "type": "gapBefore", "first": "b-learn", "then": "b-test" },
         { "type": "gapBefore", "first": "c-learn", "then": "c-test" }
       ],
-      "explanation": "A plan that works: learn each topic, come back to test it after a gap, mix the topics, and finish with a mixed self-test right before the mock.",
-      "source": "dunlosky2013"
+      "explanation": "A plan that works: learn each topic, come back to test it after a gap, and take the mixed self-test after all the topic tests. Mixing topics in one session (interleaving) helps you tell them apart (Rohrer & Taylor, 2007).",
+      "notCorrectFeedback": "This plan doesn’t build in spacing yet",
+      "source": "dunlosky2013",
+      "reviewed": true
     },
     {
       "id": "c6-self-test-session",
@@ -354,7 +369,8 @@
         { "type": "last", "block": "plan" }
       ],
       "explanation": "Recall first with nothing in view, then check against the source for feedback, and schedule a delayed retry of what you missed.",
-      "source": "rawson2011"
+      "source": "rawson2011",
+      "reviewed": true
     },
     {
       "id": "c6-mixed-set",
@@ -373,7 +389,8 @@
       ],
       "rules": [{ "type": "noAdjacentSameGroup" }],
       "explanation": "No two problems of the same kind back to back: each problem makes you work out which formula it needs, as the exam will.",
-      "source": "rohrer2007"
+      "source": "rohrer2007",
+      "reviewed": true
     }
   ],
   "nextSteps": {

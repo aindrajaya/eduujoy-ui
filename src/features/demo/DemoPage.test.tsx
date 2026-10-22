@@ -15,6 +15,12 @@ afterEach(() => {
 });
 
 async function startDemo(user: UserEvent) {
+  await user.click(screen.getByRole('radio', { name: 'Pass an exam' }));
+  await user.click(screen.getByRole('button', { name: 'Continue' }));
+  await user.click(screen.getByRole('radio', { name: '3–5 h' }));
+  await user.click(screen.getByRole('button', { name: 'Continue' }));
+  await user.click(screen.getByRole('radio', { name: 'A mix' }));
+  await user.click(screen.getByRole('button', { name: 'Continue' }));
   await user.click(screen.getByRole('radio', { name: 'Under a year' }));
   await user.click(screen.getByRole('radio', { name: 'No' }));
   await user.click(screen.getByRole('button', { name: 'Start the diagnostic' }));
@@ -29,10 +35,52 @@ async function dontKnowAll(user: UserEvent) {
 }
 
 describe('/demo (PRD-UI §7b)', () => {
-  it('asks the self-report first; both questions are required and errors are tied to them', async () => {
+  it('asks goal, time and format, one screen each; every step needs a choice and Back keeps it', async () => {
     const user = userEvent.setup();
     const { container } = render(<DemoPage adapter={fast()} />);
     expect(screen.getByRole('heading', { level: 1, name: 'Find your starting point in learning science' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Step 1 of 4: Your goal' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('group', { name: 'What do you want from learning science?' })).toHaveAccessibleDescription(
+      /Choose the option closest to you/,
+    );
+    await expectNoAxeViolations(container);
+    await user.click(screen.getByRole('radio', { name: 'Teach others' }));
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('heading', { level: 2, name: 'Step 2 of 4: Weekly time' })).toHaveFocus();
+    expect(screen.queryByText(/Choose the option closest/)).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByRole('radio', { name: 'Teach others' })).toBeChecked();
+    expect(screen.queryByRole('textbox')).toBeNull();
+  });
+
+  it('the steps are keyboard-complete and survive a reload', async () => {
+    const user = userEvent.setup();
+    const first = render(<DemoPage adapter={fast()} />);
+    screen.getByRole('radio', { name: 'Pass an exam' }).focus();
+    await user.keyboard('{ArrowDown}');
+    expect(screen.getByRole('radio', { name: 'Use it at work' })).toBeChecked();
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('heading', { level: 2, name: 'Step 2 of 4: Weekly time' })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole('radio', { name: '1–2 h' })).toHaveFocus();
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(screen.getByRole('heading', { level: 2, name: 'Step 3 of 4: Format' })).toHaveFocus();
+    first.unmount();
+
+    render(<DemoPage adapter={fast()} />);
+    expect(screen.getByRole('heading', { level: 2, name: 'Step 3 of 4: Format' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByRole('radio', { name: '3–5 h' })).toBeChecked();
+  });
+
+  it('asks the self-report last; both questions are required and errors are tied to them', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<DemoPage adapter={fast()} />);
+    for (const choice of ['Just curious', '6+ h', 'Videos']) {
+      await user.click(screen.getByRole('radio', { name: choice }));
+      await user.click(screen.getByRole('button', { name: 'Continue' }));
+    }
     expect(screen.getByText(/it is not a test/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Start the diagnostic' }));
     const groups = screen.getAllByRole('group');
