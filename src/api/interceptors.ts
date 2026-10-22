@@ -1,12 +1,5 @@
-import { isAxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { toApiError, type ApiError } from './errors';
-
-declare module 'axios' {
-  interface InternalAxiosRequestConfig {
-    /** Set once a request has been replayed after a token refresh. */
-    _retried?: boolean;
-  }
-}
+import { isHttpError, type HttpClient, type RequestConfig } from './http';
 
 export interface SessionExpiredContext {
   /** The request whose 401 triggered the failed refresh. */
@@ -30,7 +23,7 @@ function skipsRefresh(url: string | undefined): boolean {
   return NO_REFRESH.some((path) => url.endsWith(path) || url.includes(`${path}?`));
 }
 
-function addRequestHeaders(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
+function addRequestHeaders(config: RequestConfig): RequestConfig {
   if (!config.headers.has('X-Request-Id')) config.headers.set('X-Request-Id', crypto.randomUUID());
   // CSRF guard the API requires on unsafe methods; harmless on safe ones.
   config.headers.set('X-Requested-With', 'eduujoy');
@@ -49,7 +42,7 @@ const wait = (ms: number) =>
  * Installs the request interceptor (request id, CSRF header) and the response interceptor
  * (problem+json mapping, one shared refresh for concurrent 401s, one replay per request).
  */
-export function installInterceptors(instance: AxiosInstance, options: InterceptorOptions = {}): void {
+export function installInterceptors(instance: HttpClient, options: InterceptorOptions = {}): void {
   let refreshing: Promise<void> | null = null;
   // The refresh cycle that last reported expiry, so many waiters on one cycle report it once.
   let currentCycle: Promise<void> | null = null;
@@ -91,7 +84,7 @@ export function installInterceptors(instance: AxiosInstance, options: Intercepto
   instance.interceptors.request.use(addRequestHeaders);
 
   instance.interceptors.response.use(undefined, async (error: unknown) => {
-    if (!isAxiosError(error) || !error.config) throw toApiError(error);
+    if (!isHttpError(error)) throw toApiError(error);
     const original = error.config;
 
     if (error.response?.status !== 401 || skipsRefresh(original.url)) throw toApiError(error);

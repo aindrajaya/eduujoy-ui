@@ -1,6 +1,6 @@
-import axios, { type AxiosInstance } from 'axios';
 import { env } from '@/lib/env';
 import { trackActivity } from './activity';
+import { createHttpClient, type HttpClient } from './http';
 import { installInterceptors, type InterceptorOptions } from './interceptors';
 import { emitSessionExpired } from './session-events';
 
@@ -11,9 +11,9 @@ export interface ApiClientOptions extends InterceptorOptions {
   baseURL: string;
 }
 
-/** Builds an Axios instance with the PRD-UI §5 rules. Components never use it directly. */
-export function createApiClient({ baseURL, ...options }: ApiClientOptions): AxiosInstance {
-  const instance = axios.create({
+/** Builds the HTTP client with the PRD-UI §5 rules. Components never use it directly. */
+export function createApiClient({ baseURL, ...options }: ApiClientOptions): HttpClient {
+  const instance = createHttpClient({
     baseURL,
     withCredentials: true,
     timeout: DEFAULT_TIMEOUT_MS,

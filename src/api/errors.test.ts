@@ -1,9 +1,9 @@
-import { AxiosError, AxiosHeaders, CanceledError, type AxiosResponse } from 'axios';
 import { describe, expect, it } from 'vitest';
 import spec from '../../docs/openapi.json';
 import { ApiError, PROBLEM_CODES, parseRetryAfter, toApiError } from './errors';
+import { HttpError, type HttpErrorCode, type RequestConfig } from './http';
 
-function axiosError({
+function httpError({
   status,
   data,
   headers = {},
@@ -15,23 +15,12 @@ function axiosError({
   data?: unknown;
   headers?: Record<string, string>;
   statusText?: string;
-  code?: string;
+  code?: HttpErrorCode;
   sentRequestId?: string | null;
-}): AxiosError {
-  const config = {
-    headers: new AxiosHeaders(sentRequestId ? { 'X-Request-Id': sentRequestId } : {}),
-  };
-  const response =
-    status === undefined
-      ? undefined
-      : ({
-          status,
-          statusText,
-          data,
-          headers: new AxiosHeaders(headers),
-          config,
-        } as AxiosResponse);
-  return new AxiosError('boom', code, config, {}, response);
+}): HttpError {
+  const config: RequestConfig = { headers: new Headers(sentRequestId ? { 'X-Request-Id': sentRequestId } : {}) };
+  const response = status === undefined ? undefined : { status, statusText, data, headers, config };
+  return new HttpError('boom', code ?? (status === undefined ? 'ERR_NETWORK' : 'ERR_BAD_RESPONSE'), config, response);
 }
 
 const problem = {
@@ -50,7 +39,7 @@ const problem = {
 
 describe('toApiError', () => {
   it('maps problem+json with field errors and the API request id', () => {
-    const e = toApiError(axiosError({ status: 400, data: problem }));
+    const e = toApiError(httpError({ status: 400, data: problem }));
     expect(e).toBeInstanceOf(ApiError);
     expect(e).toMatchObject({
       status: 400,
@@ -65,21 +54,21 @@ describe('toApiError', () => {
 
   it('uses the title as message and empty field errors when a problem has neither', () => {
     const bare = { type: problem.type, status: 404, code: 'NOT_FOUND', title: 'Not found', requestId: 'r' };
-    const e = toApiError(axiosError({ status: 404, data: bare }));
+    const e = toApiError(httpError({ status: 404, data: bare }));
     expect(e.message).toBe('Not found');
     expect(e.fieldErrors).toEqual({});
   });
 
   it('falls back to the response then the sent request id when the body has none', () => {
     const body = { ...problem, requestId: '' };
-    expect(toApiError(axiosError({ status: 400, data: body, headers: { 'x-request-id': 'req-hdr' } })).requestId).toBe('req-hdr');
-    expect(toApiError(axiosError({ status: 400, data: body })).requestId).toBe('req-sent');
-    expect(toApiError(axiosError({ status: 400, data: body, sentRequestId: null })).requestId).toBeUndefined();
+    expect(toApiError(httpError({ status: 400, data: body, headers: { 'x-request-id': 'req-hdr' } })).requestId).toBe('req-hdr');
+    expect(toApiError(httpError({ status: 400, data: body })).requestId).toBe('req-sent');
+    expect(toApiError(httpError({ status: 400, data: body, sentRequestId: null })).requestId).toBeUndefined();
   });
 
   it('reads Retry-After on 429', () => {
     const e = toApiError(
-      axiosError({
+      httpError({
         status: 429,
         data: { ...problem, status: 429, code: 'RATE_LIMITED', title: 'Slow down' },
         headers: { 'retry-after': '3' },
@@ -99,27 +88,26 @@ describe('toApiError', () => {
     [502, 'INTERNAL'],
     [503, 'SERVICE_UNAVAILABLE'],
   ] as const)('maps a non-problem %i to %s', (status, code) => {
-    const e = toApiError(axiosError({ status, data: '<html>bad gateway</html>', statusText: 'Bad' }));
+    const e = toApiError(httpError({ status, data: '<html>bad gateway</html>', statusText: 'Bad' }));
     expect(e).toMatchObject({ status, code, title: 'Bad', requestId: 'req-sent' });
   });
 
   it('ignores bodies with unknown codes or wrong shapes', () => {
-    expect(toApiError(axiosError({ status: 500, data: { ...problem, code: 'WHAT' } })).code).toBe('INTERNAL');
-    expect(toApiError(axiosError({ status: 500, data: null })).title).toBe('Request failed with status 500');
-    expect(toApiError(axiosError({ status: 500, data: { title: 1 } })).code).toBe('INTERNAL');
+    expect(toApiError(httpError({ status: 500, data: { ...problem, code: 'WHAT' } })).code).toBe('INTERNAL');
+    expect(toApiError(httpError({ status: 500, data: null })).title).toBe('Request failed with status 500');
+    expect(toApiError(httpError({ status: 500, data: { title: 1 } })).code).toBe('INTERNAL');
   });
 
   it('maps timeouts and network failures without a response', () => {
-    expect(toApiError(axiosError({ code: 'ECONNABORTED' }))).toMatchObject({ status: 0, code: 'TIMEOUT', requestId: 'req-sent' });
-    expect(toApiError(axiosError({ code: 'ETIMEDOUT' })).code).toBe('TIMEOUT');
-    expect(toApiError(axiosError({ code: 'ERR_NETWORK', sentRequestId: null }))).toMatchObject({
+    expect(toApiError(httpError({ code: 'ECONNABORTED' }))).toMatchObject({ status: 0, code: 'TIMEOUT', requestId: 'req-sent' });
+    expect(toApiError(httpError({ code: 'ERR_NETWORK', sentRequestId: null }))).toMatchObject({
       code: 'NETWORK_ERROR',
       requestId: undefined,
     });
   });
 
   it('maps cancellations, plain errors and non-errors', () => {
-    expect(toApiError(new CanceledError()).code).toBe('CANCELED');
+    expect(toApiError(httpError({ code: 'ERR_CANCELED' })).code).toBe('CANCELED');
     expect(toApiError(new Error('oops'))).toMatchObject({ code: 'UNKNOWN', detail: 'oops' });
     expect(toApiError('weird')).toMatchObject({ code: 'UNKNOWN', detail: undefined });
   });
@@ -127,11 +115,6 @@ describe('toApiError', () => {
   it('returns an existing ApiError unchanged', () => {
     const e = new ApiError({ status: 409, code: 'CONFLICT', title: 'Conflict' });
     expect(toApiError(e)).toBe(e);
-  });
-
-  it('tolerates a missing config on the axios error', () => {
-    const e = new AxiosError('boom', 'ERR_NETWORK');
-    expect(toApiError(e)).toMatchObject({ code: 'NETWORK_ERROR', requestId: undefined });
   });
 });
 
