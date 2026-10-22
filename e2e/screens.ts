@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test';
-import { mockPath, mockPathSummary, mockProblem, mockProgress, mockProgressHistory } from '../src/api/mocks/data';
+import { mockPath, mockPathJobEvents, mockPathSummary, mockProblem, mockProgress, mockProgressHistory } from '../src/api/mocks/data';
+import { toEventStreamText, type MockSseEvent } from '../src/api/mocks/sse';
 import { json, mockAuth, problem } from './api';
 
 // U12a: the screens each part restyles, with realistic mock data. Used by contrast.spec.ts (axe in
@@ -91,6 +92,40 @@ export const SCREENS: readonly Screen[] = [
     },
   },
   { name: 'paths', parts: [1, 2], url: '/paths', setup: signedInWithPath, ready: h1(/paths/i) },
+  { name: 'path', parts: [2], url: '/paths/path-1', setup: signedInWithPath, ready: h1(mockPath.topic.canonicalName) },
+  {
+    name: 'today-empty',
+    parts: [2],
+    url: '/today',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [], nextCursor: null }));
+    },
+    ready: async (page) => {
+      await expect(page.getByText('No active path yet')).toBeVisible();
+    },
+  },
+  {
+    name: 'generation-reconnecting',
+    parts: [2],
+    url: '/paths/new/job-1',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      // Two stages in, then the stream drops and the reconnect waits: staged progress, reconnecting.
+      let connections = 0;
+      await page.route('**/v1/jobs/job-1/events', (route) => {
+        connections += 1;
+        if (connections > 1) return never();
+        const first = (mockPathJobEvents as unknown as MockSseEvent[]).slice(0, 2);
+        return route.fulfill({
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' },
+          body: `: connected\n\n${toEventStreamText(first)}`,
+        });
+      });
+    },
+    ready: h1('Building your path…'),
+  },
   {
     name: 'step',
     parts: [1, 2],
