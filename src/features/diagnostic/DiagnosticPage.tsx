@@ -14,7 +14,8 @@ import { formatRetryWait } from '@/lib/time';
 import StateMessage from '@/ui/StateMessage';
 import PlacementResult from './components/PlacementResult';
 import { diagnosticKeys } from './keys';
-import { submitBatch, useDiagnostic, type DiagnosticState } from './queries';
+import { apiDiagnosticAdapter } from './apiAdapter';
+import { useDiagnostic, type DiagnosticState } from './queries';
 
 function buildPathError(error: ApiError): string {
   switch (error.code) {
@@ -81,7 +82,7 @@ function BatchQuiz({ id, batch, userId }: { id: string; batch: DiagnosticBatchRe
           allowSkip
           autoSubmit
           submitLabel="Continue"
-          submit={(answers, idempotencyKey) => submitBatch(id, items, answers, idempotencyKey)}
+          submit={(answers, idempotencyKey) => apiDiagnosticAdapter.submitAnswers(id, items, answers, idempotencyKey)}
           onSubmitted={(next) => {
             // Answer responses omit the topic; keep the one from the resumed state.
             client.setQueryData<DiagnosticState>(diagnosticKeys.batch(id), (prev) => ({ ...next, topic: prev?.topic }));

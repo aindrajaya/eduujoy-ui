@@ -10,6 +10,10 @@ export interface QuizRunnerProps<R> extends QuizSubmitOptions<R> {
   /** Drafts are stored per user (PRD-UI §7). */
   userId: string | undefined;
   allowSkip?: boolean;
+  /** The skip action's label; the demo says "I don't know yet". */
+  skipLabel?: string;
+  /** False for the public demo, whose drafts must leave other users' drafts alone. */
+  clearOtherDrafts?: boolean;
   submitLabel?: string;
   /** Submit as soon as the last answer is committed (short batches like the diagnostic). */
   autoSubmit?: boolean;
@@ -23,6 +27,8 @@ export interface QuizRunnerProps<R> extends QuizSubmitOptions<R> {
 export default function QuizRunner<R>({
   userId,
   allowSkip,
+  skipLabel,
+  clearOtherDrafts = true,
   submitLabel,
   autoSubmit = false,
   describeError,
@@ -32,7 +38,7 @@ export default function QuizRunner<R>({
   const { index, answers, flagged, status } = useQuizState();
   const dispatch = useQuizDispatch();
   const { submit, waitingForNetwork } = useQuizSubmit(submitOptions);
-  useQuizDraft(userId);
+  useQuizDraft(userId, { clearOthers: clearOtherDrafts });
 
   // A failed auto-submit lands on the review screen with its retry, so this only fires on entry.
   useEffect(() => {
@@ -89,6 +95,7 @@ export default function QuizRunner<R>({
       defaultAnswer={answers[question.id]}
       flagged={flagged.has(question.id)}
       allowSkip={allowSkip}
+      skipLabel={skipLabel}
       finalLabel={autoSubmit ? (submitLabel ?? 'Submit answers') : 'Review answers'}
       onCommit={onCommit}
       onToggleFlag={onToggleFlag}

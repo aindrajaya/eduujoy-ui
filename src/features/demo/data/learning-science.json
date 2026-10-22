@@ -1,0 +1,406 @@
+{
+  "topic": { "id": "learning-science", "name": "Learning science for exam prep" },
+  "sources": {
+    "roediger2006": {
+      "label": "Roediger & Karpicke (2006). Test-enhanced learning. Psychological Science, 17(3), 249–255.",
+      "url": "https://doi.org/10.1111/j.1467-9280.2006.01693.x"
+    },
+    "dunlosky2013": {
+      "label": "Dunlosky et al. (2013). Improving students’ learning with effective learning techniques. Psychological Science in the Public Interest, 14(1), 4–58.",
+      "url": "https://doi.org/10.1177/1529100612453266"
+    },
+    "cepeda2006": {
+      "label": "Cepeda et al. (2006). Distributed practice in verbal recall tasks: A review and quantitative synthesis. Psychological Bulletin, 132(3), 354–380.",
+      "url": "https://doi.org/10.1037/0033-2909.132.3.354"
+    },
+    "rohrer2007": {
+      "label": "Rohrer & Taylor (2007). The shuffling of mathematics problems improves learning. Instructional Science, 35(6), 481–498.",
+      "url": "https://doi.org/10.1007/s11251-007-9015-8"
+    },
+    "bjork1994": {
+      "label": "Bjork (1994). Memory and metamemory considerations in the training of human beings. In Metcalfe & Shimamura (Eds.), Metacognition: Knowing about knowing, 185–205. MIT Press."
+    },
+    "koriat2005": {
+      "label": "Koriat & Bjork (2005). Illusions of competence in monitoring one’s knowledge during study. Journal of Experimental Psychology: Learning, Memory, and Cognition, 31(2), 187–194.",
+      "url": "https://doi.org/10.1037/0278-7393.31.2.187"
+    },
+    "butler2008": {
+      "label": "Butler & Roediger (2008). Feedback enhances the positive effects and reduces the negative effects of multiple-choice testing. Memory & Cognition, 36(3), 604–616.",
+      "url": "https://doi.org/10.3758/MC.36.3.604"
+    },
+    "kornell2009": {
+      "label": "Kornell (2009). Optimising learning using flashcards: Spacing is more effective than cramming. Applied Cognitive Psychology, 23(9), 1297–1317.",
+      "url": "https://doi.org/10.1002/acp.1537"
+    },
+    "karpicke2011": {
+      "label": "Karpicke & Blunt (2011). Retrieval practice produces more learning than elaborative studying with concept mapping. Science, 331(6018), 772–775.",
+      "url": "https://doi.org/10.1126/science.1199327"
+    },
+    "rawson2011": {
+      "label": "Rawson & Dunlosky (2011). Optimizing schedules of retrieval practice for durable and efficient learning: How much is enough? Journal of Experimental Psychology: General, 140(3), 283–302.",
+      "url": "https://doi.org/10.1037/a0023956"
+    }
+  },
+  "items": [
+    {
+      "id": "c1-retrieval",
+      "bloom": "C1",
+      "type": "single_choice",
+      "prompt": "Which description matches retrieval practice?",
+      "options": [
+        { "id": "a", "label": "Rereading your notes until they feel familiar" },
+        { "id": "b", "label": "Recalling information from memory, for example answering questions without looking" },
+        { "id": "c", "label": "Highlighting the key sentences in a chapter" },
+        { "id": "d", "label": "Copying a summary out again more neatly" }
+      ],
+      "answer": "b",
+      "explanation": "Retrieval practice means pulling information out of memory, such as self-testing. Recalling strengthens later recall more than rereading the same material.",
+      "source": "roediger2006"
+    },
+    {
+      "id": "c1-spacing",
+      "bloom": "C1",
+      "type": "single_choice",
+      "prompt": "What is the spacing effect?",
+      "options": [
+        { "id": "a", "label": "Leaving blank space in your notes helps you remember them" },
+        { "id": "b", "label": "Breaks during a session make no difference to memory" },
+        { "id": "c", "label": "Spreading study over separate sessions leads to better long-term memory than one massed session" },
+        { "id": "d", "label": "Studying in a different room each time always improves recall" }
+      ],
+      "answer": "c",
+      "explanation": "The same total study time, spread across separate sessions, produces better retention later than massing it into one session.",
+      "source": "cepeda2006"
+    },
+    {
+      "id": "c1-interleaving",
+      "bloom": "C1",
+      "type": "single_choice",
+      "prompt": "What is interleaving?",
+      "options": [
+        { "id": "a", "label": "Studying one topic until you have mastered it before starting the next" },
+        { "id": "b", "label": "Alternating study with exercise" },
+        { "id": "c", "label": "Reading two textbooks side by side" },
+        { "id": "d", "label": "Mixing different topics or problem types within one study session" }
+      ],
+      "answer": "d",
+      "explanation": "Interleaving mixes problem types in one session, so you practise choosing the right method as well as applying it.",
+      "source": "rohrer2007"
+    },
+    {
+      "id": "c2-why-spacing",
+      "bloom": "C2",
+      "type": "single_choice",
+      "prompt": "Why does spaced study tend to beat one long session of the same total length?",
+      "options": [
+        { "id": "a", "label": "The brain can store only a fixed number of facts per day" },
+        { "id": "b", "label": "Some forgetting between sessions makes the next recall more effortful, and that effort strengthens memory" },
+        { "id": "c", "label": "Spaced sessions let you skip the hardest material" },
+        { "id": "d", "label": "Long sessions always end up shorter than planned" }
+      ],
+      "answer": "b",
+      "explanation": "One leading account: a gap lets some forgetting happen, so the next session takes more effort to recall, and that ‘desirable difficulty’ makes learning last.",
+      "source": "bjork1994"
+    },
+    {
+      "id": "c2-familiarity",
+      "bloom": "C2",
+      "type": "single_choice",
+      "prompt": "Rereading a chapter three times makes it feel familiar. Why is that feeling a poor guide to what you will recall in the exam?",
+      "options": [
+        { "id": "a", "label": "Recognising material while it is in front of you is not the same as recalling it without it" },
+        { "id": "b", "label": "Rereading erases what you learned earlier" },
+        { "id": "c", "label": "Familiar material is never tested" },
+        { "id": "d", "label": "The feeling is accurate; rereading is the best method" }
+      ],
+      "answer": "a",
+      "explanation": "Judging what you know while the answer is in view overestimates what you can recall later, when it is not.",
+      "source": "koriat2005"
+    },
+    {
+      "id": "c2-why-interleave",
+      "bloom": "C2",
+      "type": "single_choice",
+      "prompt": "Exam questions come in a mixed order. Why does practising mixed problem types help with that?",
+      "options": [
+        { "id": "a", "label": "It makes each practice session shorter" },
+        { "id": "b", "label": "It lets you leave out the hardest problem types" },
+        { "id": "c", "label": "It trains you to decide which method a problem needs, not only to apply a method you were told to use" },
+        { "id": "d", "label": "It only works for learning languages" }
+      ],
+      "answer": "c",
+      "explanation": "Blocked practice tells you the method in advance. Mixed practice makes you choose it, which is what a mixed exam asks for.",
+      "source": "rohrer2007"
+    },
+    {
+      "id": "c3-mock-in-6-days",
+      "bloom": "C3",
+      "type": "scenario",
+      "prompt": "Your mock exam is in 6 days. You can study 2 hours a day, and it covers three topics. What do you do today?",
+      "options": [
+        { "id": "a", "label": "Spend both hours rereading topic 1" },
+        { "id": "b", "label": "Wait until the last two days so it is fresh" },
+        { "id": "c", "label": "Make highlighted summaries of all three topics" },
+        { "id": "d", "label": "Study each topic briefly, end with a short self-test on each, and plan to come back to all three on later days" }
+      ],
+      "answer": "d",
+      "explanation": "This plan combines retrieval practice, spacing and mixing topics, the techniques rated most useful in a large review.",
+      "source": "dunlosky2013"
+    },
+    {
+      "id": "c3-after-practice-set",
+      "bloom": "C3",
+      "type": "scenario",
+      "prompt": "You finish a practice set and get 6 of 10 right. What is the most useful next move?",
+      "options": [
+        { "id": "a", "label": "Check the right answers for the 4 you missed, then try those questions again from memory a few days later" },
+        { "id": "b", "label": "Move on: 6 of 10 is a pass" },
+        { "id": "c", "label": "Reread the whole chapter from the start" },
+        { "id": "d", "label": "Repeat the same 10 questions straight away until you get 10 of 10" }
+      ],
+      "answer": "a",
+      "explanation": "Feedback after a test corrects errors, and retrying after a gap turns the fix into durable learning; instant repeats mostly measure short-term memory.",
+      "source": "butler2008"
+    },
+    {
+      "id": "c3-flashcards",
+      "bloom": "C3",
+      "type": "scenario",
+      "prompt": "You have 40 flashcards to learn over a week. Which approach fits the evidence best?",
+      "options": [
+        { "id": "a", "label": "Split them into 4 piles of 10 and master one pile per sitting" },
+        { "id": "b", "label": "Keep all 40 in one deck, cycle through it over several days, and recall each answer before you flip" },
+        { "id": "c", "label": "Read the front and back together to save time" },
+        { "id": "d", "label": "Drop a card as soon as you get it right once" }
+      ],
+      "answer": "b",
+      "explanation": "One large deck spaces the repetitions of each card further apart, which beat small, crammed piles in a flashcard study.",
+      "source": "kornell2009"
+    },
+    {
+      "id": "c4-score-drop",
+      "bloom": "C4",
+      "type": "scenario",
+      "prompt": "A learner’s log: on day 1, after rereading a chapter four times in a row, they score 90% on a practice quiz. On day 7 they score 45% on a test of the same chapter. What best explains the drop?",
+      "options": [
+        { "id": "a", "label": "The day 7 test was unfair" },
+        { "id": "b", "label": "Four rereads were too few; eight would have fixed it" },
+        { "id": "c", "label": "Massed rereading lifted the immediate score but did not last; spaced retrieval would have made it more durable" },
+        { "id": "d", "label": "Memory always halves after a week, whatever the method" }
+      ],
+      "answer": "c",
+      "explanation": "In a classic study, rereading did better on a test after 5 minutes, but self-testing did better a week later. Immediate scores can mislead.",
+      "source": "roediger2006"
+    },
+    {
+      "id": "c4-two-students",
+      "bloom": "C4",
+      "type": "scenario",
+      "prompt": "Two students study for the same 3 hours. A studies 1 hour on Monday, Wednesday and Friday, ending each session with a self-quiz. B studies 3 hours on Friday, rereading notes. On Friday evening they score the same. What is the best prediction for a test the following Friday?",
+      "options": [
+        { "id": "a", "label": "They will score the same again" },
+        { "id": "b", "label": "B will score higher, because the material was fresher" },
+        { "id": "c", "label": "It cannot be predicted from study methods" },
+        { "id": "d", "label": "A will probably score higher, because spaced retrieval slows forgetting" }
+      ],
+      "answer": "d",
+      "explanation": "Equal scores soon after study can hide different rates of forgetting. Spacing and self-testing both reduce forgetting over the following days.",
+      "source": "cepeda2006"
+    },
+    {
+      "id": "c4-blocked-vs-mixed",
+      "bloom": "C4",
+      "type": "scenario",
+      "prompt": "A class practises four problem types. Group 1 practises them in blocks (all of type A, then all of type B, and so on); Group 2 practises them shuffled. Group 1 scores higher during practice, but Group 2 scores higher on a later mixed test. What explains the reversal?",
+      "options": [
+        { "id": "a", "label": "Blocked practice gives the method away, which lifts practice scores but not the skill of choosing a method that a mixed test needs" },
+        { "id": "b", "label": "Group 2 got easier problems" },
+        { "id": "c", "label": "Group 1 practised too much and forgot" },
+        { "id": "d", "label": "Shuffled practice includes more problems" }
+      ],
+      "answer": "a",
+      "explanation": "This pattern, worse during practice and better on the later test, is what interleaving studies with maths problems found.",
+      "source": "rohrer2007"
+    },
+    {
+      "id": "c5-two-plans",
+      "bloom": "C5",
+      "type": "linked_choice",
+      "prompt": "An exam is in 2 weeks and you have 8 hours. Plan A: eight 1-hour sessions spread over the two weeks, each starting with a self-test on earlier material. Plan B: two 4-hour sessions on the final weekend, rereading and highlighting.",
+      "parts": [
+        {
+          "id": "which",
+          "prompt": "Which plan is better?",
+          "options": [
+            { "id": "which-a", "label": "Plan A" },
+            { "id": "which-b", "label": "Plan B" },
+            { "id": "which-same", "label": "They are about equal" }
+          ]
+        },
+        {
+          "id": "why",
+          "prompt": "What is the main reason?",
+          "options": [
+            { "id": "why-time", "label": "It uses more total time" },
+            { "id": "why-spaced", "label": "It combines spacing with retrieval practice" },
+            { "id": "why-highlight", "label": "Highlighting finds the key ideas quickly" },
+            { "id": "why-fresh", "label": "Studying close to the exam keeps it fresh" }
+          ]
+        }
+      ],
+      "answer": ["which-a", "why-spaced"],
+      "explanation": "Both plans use 8 hours. Plan A spreads them out and tests memory each time; rereading and highlighting rate low in the evidence.",
+      "source": "dunlosky2013"
+    },
+    {
+      "id": "c5-confidence-claim",
+      "bloom": "C5",
+      "type": "linked_choice",
+      "prompt": "A study app says: “Our learners feel 30% more confident after one session of rereading our summaries.”",
+      "parts": [
+        {
+          "id": "evidence",
+          "prompt": "Is that good evidence that the method works?",
+          "options": [
+            { "id": "evidence-yes", "label": "Yes" },
+            { "id": "evidence-no", "label": "No" }
+          ]
+        },
+        {
+          "id": "why",
+          "prompt": "Why?",
+          "options": [
+            { "id": "why-familiar", "label": "Confidence after rereading often reflects familiarity, not what you can recall later" },
+            { "id": "why-measure", "label": "Confidence cannot be measured" },
+            { "id": "why-small", "label": "30% is too small to matter" }
+          ]
+        }
+      ],
+      "answer": ["evidence-no", "why-familiar"],
+      "explanation": "Confidence during study often overestimates later recall, because familiar material feels known. The claim needs a test of recall days later.",
+      "source": "koriat2005"
+    },
+    {
+      "id": "c5-test-at-end",
+      "bloom": "C5",
+      "type": "linked_choice",
+      "prompt": "A tutor advises: “Only use practice tests at the end, once you have learned everything. Testing too early just shows you what you don’t know.”",
+      "parts": [
+        {
+          "id": "sound",
+          "prompt": "How sound is this advice?",
+          "options": [
+            { "id": "sound-yes", "label": "Sound" },
+            { "id": "sound-no", "label": "Unsound" }
+          ]
+        },
+        {
+          "id": "why",
+          "prompt": "Why?",
+          "options": [
+            { "id": "why-learning", "label": "Testing is itself a learning event, and it helps throughout study, especially with feedback" },
+            { "id": "why-grading", "label": "Tests are only useful for grading" },
+            { "id": "why-motivation", "label": "Early tests always lower motivation" }
+          ]
+        }
+      ],
+      "answer": ["sound-no", "why-learning"],
+      "explanation": "Retrieval practice produced more learning than elaborative study, even when the task was to build understanding, so it belongs throughout study, not only at the end.",
+      "source": "karpicke2011"
+    },
+    {
+      "id": "c6-week-plan",
+      "bloom": "C6",
+      "type": "order",
+      "prompt": "Your mock exam covers topics A, B and C. Put these 8 study blocks in the order you would do them over the week before the mock.",
+      "options": [
+        { "id": "a-learn", "label": "Topic A: learn", "group": "A" },
+        { "id": "a-test", "label": "Topic A: self-test", "group": "A" },
+        { "id": "b-learn", "label": "Topic B: learn", "group": "B" },
+        { "id": "b-test", "label": "Topic B: self-test", "group": "B" },
+        { "id": "c-learn", "label": "Topic C: learn", "group": "C" },
+        { "id": "c-test", "label": "Topic C: self-test", "group": "C" },
+        { "id": "mock", "label": "Mock exam" },
+        { "id": "mixed", "label": "Mixed self-test on A, B and C" }
+      ],
+      "rules": [
+        { "type": "last", "block": "mock" },
+        { "type": "immediatelyBefore", "first": "mixed", "then": "mock" },
+        { "type": "gapBefore", "first": "a-learn", "then": "a-test" },
+        { "type": "gapBefore", "first": "b-learn", "then": "b-test" },
+        { "type": "gapBefore", "first": "c-learn", "then": "c-test" }
+      ],
+      "explanation": "A plan that works: learn each topic, come back to test it after a gap, mix the topics, and finish with a mixed self-test right before the mock.",
+      "source": "dunlosky2013"
+    },
+    {
+      "id": "c6-self-test-session",
+      "bloom": "C6",
+      "type": "order",
+      "prompt": "Put the steps of one self-testing session in order.",
+      "options": [
+        { "id": "check", "label": "Check your answers against the source" },
+        { "id": "plan", "label": "Plan when to retry the ones you missed, in a few days" },
+        { "id": "write", "label": "Write down everything you remember about the topic" },
+        { "id": "mark", "label": "Mark the questions you missed" },
+        { "id": "close", "label": "Close the book and your notes" },
+        { "id": "answer", "label": "Answer practice questions without looking" }
+      ],
+      "rules": [
+        { "type": "first", "block": "close" },
+        { "type": "before", "first": "write", "then": "check" },
+        { "type": "before", "first": "answer", "then": "check" },
+        { "type": "before", "first": "check", "then": "mark" },
+        { "type": "last", "block": "plan" }
+      ],
+      "explanation": "Recall first with nothing in view, then check against the source for feedback, and schedule a delayed retry of what you missed.",
+      "source": "rawson2011"
+    },
+    {
+      "id": "c6-mixed-set",
+      "bloom": "C6",
+      "type": "order",
+      "prompt": "Your exam mixes four kinds of volume problem. Arrange these 8 practice problems into one session that prepares you for it.",
+      "options": [
+        { "id": "cyl-1", "label": "Cylinder volume, problem 1", "group": "cylinder" },
+        { "id": "cyl-2", "label": "Cylinder volume, problem 2", "group": "cylinder" },
+        { "id": "cone-1", "label": "Cone volume, problem 1", "group": "cone" },
+        { "id": "cone-2", "label": "Cone volume, problem 2", "group": "cone" },
+        { "id": "sph-1", "label": "Sphere volume, problem 1", "group": "sphere" },
+        { "id": "sph-2", "label": "Sphere volume, problem 2", "group": "sphere" },
+        { "id": "pri-1", "label": "Prism volume, problem 1", "group": "prism" },
+        { "id": "pri-2", "label": "Prism volume, problem 2", "group": "prism" }
+      ],
+      "rules": [{ "type": "noAdjacentSameGroup" }],
+      "explanation": "No two problems of the same kind back to back: each problem makes you work out which formula it needs, as the exam will.",
+      "source": "rohrer2007"
+    }
+  ],
+  "nextSteps": {
+    "novice": [
+      { "title": "Turn one chapter into 10 questions and answer them from memory", "bloom": "C3" },
+      { "title": "Explain in your own words why recalling beats rereading", "bloom": "C2" },
+      { "title": "Spread one topic over three short sessions this week", "bloom": "C3" }
+    ],
+    "advanced_beginner": [
+      { "title": "Plan a week that spaces each topic across at least two days", "bloom": "C3" },
+      { "title": "Mix two topics in one practice set", "bloom": "C3" },
+      { "title": "Compare your score after a 3-day gap with your same-day score", "bloom": "C4" }
+    ],
+    "competent": [
+      { "title": "Find your weakest topic from your practice-test log", "bloom": "C4" },
+      { "title": "Rate two revision plans against spacing and retrieval", "bloom": "C5" },
+      { "title": "Adjust next week’s schedule after each self-test", "bloom": "C5" }
+    ],
+    "proficient": [
+      { "title": "Design a 4-week revision plan with growing gaps between reviews", "bloom": "C6" },
+      { "title": "Judge a study app’s claims against the evidence", "bloom": "C5" },
+      { "title": "Coach a classmate through one retrieval session", "bloom": "C6" }
+    ],
+    "expert": [
+      { "title": "Design a revision plan for a subject you have not studied before", "bloom": "C6" },
+      { "title": "Critique a published study-skills guide", "bloom": "C5" },
+      { "title": "Build a question bank someone else can revise from", "bloom": "C6" }
+    ]
+  }
+}

@@ -13,7 +13,7 @@ const questions: QuizQuestion[] = [
   { id: 'q3', kind: 'short_answer', prompt: 'Three?' },
 ];
 
-function setup(userId: string | null = 'u1') {
+function setup(userId: string | null = 'u1', options?: { clearOthers?: boolean }) {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QuizProvider quizId="quiz-1" questions={questions} idempotencyKey="fresh-key">
       {children}
@@ -21,7 +21,7 @@ function setup(userId: string | null = 'u1') {
   );
   return renderHook(
     () => {
-      useQuizDraft(userId ?? undefined);
+      useQuizDraft(userId ?? undefined, options);
       return { state: useQuizState(), dispatch: useQuizDispatch() };
     },
     { wrapper },
@@ -122,6 +122,14 @@ describe('isSnapshot', () => {
 });
 
 describe('useQuizDraft and other users', () => {
+  it('the public demo keeps other users’ drafts (clearOthers: false)', () => {
+    writeDraft('u1', 'quiz-9', { index: 2 });
+    writeDraft('demo', 'quiz-1', { index: 1 });
+    const { result } = setup('demo', { clearOthers: false });
+    expect(readDraft('u1', 'quiz-9')).toEqual({ index: 2 });
+    expect(result.current.state.index).toBe(1);
+  });
+
   it('removes other users’ drafts when this user opens a quiz', () => {
     writeDraft('someone-else', 'quiz-1', { index: 2 });
     writeDraft('u1', 'quiz-1', { index: 1 });
