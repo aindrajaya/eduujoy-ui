@@ -1,4 +1,4 @@
-import { screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { mockDiagnosticBatch, mockProblem, mockTopic } from '@/api/mocks/data';
@@ -7,6 +7,7 @@ import { server } from '@/api/mocks/server';
 import type { DiagnosticStartRequest, TopicResolveRequest } from '@/api/types';
 import { expectNoAxeViolations } from '@/test/axe';
 import { renderRoute } from '@/test/render';
+import { EXPERIENCE } from './experience';
 
 const choices = [
   { id: 'java-lang', canonicalName: 'Java (programming language)', similarity: 0.84 },
@@ -22,9 +23,10 @@ async function openForm(path = '/start') {
   return { user, ...view };
 }
 
-async function submitIntake(user: ReturnType<typeof userEvent.setup>, topic = 'ux research') {
+async function submitIntake(user: ReturnType<typeof userEvent.setup>, topic = 'ux research', experience = 'I’m new to this') {
   await user.type(screen.getByLabelText('What do you want to learn?'), topic);
   await user.type(screen.getByLabelText("What's your goal?"), 'Run usability studies');
+  await user.click(screen.getByRole('radio', { name: experience }));
   await user.click(screen.getByRole('button', { name: 'Continue' }));
 }
 
@@ -61,6 +63,7 @@ describe('/start (US-01)', () => {
       goal: 'Run usability studies',
       weeklyHours: 3,
       preferredFormats: ['video', 'text'],
+      selfReport: { years: 0, projectsShipped: 0 },
     });
   });
 
@@ -184,4 +187,16 @@ describe('/start (US-01)', () => {
     await submitIntake(user);
     expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong. Please try again.');
   });
+
+  it.each(EXPERIENCE.map((e) => [e.label, e.selfReport] as const))(
+    'the choice "%s" starts the diagnostic with its mapped selfReport',
+    async (label, selfReport) => {
+      const sent = capture();
+      const { user } = await openForm();
+      await submitIntake(user, 'ux research', label);
+      await waitFor(() => {
+        expect(sent.start?.selfReport).toEqual(selfReport);
+      });
+    },
+  );
 });
