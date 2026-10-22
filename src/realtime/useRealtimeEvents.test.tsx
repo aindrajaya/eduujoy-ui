@@ -37,12 +37,9 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     renderRoute('/progress');
     expect(await screen.findByText('Advanced beginner · C3 Apply')).toBeInTheDocument();
     // The socket opens once the first paint has settled (1 s) and the bridge chunk has loaded.
-    await waitFor(
-      () => {
-        expect(openedSockets).toHaveLength(1);
-      },
-      { timeout: 3000 },
-    );
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
 
     act(() => {
       openedSockets[0]!.serverEmit('stage.advanced', {
@@ -75,12 +72,9 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     );
     renderRoute('/progress');
     await screen.findByText('Advanced beginner · C3 Apply');
-    await waitFor(
-      () => {
-        expect(openedSockets).toHaveLength(1);
-      },
-      { timeout: 3000 },
-    );
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
     const socket = openedSockets[0]!;
 
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
@@ -127,12 +121,9 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     );
     renderRoute('/progress');
     await screen.findByText('Advanced beginner · C3 Apply');
-    await waitFor(
-      () => {
-        expect(openedSockets).toHaveLength(1);
-      },
-      { timeout: 3000 },
-    );
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
     const socket = openedSockets[0]!;
     let meCalls = 0;
     server.use(
@@ -172,12 +163,9 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     const uninstall = installSessionExpiry(router, queryClient);
     onTestFinished(uninstall);
     await screen.findByText('Advanced beginner · C3 Apply');
-    await waitFor(
-      () => {
-        expect(openedSockets).toHaveLength(1);
-      },
-      { timeout: 3000 },
-    );
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
     const socket = openedSockets[0]!;
     const unauthorized = () => problemResponse(mockProblem(401, 'UNAUTHENTICATED', 'Signed out'));
     server.use(
@@ -207,12 +195,9 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     );
     renderRoute('/progress');
     await screen.findByText('Advanced beginner · C3 Apply');
-    await waitFor(
-      () => {
-        expect(openedSockets).toHaveLength(1);
-      },
-      { timeout: 3000 },
-    );
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
     act(() => {
       openedSockets[0]!.rejectHandshake(new Error('xhr poll error'));
     });

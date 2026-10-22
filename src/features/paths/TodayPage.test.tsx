@@ -32,7 +32,7 @@ describe('/today (US-03 home)', () => {
     // The idle prefetch (setTimeout in jsdom) loads the detail off the critical path.
     await waitFor(() => {
       expect(detailLoads).toBe(1);
-    }, { timeout: 4000 });
+    });
   });
 
   it('falls back to the path detail when the list has no currentStep (older API)', async () => {
@@ -59,10 +59,10 @@ describe('/today (US-03 home)', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('offers a retry when paths cannot load', { timeout: 10_000 }, async () => {
+  it('offers a retry when paths cannot load', async () => {
     server.use(http.get('/v1/paths', ({ response }) => response.untyped(problemResponse(mockProblem(500, 'INTERNAL', 'Boom')))));
     renderRoute('/today');
-    expect(await screen.findByRole('button', { name: 'Try again' }, { timeout: 8000 })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 });
 

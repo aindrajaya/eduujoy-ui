@@ -66,12 +66,9 @@ describe('auth mutations', () => {
       result.current.mutate();
     });
     // Two retries at 0.5 s and 1 s come first.
-    await waitFor(
-      () => {
-        expect(result.current.isError).toBe(true);
-      },
-      { timeout: 4000 },
-    );
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
     expect(client.getQueryCache().getAll().map((q) => q.queryKey)).toEqual([sessionKeys.me()]);
     expect(client.getQueryData(sessionKeys.me())).toBeNull();
     // One attempt plus two retries.
