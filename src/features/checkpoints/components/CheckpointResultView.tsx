@@ -49,7 +49,7 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
         <section aria-labelledby="result-title" className="space-y-3">
           <div className="flex items-center gap-3">
             <Icon className={`h-8 w-8 ${result.passed ? 'text-success' : 'text-danger'}`} aria-hidden="true" />
-            <h1 id="result-title" ref={heading} tabIndex={-1} className="text-2xl font-bold text-text outline-none">
+            <h1 id="result-title" ref={heading} tabIndex={-1} className="text-text outline-none md:text-3xl">
               {result.passed ? 'You passed this checkpoint' : 'Not passed yet'}
             </h1>
           </div>
@@ -64,19 +64,19 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
             aria-valuemax={100}
             aria-valuenow={result.score}
             aria-valuetext={`${result.score}%, pass mark ${passScore}%`}
-            className="relative h-2 overflow-hidden rounded-chip bg-surface-muted"
+            className="relative h-3 overflow-hidden rounded-chip border-2 border-ink bg-surface"
           >
             <div className={`h-full ${result.passed ? 'bg-success' : 'bg-danger'}`} style={{ width: `${result.score}%` }} />
             <div className="absolute inset-y-0 w-0.5 bg-text" style={{ left: `${passScore}%` }} aria-hidden="true" />
           </div>
           {result.passed && result.stageAdvanced && (
-            <p role="note" className="rounded-card bg-success-soft p-3 text-sm text-text">
+            <p role="note" className="rounded-card border-2 border-success bg-surface p-3 text-sm text-text">
               You reached the next stage. We are checking your level and building your next path
               {result.nextPathJob ? '.' : '; it appears on Today when it is ready.'}
             </p>
           )}
           {!result.passed && result.remedialStepId && (
-            <p role="note" className="rounded-card bg-primary-soft p-3 text-sm text-text">
+            <p role="note" className="rounded-card border-2 border-primary bg-surface p-3 text-sm text-text">
               We added a review step one level lower, with a different resource. Do it first, then come back to this
               checkpoint.
             </p>
@@ -89,12 +89,12 @@ export default function CheckpointResultView({ path, step, result, onRetry }: Ch
         </section>
 
         <section aria-labelledby="feedback-title" className="space-y-3">
-          <h2 id="feedback-title" className="font-semibold text-text">
+          <h2 id="feedback-title" className="sk-display-md text-text">
             Feedback on your answers
           </h2>
           <ol className="space-y-3">
             {result.items.map((item, i) => (
-              <li key={item.itemId} className="space-y-1 rounded-card border border-border p-4">
+              <li key={item.itemId} className="sk-card space-y-1">
                 <p className="flex justify-between gap-3 text-sm text-text-muted">
                   <span>Question {i + 1}</span>
                   <span className="font-semibold text-text">{item.score}%</span>
