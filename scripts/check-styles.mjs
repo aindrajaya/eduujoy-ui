@@ -20,6 +20,10 @@ const SCOPE = [
   // U12a-2: Today, Paths, steps (and path generation).
   'src/features/paths',
   'src/features/steps',
+  // U12a-3: /start, the diagnostic, checkpoints and their results.
+  'src/features/onboarding',
+  'src/features/diagnostic',
+  'src/features/checkpoints',
 ];
 
 // Generated from tokens.json, or brand marks that must keep their own colours.
