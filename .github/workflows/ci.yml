@@ -77,3 +77,6 @@ jobs:
       - run: pnpm build:lh
       - name: Lighthouse budgets on /signin, /today, /steps/1 (production bundle, mock API on the preview server)
         run: pnpm lhci
+      - name: Lighthouse summary (why each LCP is what it is)
+        if: always()
+        run: node scripts/lh-summary.mjs
