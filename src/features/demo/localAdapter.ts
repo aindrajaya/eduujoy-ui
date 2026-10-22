@@ -1,4 +1,4 @@
-import { readJson, removeItem, writeJson } from '@/lib/storage';
+import { keysWithPrefix, readJson, removeItem, writeJson } from '@/lib/storage';
 import type { DiagnosticPort } from '@/features/diagnostic/port';
 import type { QuizQuestion } from '@/features/quiz/types';
 import { isCorrect, toQuestion, type Bank } from './bank';
@@ -29,6 +29,8 @@ interface StoredAttempt {
 }
 
 export const DEMO_ATTEMPT_KEY = 'demo:attempt';
+/** The quiz engine's drafts for the demo (useQuizDraft with the user id "demo"). */
+export const DEMO_DRAFT_OWNER = 'demo';
 
 const isAttempt = (value: unknown): value is StoredAttempt => {
   if (typeof value !== 'object' || value === null) return false;
@@ -157,6 +159,7 @@ export function createLocalDiagnosticAdapter({
 
     reset() {
       removeItem(DEMO_ATTEMPT_KEY);
+      for (const key of keysWithPrefix(`quiz:${DEMO_DRAFT_OWNER}:`)) removeItem(key);
     },
   };
 }
