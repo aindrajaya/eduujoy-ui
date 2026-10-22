@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '@/test/axe';
 import YouTubeEmbed from './YouTubeEmbed';
 
@@ -38,6 +38,33 @@ describe('YouTubeEmbed', () => {
     expect(new URL(container.querySelector('iframe')?.getAttribute('src') ?? '').searchParams.has('end')).toBe(false);
     rerender(<YouTubeEmbed videoId="Fj-2tVw0d1g" title="t" />);
     expect(screen.queryByText(/^Watch/)).not.toBeInTheDocument();
+  });
+
+  it('requests the thumbnail only once the player is near the viewport', () => {
+    let notify: (entries: { isIntersecting: boolean }[]) => void = () => undefined;
+    const observe = vi.fn();
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
+          notify = callback;
+        }
+        observe = observe;
+        disconnect = vi.fn();
+      },
+    );
+    try {
+      const { container } = render(<YouTubeEmbed videoId="Fj-2tVw0d1g" title="User research methods" />);
+      expect(observe).toHaveBeenCalledOnce();
+      expect(container.querySelector('img')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Play video: User research methods' })).toBeInTheDocument();
+      act(() => {
+        notify([{ isIntersecting: true }]);
+      });
+      expect(container.querySelector('img')).toHaveAttribute('src', 'https://i.ytimg.com/vi/Fj-2tVw0d1g/hqdefault.jpg');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('renders nothing for an invalid video id', () => {
