@@ -117,6 +117,11 @@ function TodayView({ summary, step, path }: TodayData) {
   );
 }
 
+/** The screen's h1 while there is no path to title it (loading, empty, error). */
+function TodayTitle() {
+  return <h1 className="px-6 pt-6 text-2xl font-bold text-text md:text-3xl">Today</h1>;
+}
+
 /** US-03 home: the active path's current step and next action (PRD-UI §3). */
 export default function TodayPage() {
   const active = useActivePaths();
@@ -126,29 +131,35 @@ export default function TodayPage() {
 
   if (isPathBuildingClosed(active.error)) {
     return (
-      <div className="p-6">
-        <PathBuildingSoon />
-      </div>
+      <>
+        <TodayTitle />
+        <div className="p-6">
+          <PathBuildingSoon />
+        </div>
+      </>
     );
   }
 
   if (active.isSuccess && !summary) {
     return (
-      <div className="p-6">
-        <StateMessage
-          title="No active path yet"
-          action={
-            <Link
-              to="/start"
-              className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 font-semibold text-on-primary"
-            >
-              Start a learning path
-            </Link>
-          }
-        >
-          Tell us what you want to learn and we’ll build a step-by-step path.
-        </StateMessage>
-      </div>
+      <>
+        <TodayTitle />
+        <div className="p-6">
+          <StateMessage
+            title="No active path yet"
+            action={
+              <Link
+                to="/start"
+                className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 font-semibold text-on-primary"
+              >
+                Start a learning path
+              </Link>
+            }
+          >
+            Tell us what you want to learn and we’ll build a step-by-step path.
+          </StateMessage>
+        </div>
+      </>
     );
   }
 
@@ -159,18 +170,22 @@ export default function TodayPage() {
   const data: TodayData | undefined = summary && step !== undefined ? { summary, step, path: path.data } : undefined;
 
   return (
-    <AsyncView
-      query={{
-        data,
-        isPending: active.isPending || (summary !== undefined && step === undefined && path.isPending),
-        error: active.error ?? (step === undefined ? path.error : null),
-        isRefetching: active.isRefetching,
-        refetch: () => (active.error ? active.refetch() : path.refetch()),
-      }}
-      label="today’s step"
-      skeleton={<TodaySkeleton />}
-    >
-      {(today) => <TodayView {...today} />}
-    </AsyncView>
+    <>
+      {/* With a path, its name is the h1 (TodayView); until then the screen is titled "Today". */}
+      {data === undefined && <TodayTitle />}
+      <AsyncView
+        query={{
+          data,
+          isPending: active.isPending || (summary !== undefined && step === undefined && path.isPending),
+          error: active.error ?? (step === undefined ? path.error : null),
+          isRefetching: active.isRefetching,
+          refetch: () => (active.error ? active.refetch() : path.refetch()),
+        }}
+        label="today’s step"
+        skeleton={<TodaySkeleton />}
+      >
+        {(today) => <TodayView {...today} />}
+      </AsyncView>
+    </>
   );
 }
