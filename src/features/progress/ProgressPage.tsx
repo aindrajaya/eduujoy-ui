@@ -94,61 +94,64 @@ export default function ProgressPage() {
   const [params, setParams] = useSearchParams();
 
   return (
-    <AsyncView
-      query={progress}
-      label="your progress"
-      skeleton={<ProgressSkeleton />}
-      isEmpty={(items) => items.length === 0}
-      empty={
-        <div className="p-6">
-          <StateMessage
-            title="No progress yet"
-            icon={ChartColumn}
-            action={
-              <Link to="/start" className="font-semibold text-primary underline">
-                Start a learning path
-              </Link>
-            }
-          >
-            Your grid appears after your first diagnostic.
-          </StateMessage>
-        </div>
-      }
-    >
-      {(items) => {
-        const selected = items.find((i) => i.topic.id === params.get('topic')) ?? items[0];
-        if (!selected) return null;
-        return (
-          <>
-            <div className="animate-fade-in space-y-6 p-4 md:p-6">
-              <h1 className="text-2xl font-bold text-text md:text-3xl">Progress</h1>
-              {items.length > 1 && (
-                <nav aria-label="Topics" className="flex flex-wrap gap-2">
-                  {items.map((i) => (
-                    <button
-                      key={i.topic.id}
-                      type="button"
-                      aria-current={i.topic.id === selected.topic.id ? 'true' : undefined}
-                      onClick={() => {
-                        setParams({ topic: i.topic.id }, { replace: true });
-                      }}
-                      className={`min-h-11 rounded-chip border-2 px-4 font-semibold ${
-                        i.topic.id === selected.topic.id ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text'
-                      }`}
-                    >
-                      {i.topic.canonicalName}
-                    </button>
-                  ))}
-                </nav>
+    <>
+      {/* The screen's h1 in every state, as on /paths. */}
+      <h1 className="px-4 pt-4 text-2xl font-bold text-text md:px-6 md:pt-6 md:text-3xl">Progress</h1>
+      <AsyncView
+        query={progress}
+        label="your progress"
+        skeleton={<ProgressSkeleton />}
+        isEmpty={(items) => items.length === 0}
+        empty={
+          <div className="p-6">
+            <StateMessage
+              title="No progress yet"
+              icon={ChartColumn}
+              action={
+                <Link to="/start" className="font-semibold text-primary underline">
+                  Start a learning path
+                </Link>
+              }
+            >
+              Your grid appears after your first diagnostic.
+            </StateMessage>
+          </div>
+        }
+      >
+        {(items) => {
+          const selected = items.find((i) => i.topic.id === params.get('topic')) ?? items[0];
+          if (!selected) return null;
+          return (
+            <>
+              <div className="animate-fade-in space-y-6 p-4 md:p-6">
+                {items.length > 1 && (
+                  <nav aria-label="Topics" className="flex flex-wrap gap-2">
+                    {items.map((i) => (
+                      <button
+                        key={i.topic.id}
+                        type="button"
+                        aria-current={i.topic.id === selected.topic.id ? 'true' : undefined}
+                        onClick={() => {
+                          setParams({ topic: i.topic.id }, { replace: true });
+                        }}
+                        className={`min-h-11 rounded-chip border-2 px-4 font-semibold ${
+                          i.topic.id === selected.topic.id ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text'
+                        }`}
+                      >
+                        {i.topic.canonicalName}
+                      </button>
+                    ))}
+                  </nav>
+                )}
+                <TopicProgress key={selected.topic.id} item={selected} />
+              </div>
+              {selected.activePathId && (
+                <StickyActionBar label="Continue your path" to={`/paths/${encodeURIComponent(selected.activePathId)}`} aboveTabs />
               )}
-              <TopicProgress key={selected.topic.id} item={selected} />
-            </div>
-            {selected.activePathId && (
-              <StickyActionBar label="Continue your path" to={`/paths/${encodeURIComponent(selected.activePathId)}`} aboveTabs />
-            )}
-          </>
-        );
-      }}
-    </AsyncView>
+            </>
+          );
+        }}
+      </AsyncView>
+    </>
   );
 }
