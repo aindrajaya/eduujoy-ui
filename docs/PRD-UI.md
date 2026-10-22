@@ -31,9 +31,9 @@ A Vite + React + TypeScript SPA with feature folders that mirror the API's modul
 | Build | Vite, TypeScript `strict` | Migrating from Next.js 16 (see the migration note below) |
 | Routing | React Router (data router: `loader`, `lazy` routes) | Route-level code splitting and auth checks before render |
 | Server state | TanStack Query | Fetching, caching, revalidation, request deduplication |
-| HTTP | Axios, one central instance in `src/api` | Interceptors, typed calls, problem+json mapping |
+| HTTP | A small fetch client in `src/api/http.ts` with Axios-style interceptors, one instance | Interceptors, typed calls, problem+json mapping |
 | API types | `openapi-typescript` generated from the API's `openapi.json` | `pnpm api:types`; CI fails if stale |
-| Forms | React Hook Form + Zod resolver | Uncontrolled inputs; Zod schemas mirror DTO bounds |
+| Forms | React Hook Form for quizzes and longer forms; plain controlled forms for sign-in and sign-up | Zod schemas mirror DTO bounds |
 | Local UI state | `useReducer` per feature, small React contexts | No global store library in the MVP |
 | Styling | Tailwind CSS + CSS variables for tokens | Mobile-first breakpoints |
 | Primitives | Radix UI (dialog, popover, tabs, toast) | Accessible behaviour without heavy UI kits |
@@ -44,7 +44,7 @@ A Vite + React + TypeScript SPA with feature folders that mirror the API's modul
 ```text
 src/
   main.tsx  router.tsx  query-client.ts
-  api/          # client.ts (axios instance), interceptors.ts, errors.ts, schema.d.ts (generated), endpoints/*.ts
+  api/          # http.ts (fetch client), client.ts (the one instance), interceptors.ts, errors.ts, schema.d.ts (generated), endpoints/*.ts
   auth/         # session loader, RequireAuth, RequireRole, useSession
   realtime/     # useJobStream (SSE), socket.ts (lazy), useRealtimeEvents
   features/
@@ -130,11 +130,11 @@ Design at 360 px wide first, then widen; every primary action sits in the thumb 
 
 ## 5. Data layer
 
-Components never call Axios: they call typed functions in `src/api/endpoints`, wrapped by TanStack Query hooks in each feature's `queries.ts`. Real-time events update the same query cache, so every screen reads from one source.
+Components never call the HTTP client: they call typed functions in `src/api/endpoints`, wrapped by TanStack Query hooks in each feature's `queries.ts`. Real-time events update the same query cache, so every screen reads from one source.
 
 **Central API module rules**
 
-1. One Axios instance: `baseURL = VITE_API_URL`, `withCredentials: true`, timeout 15 s (60 s for uploads).
+1. One HTTP client instance (`src/api/http.ts`, Axios-style interceptors): `baseURL = VITE_API_URL`, `withCredentials: true`, timeout 15 s (60 s for uploads); absolute URLs outside that origin are refused.
 2. Request interceptor adds `X-Request-Id` (UUID) and `X-Requested-With: eduujoy`; unsafe methods that create work also send `Idempotency-Key`.
 3. Response interceptor maps `application/problem+json` to a typed `ApiError { status, code, title, detail, fieldErrors, requestId }`.
 4. On `401`, run one shared refresh (`POST /v1/auth/refresh`): concurrent `401`s wait for the same promise, then each original request retries once. If refresh fails, clear the query cache and route to `/signin?next=…`.
@@ -315,7 +315,7 @@ Thirteen slices, worked one at a time. Each slice builds against MSW mocks gener
 | --- | --- | --- | --- | --- |
 | U0a | Vite migration: new Vite + React Router shell in the same repo; port the kept screens as presentation-only components (Section 2 migration note); delete Next.js server code, Prisma and `next.config` | — | App runs on Vite with the kept screens rendering from static props; no `next` dependency left; no server code in the repo | `pnpm build && pnpm preview`; `grep -r "from 'next" src` returns nothing |
 | U0b | Tooling: strict TS, ESLint, Vitest, Tailwind tokens, `size-limit`, Lighthouse CI, CI pipeline (security scan moved to pnpm) | A0 | CI green on `main`; budgets reported | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` |
-| U1 | API module: Axios client, interceptors, `ApiError`, generated types, MSW setup | A3 | Refresh single-flight test passes with 5 parallel 401s | `vitest api/` |
+| U1 | API module: HTTP client (fetch, Axios-style interceptors), interceptors, `ApiError`, generated types, MSW setup | A3 | Refresh single-flight test passes with 5 parallel 401s | `vitest api/` |
 | U2 | Router and auth: data router, lazy routes, session loader, `RequireAuth`, `RequireRole`, sign-in and sign-up | A2 | No protected markup in the DOM before `auth/me` resolves | Playwright `auth.spec.ts` |
 | U3 | App shell: bottom tabs, sticky action bar, skeletons, toasts, wake-up state | — | Lighthouse mobile LCP ≤ 2.5 s on `/today` (mocked) | Lighthouse CI |
 | U4 | Onboarding: topic intake with disambiguation | A6 | US-01 acceptance criteria pass | Playwright `onboarding.spec.ts` |
