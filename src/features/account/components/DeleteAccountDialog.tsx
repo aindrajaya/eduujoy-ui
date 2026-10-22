@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react';
+import ErrorNote from '@/ui/ErrorNote';
 
 export interface DeleteAccountDialogProps {
   open: boolean;
@@ -47,9 +48,9 @@ export default function DeleteAccountDialog({
         e.preventDefault();
         if (!deleting) onCancel();
       }}
-      className="m-auto w-[min(28rem,calc(100%-2rem))] rounded-2xl border border-border bg-surface p-6 text-text shadow-2xl backdrop:bg-black/50"
+      className="sk-card m-auto w-[min(28rem,calc(100%-2rem))] p-6 text-text backdrop:bg-bg/80"
     >
-      <h2 id={titleId} className="text-xl font-bold">
+      <h2 id={titleId} className="sk-display-md">
         Delete your account?
       </h2>
       <div id={bodyId} className="mt-3 space-y-2 text-sm text-text-muted">
@@ -61,16 +62,18 @@ export default function DeleteAccountDialog({
         <p>Download your data first if you want a copy.</p>
       </div>
       {errorMessage && (
-        <p role="alert" className="mt-4 rounded-lg bg-danger-soft p-3 text-sm text-danger">
+        <div className="mt-4">
+          <ErrorNote>
           {errorMessage}
-        </p>
+        </ErrorNote>
+        </div>
       )}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row-reverse">
         <button
           type="button"
           onClick={onConfirm}
           disabled={deleting}
-          className="min-h-11 flex-1 rounded-xl border-2 border-danger bg-surface px-5 font-semibold text-danger disabled:opacity-60"
+          className="sk-btn flex-1"
         >
           {deleting ? 'Deleting…' : 'Delete my account'}
         </button>
@@ -79,7 +82,7 @@ export default function DeleteAccountDialog({
           type="button"
           onClick={onCancel}
           disabled={deleting}
-          className="min-h-11 flex-1 rounded-xl border-2 border-border px-5 font-semibold text-text disabled:opacity-60"
+          className="sk-btn sk-btn-ghost flex-1"
         >
           Keep my account
         </button>

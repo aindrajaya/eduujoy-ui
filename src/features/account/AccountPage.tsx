@@ -42,12 +42,12 @@ export default function AccountPage() {
     <div className="animate-fade-in space-y-6 p-4 md:p-6">
       <header className="flex flex-col items-center">
         <div
-          className="mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-600 text-2xl font-bold text-white shadow-lg md:h-24 md:w-24 md:text-4xl"
+          className="mb-3 flex h-20 w-20 items-center justify-center rounded-full border-2 border-ink bg-surface font-display text-3xl text-text shadow-lg md:h-24 md:w-24 md:text-4xl"
           aria-hidden="true"
         >
           {initials(name)}
         </div>
-        <h1 className="text-xl font-bold text-text md:text-2xl">{name}</h1>
+        <h1 className="text-2xl text-text md:text-3xl">{name}</h1>
         <p className="text-base text-text-muted">{me?.user.email}</p>
       </header>
 
@@ -62,7 +62,7 @@ export default function AccountPage() {
       {me && <PlanCard me={me} />}
 
       {hasRole(me, ['reviewer', 'admin']) && (
-        <nav aria-label="Staff" className="flex flex-col gap-2 rounded-card border border-border p-4">
+        <nav aria-label="Staff" className="sk-card flex flex-col gap-2">
           <Link to="/admin/review" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
             Review queue
           </Link>
@@ -85,7 +85,7 @@ export default function AccountPage() {
         type="button"
         onClick={handleSignOut}
         disabled={signOut.isPending}
-        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-border bg-surface px-4 py-3 font-semibold text-danger transition-colors hover:border-danger disabled:opacity-60"
+        className="sk-btn w-full"
       >
         <LogOut className="h-5 w-5" aria-hidden="true" />
         {signOut.isPending ? 'Signing out…' : 'Sign out'}
