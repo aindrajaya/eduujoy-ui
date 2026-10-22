@@ -25,13 +25,9 @@ export default function TextField({ label, icon: Icon, error, hint, className, .
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`min-h-11 w-full rounded-xl border-2 bg-surface py-3 pr-4 text-base text-text placeholder-text-muted transition-colors focus:ring-2 focus:outline-none ${
+          className={`quiz-field min-h-11 w-full py-3 pr-4 text-base text-text placeholder-text-muted ${
             Icon ? 'pl-12' : 'pl-4'
-          } ${
-            error
-              ? 'border-danger focus:border-danger focus:ring-danger/30'
-              : 'border-border hover:border-text-muted focus:border-primary focus:ring-focus/40'
-          }`}
+          } ${error ? 'border-danger' : 'focus:border-primary'}`}
           {...input}
         />
         {Icon && (

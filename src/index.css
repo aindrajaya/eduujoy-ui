@@ -1,7 +1,8 @@
 @import 'tailwindcss';
 @import './ui/tokens.css';
-/* Sketch tokens as Tailwind theme names (bg-sk-surface, ...); their values load with /demo (UD). */
+/* Sketch tokens as Tailwind theme names (bg-sk-surface, ...), and the sketch primitives (U12a). */
 @import './ui/sketch/theme.css';
+@import './ui/sketch/sketch.css';
 
 /*
  * Entry motion for screens and cards (PRD-UI §4: 150-200 ms ease-out). Transform only: content is
@@ -33,15 +34,30 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family:
-    Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  /* Nunito once loaded (after first paint, ui/sketch/loadFonts.ts); the system stack until then. */
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-body-size);
+  line-height: var(--sk-body-line-height);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+@layer base {
+  /* The one H1 per screen is hand-lettered (README "Type": display-xl). Screens may size it with a
+     utility, never below 18px. Excalifont has one weight, so no faux bold. */
+  h1 {
+    font-family: var(--sk-font-display);
+    font-size: var(--sk-display-xl-size);
+    line-height: var(--sk-display-xl-line-height);
+    font-weight: var(--sk-display-xl-weight);
+    font-synthesis: none;
+  }
+}
+
+/* README "Focus": a 3px dashed primary outline at a 3px offset on every interactive element. */
 :focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline: var(--sk-stroke-strong) dashed var(--sk-primary);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -12,7 +12,7 @@ const STAGES: DreyfusStage[] = ['expert', 'proficient', 'competent', 'advanced_b
 export default function DemoGrid({ stage, bloom }: { stage: DreyfusStage; bloom: BloomLevel }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[20rem] table-fixed border-separate border-spacing-1">
+      <table className="w-full min-w-80 table-fixed border-separate border-spacing-1">
         <caption className="sr-only">Your demo placement by skill stage (rows) and thinking level (columns)</caption>
         <thead>
           <tr>

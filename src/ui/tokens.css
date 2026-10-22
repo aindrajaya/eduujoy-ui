@@ -1,57 +1,41 @@
 /*
- * Design tokens (PRD-UI §4). Values start from the existing app's palette
- * (indigo primary, green progress); brand assets are an open question (§12).
- * Type scale (12-30px) and the 4px spacing scale match Tailwind's defaults.
+ * App tokens (PRD-UI §4, §4b). U12a: every value comes from the Eduujoy Sketch tokens
+ * (sketch/tokens.css, generated from the design system's tokens.json), light and dark included,
+ * so screens keep their token names (bg-surface, text-text-muted, ...) and take the sketch look.
+ * Tailwind's own radius, shadow and font scales are mapped onto the sketch tokens too, so a
+ * `rounded-xl` or `shadow-lg` anywhere draws a wobbly corner or a hard offset shadow, never a raw value.
  */
+@import './sketch/tokens.css';
+
 :root {
-  color-scheme: light;
-  --bg: #f3f4f6;
-  --surface: #ffffff;
-  --surface-muted: #f9fafb;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-muted: #4b5563;
-  --primary: #4338ca;
-  --primary-hover: #3730a3;
-  --primary-soft: #eef2ff;
-  --on-primary: #ffffff;
-  --success: #15803d;
-  --success-soft: #f0fdf4;
-  --warning: #a16207;
-  --warning-soft: #fefce8;
-  --danger: #b91c1c;
-  --danger-soft: #fef2f2;
-  --focus: #6366f1;
+  color-scheme: var(--sk-color-scheme);
+  --bg: var(--sk-bg);
+  --surface: var(--sk-surface);
+  --surface-muted: var(--sk-surface-sunken);
+  /* Ink: every border is ink (README "Shapes"); hairline separators use the muted ink. */
+  --border: var(--sk-text-muted);
+  --text: var(--sk-text);
+  --text-muted: var(--sk-text-muted);
+  --primary: var(--sk-primary);
+  --primary-hover: var(--sk-primary);
+  /* The *-soft grounds carry status-coloured text, which the README allows on bg or surface only
+     (primary on surface-sunken is 4.4:1 in light), so they are surface. */
+  --primary-soft: var(--sk-surface);
+  --on-primary: var(--sk-on-primary);
+  --success: var(--sk-success);
+  --success-soft: var(--sk-surface);
+  --warning: var(--sk-warning);
+  --warning-soft: var(--sk-surface);
+  --danger: var(--sk-danger);
+  --danger-soft: var(--sk-surface);
+  --focus: var(--sk-primary);
 
-  /* One colour per Dreyfus stage for the progress grid (always paired with a text label). */
-  --stage-novice: #94a3b8;
-  --stage-advanced-beginner: #60a5fa;
-  --stage-competent: #34d399;
-  --stage-proficient: #fbbf24;
-  --stage-expert: #f472b6;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #030712;
-    --surface: #111827;
-    --surface-muted: #1f2937;
-    --border: #374151;
-    --text: #f9fafb;
-    --text-muted: #d1d5db;
-    --primary: #a5b4fc;
-    --primary-hover: #c7d2fe;
-    --primary-soft: #1e1b4b;
-    --on-primary: #111827;
-    --success: #4ade80;
-    --success-soft: #052e16;
-    --warning: #facc15;
-    --warning-soft: #422006;
-    --danger: #f87171;
-    --danger-soft: #450a0a;
-    --focus: #a5b4fc;
-  }
+  /* Dreyfus stage marks (never text; the stage name is always written beside them). */
+  --stage-novice: var(--sk-stage-novice);
+  --stage-advanced-beginner: var(--sk-stage-advanced-beginner);
+  --stage-competent: var(--sk-stage-competent);
+  --stage-proficient: var(--sk-stage-proficient);
+  --stage-expert: var(--sk-stage-expert);
 }
 
 @theme inline {
@@ -59,6 +43,7 @@
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
+  --color-ink: var(--sk-text);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-primary: var(--primary);
@@ -78,9 +63,29 @@
   --color-stage-proficient: var(--stage-proficient);
   --color-stage-expert: var(--stage-expert);
 
-  --radius-control: 8px;
-  --radius-card: 12px;
-  --radius-chip: 999px;
+  /* Shapes: wobbly corners for cards and controls, pills for chips (README "Shapes"). */
+  --radius-control: var(--sk-wobble-control);
+  --radius-card: var(--sk-wobble-card);
+  --radius-chip: var(--sk-radius-pill);
+  --radius-sm: var(--sk-wobble-control);
+  --radius-md: var(--sk-wobble-control);
+  --radius-lg: var(--sk-wobble-control);
+  --radius-xl: var(--sk-wobble-control);
+  --radius-2xl: var(--sk-wobble-card);
+  --radius-3xl: var(--sk-wobble-card);
+
+  /* Depth: hard offset shadows only, never blurred (README "Depth"). */
+  --shadow-sm: var(--sk-shadow-sketch-sm);
+  --shadow-md: var(--sk-shadow-sketch-sm);
+  --shadow: var(--sk-shadow-sketch-sm);
+  --shadow-lg: var(--sk-shadow-sketch);
+  --shadow-xl: var(--sk-shadow-sketch);
+  --shadow-2xl: var(--sk-shadow-sketch);
+
+  /* Type: Nunito for everything a learner reads, Excalifont for display only (README "Type"). */
+  --font-sans: var(--sk-font-sans);
+  --font-display: var(--sk-font-display);
+  --font-mono: var(--sk-font-mono);
 
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --default-transition-duration: 200ms;
