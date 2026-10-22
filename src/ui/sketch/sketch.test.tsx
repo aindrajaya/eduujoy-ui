@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import BloomChip from './BloomChip';
-import { preloadSketchFont } from './preloadFont';
+import { loadSketchFonts } from './loadFonts';
 import StageBadge from './StageBadge';
 
 describe('sketch primitives (PRD-UI §4b)', () => {
@@ -17,12 +17,12 @@ describe('sketch primitives (PRD-UI §4b)', () => {
     expect(screen.getByText('C3 Apply')).toBeInTheDocument();
   });
 
-  it('preloads Nunito once', () => {
-    preloadSketchFont();
-    preloadSketchFont();
-    const links = document.head.querySelectorAll('link[rel="preload"][as="font"]');
-    expect(links).toHaveLength(1);
-    expect(links[0]?.getAttribute('href')).toMatch(/Nunito-latin-wght/);
-    expect(links[0]?.getAttribute('crossorigin')).toBe('anonymous');
+  it('declares the fonts only after first paint, and can be cancelled', () => {
+    vi.useFakeTimers();
+    const cancel = loadSketchFonts(50);
+    cancel();
+    vi.runAllTimers();
+    vi.useRealTimers();
+    expect(document.head.querySelector('link[rel="preload"]')).toBeNull();
   });
 });
