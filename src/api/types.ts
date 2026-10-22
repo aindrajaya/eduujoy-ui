@@ -3,6 +3,13 @@ import type { components } from './schema';
 
 type Schemas = components['schemas'];
 
+/**
+ * openapi-typescript marks fields that have a `default` as required. In a request body they are
+ * optional (the server applies the default), and some must be left out (quantity with a
+ * subscription is a 400), so request types make those fields optional again.
+ */
+type WithDefaulted<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export type Problem = Schemas['Problem'];
 export type ProblemCode = Schemas['ProblemCode'];
 export type FieldError = Schemas['FieldError'];
@@ -15,7 +22,7 @@ export type RegisterRequest = Schemas['RegisterRequest'];
 export type LoginRequest = Schemas['LoginRequest'];
 
 export type Topic = Schemas['Topic'];
-export type TopicResolveRequest = Schemas['TopicResolveRequest'];
+export type TopicResolveRequest = WithDefaulted<Schemas['TopicResolveRequest'], 'createNew'>;
 export type TopicResolveResponse = Schemas['TopicResolveResponse'];
 
 export type BloomLevel = Schemas['BloomLevel'];
@@ -58,7 +65,7 @@ export type ProgressResponse = Schemas['ProgressResponse'];
 export type ProgressHistoryResponse = Schemas['ProgressHistoryResponse'];
 export type TopicPosition = Schemas['TopicPosition'];
 
-export type CheckoutRequest = Schemas['CheckoutRequest'];
+export type CheckoutRequest = WithDefaulted<Schemas['CheckoutRequest'], 'quantity'>;
 export type CheckoutResponse = Schemas['CheckoutResponse'];
 
 export type ReviewItem = Schemas['ReviewItem'];

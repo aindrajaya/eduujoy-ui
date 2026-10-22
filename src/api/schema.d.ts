@@ -242,7 +242,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create a Lemon Squeezy checkout link (FR-23). */
+        /**
+         * Create a Lemon Squeezy checkout link (FR-23).
+         * @description After payment, Lemon Squeezy sends the learner back to `{origin}/account?checkout=success`,
+         *     where `{origin}` is the request's allow-listed Origin. The flag is only a hint: the plan
+         *     changes when the webhook is processed (`entitlement.changed`, or `GET /v1/auth/me`).
+         *     A `subscription` checkout while a subscription is active returns 409 `CONFLICT`; credit
+         *     packs are unaffected. 503 when the payment provider is unavailable.
+         */
         post: operations["billingCheckout"];
         delete?: never;
         options?: never;
@@ -388,6 +395,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete my account and personal data; signs out (clears both cookies).
+         * @description Requires a sign-in (password or Google, not a token refresh) within the last 10 minutes.
+         *     Otherwise 401 with code `REAUTH_REQUIRED`: the client must not try a refresh for it (a
+         *     refresh keeps the original sign-in time); it asks the learner to sign in again, then retries.
+         */
+        delete: operations["meDelete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download all my personal data as JSON (GDPR-level export, master PRD §12; PRD-API §12).
+         * @description No re-authentication needed; rate-limited.
+         */
+        get: operations["meExport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/paths": {
         parameters: {
             query?: never;
@@ -522,6 +571,11 @@ export interface components {
         CheckoutRequest: {
             /** @enum {string} */
             product: "subscription" | "credit_pack";
+            /**
+             * @description Credit packs to buy (credit_pack only; 400 if sent with subscription or outside 1–10). Preset on the Lemon Squeezy checkout; credits come only from the paid order in the webhook.
+             * @default 1
+             */
+            quantity: number;
         };
         CheckoutResponse: {
             /** Format: uri */
@@ -825,7 +879,7 @@ export interface components {
             type: string;
         };
         /** @enum {string} */
-        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "REFRESH_CONCURRENT" | "SERVICE_UNAVAILABLE" | "INTERNAL";
+        ProblemCode: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "SESSION_REVOKED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "EMAIL_TAKEN" | "IDEMPOTENCY_MISMATCH" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "AI_BUDGET_EXCEEDED" | "NO_REPLACEMENT" | "CSRF_REJECTED" | "REFRESH_CONCURRENT" | "SERVICE_UNAVAILABLE" | "REAUTH_REQUIRED" | "INTERNAL";
         ProgressHistoryResponse: {
             items: {
                 confidence: number;
@@ -955,9 +1009,14 @@ export interface components {
             updatedAt: string;
         };
         TopicResolveRequest: {
+            /**
+             * @description Skip matching and create a topic from `text` (after the learner rejected the choices). Subject to the daily new-topic cap (429).
+             * @default false
+             */
+            createNew: boolean;
             text: string;
         };
-        /** @description `matched` (similarity ≥ 0.88), `choices` (0.75–0.88, at most 3), or `created` (new topic). */
+        /** @description `matched` (similarity at or above the server's match threshold), `choices` (at most 3, between the choice and match thresholds), or `created` (new topic). Thresholds are server-side and may be tuned. */
         TopicResolveResponse: {
             choices?: (components["schemas"]["Topic"] & {
                 similarity?: number;
@@ -1482,6 +1541,8 @@ export interface operations {
             };
             400: components["responses"]["ValidationError"];
             401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     billingWebhook: {
@@ -1700,6 +1761,62 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    meDelete: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description CSRF guard for unsafe methods. */
+                "X-Requested-With": components["parameters"]["XRequestedWith"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted and signed out; both cookies cleared. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in (`UNAUTHENTICATED`), or the sign-in is older than 10 minutes (`REAUTH_REQUIRED`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    meExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The export, sent as an attachment (`Content-Disposition`). */
+            200: {
+                headers: {
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            429: components["responses"]["TooManyRequests"];
         };
     };
     pathsList: {

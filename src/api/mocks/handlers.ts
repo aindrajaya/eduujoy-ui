@@ -132,6 +132,14 @@ export const handlers = [
   http.get('/v1/progress/{topicId}/history', ({ response }) =>
     response(200).json(mockProgressHistory),
   ),
+  // Account (contract 0.6.0): the export is a JSON attachment; delete answers 204 and clears cookies.
+  http.get('/v1/me/export', ({ response }) =>
+    response(200).json(
+      { user: mockMe.user, exportedAt: '2026-10-22T08:00:00Z' },
+      { headers: { 'Content-Disposition': 'attachment; filename="eduujoy-export.json"' } },
+    ),
+  ),
+  http.delete('/v1/me', ({ response }) => response(204).empty()),
   http.post('/v1/billing/checkout', ({ response }) =>
     response(200).json({ url: 'https://eduujoy.lemonsqueezy.com/checkout/mock' }),
   ),
