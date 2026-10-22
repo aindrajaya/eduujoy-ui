@@ -23,7 +23,7 @@ export default function StickyActionBar({ label, aboveTabs = false, ...action }:
   );
   return (
     <div
-      className={`sticky z-10 border-t-2 border-ink bg-surface px-4 pt-3 lg:bottom-0 lg:border-t-0 lg:bg-transparent lg:px-6 lg:pb-6 ${
+      className={`sticky z-10 border-t-2 border-ink bg-surface px-4 pt-3 lg:bottom-0 lg:flex lg:justify-end lg:px-6 lg:pb-3 ${
         aboveTabs
           ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))] pb-3'
           : 'bottom-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]'
