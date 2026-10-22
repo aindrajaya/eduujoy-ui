@@ -9,6 +9,7 @@ import {
 import { toEventStreamText } from '../src/api/mocks/sse';
 import type { CheckpointResult, Path, PathStep } from '../src/api/types';
 import { json, mockAuth } from './api';
+import { SCREENS } from './screens';
 
 // U9 done-when: US-05 passes, including offline submit (PRD-UI §11). Open answers are graded by a
 // job whose result streams over SSE; two fails insert a review step one level lower.
@@ -121,5 +122,21 @@ test.describe('checkpoints (U9, US-05)', () => {
     await page.goto('/checkpoints/step-2?path=path-1&job=grade-1');
     await expect(page.getByRole('heading', { name: 'You passed this checkpoint' })).toBeVisible();
     await expect(page.getByText('87%', { exact: true })).toBeVisible();
+  });
+
+  test('at 360 px a not-passed result fits: no page overflow, and feedback lines wrap inside their cards', async ({ page }) => {
+    const screen = SCREENS.find((sc) => sc.name === 'checkpoint-not-passed');
+    if (!screen) throw new Error('checkpoint-not-passed screen missing');
+    await page.setViewportSize({ width: 360, height: 740 });
+    await screen.setup(page);
+    await page.goto(screen.url);
+    await screen.ready(page);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+    const clipped = await page
+      .getByRole('region', { name: /Feedback/ })
+      .getByRole('listitem')
+      .evaluateAll((items) => items.filter((li) => li.scrollWidth > li.clientWidth).length);
+    expect(clipped).toBe(0);
   });
 });
