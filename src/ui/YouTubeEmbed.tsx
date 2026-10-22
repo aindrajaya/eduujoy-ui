@@ -14,12 +14,12 @@ export interface YouTubeEmbedProps {
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 
 /**
- * True once the element is within `margin` of the viewport. The thumbnail is YouTube's image, so
+ * True once the element enters the viewport (or comes within `margin` of it). The thumbnail is YouTube's image, so
  * a page whose video sits below the fold makes no request to Google until the learner scrolls
  * near it (Lighthouse third-party-summary; less data on mobile). Without IntersectionObserver,
  * it is true at once.
  */
-function useNearViewport(ref: RefObject<Element | null>, margin = '200px'): boolean {
+function useNearViewport(ref: RefObject<Element | null>, margin = '0px'): boolean {
   const [near, setNear] = useState(() => typeof IntersectionObserver === 'undefined');
   useEffect(() => {
     const element = ref.current;
