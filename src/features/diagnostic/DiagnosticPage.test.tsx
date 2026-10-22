@@ -30,7 +30,7 @@ describe('/diagnostic/:id (US-02)', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('submits the batch after its last answer and shows the placement', { timeout: 10_000 }, async () => {
+  it('submits the batch after its last answer and shows the placement', async () => {
     let body: DiagnosticAnswersRequest | undefined;
     server.use(
       http.post('/v1/diagnostics/{id}/answers', async ({ request, response }) => {
@@ -48,7 +48,7 @@ describe('/diagnostic/:id (US-02)', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('skipped items are sent as skipped', { timeout: 10_000 }, async () => {
+  it('skipped items are sent as skipped', async () => {
     let body: DiagnosticAnswersRequest | undefined;
     server.use(
       http.post('/v1/diagnostics/{id}/answers', async ({ request, response }) => {
@@ -64,7 +64,7 @@ describe('/diagnostic/:id (US-02)', () => {
     expect(body?.answers.every((a) => a.skipped)).toBe(true);
   });
 
-  it('builds the path and hands off to /paths/new/:jobId', { timeout: 10_000 }, async () => {
+  it('builds the path and hands off to /paths/new/:jobId', async () => {
     server.use(http.get('/v1/diagnostics/{id}', ({ response }) => response(200).json({ ...mockDiagnosticResume, ...mockDiagnosticCompleted, items: [] })));
     const { router } = renderRoute('/diagnostic/diag-1');
     await userEvent.click(await screen.findByRole('button', { name: 'Build my path' }));
@@ -108,13 +108,13 @@ describe('/diagnostic/:id (US-02)', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('offers a retry when loading fails', { timeout: 10_000 }, async () => {
+  it('offers a retry when loading fails', async () => {
     server.use(
       http.get('/v1/diagnostics/{id}', ({ response }) =>
         response.untyped(problemResponse(mockProblem(500, 'INTERNAL', 'Boom'))),
       ),
     );
     renderRoute('/diagnostic/diag-1');
-    expect(await screen.findByRole('button', { name: 'Try again' }, { timeout: 8000 })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
-import { act, screen, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { mockPath } from '@/api/mocks/data';
 import { http } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
@@ -67,7 +67,7 @@ describe('/steps/:id (US-04, US-07, US-08)', () => {
     const box = await screen.findByRole('checkbox', { name: /Write a one-page plan/ });
     await userEvent.click(box);
     expect(box).toBeChecked();
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(patch).toEqual({ actionsDone: [{ n: 2, done: true }] });
     });
   });
@@ -104,7 +104,7 @@ describe('/steps/:id (US-04, US-07, US-08)', () => {
     const card = (await screen.findAllByRole('article'))[0]!;
     await userEvent.click(within(card).getByRole('button', { name: 'Not helpful' }));
     expect(within(card).getByRole('button', { name: 'Not helpful' })).toHaveAttribute('aria-pressed', 'true');
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(feedback).toEqual({ targetType: 'resource', targetId: 'res-2-yt', kind: 'down' });
     });
     await userEvent.click(within(card).getByRole('button', { name: 'Swap' }));

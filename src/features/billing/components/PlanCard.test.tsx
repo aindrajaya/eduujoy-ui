@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { mockMe, mockProblem } from '@/api/mocks/data';
@@ -37,7 +37,7 @@ describe('PlanCard (FR-23)', () => {
     await expectNoAxeViolations(container);
 
     await userEvent.click(screen.getByRole('button', { name: 'Upgrade to subscription' }));
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(onCheckoutUrl).toHaveBeenCalledWith('https://eduujoy.lemonsqueezy.com/checkout/abc');
     });
     expect(body).toEqual({ product: 'subscription' });
@@ -55,7 +55,7 @@ describe('PlanCard (FR-23)', () => {
     expect(screen.getByText('Subscription')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Upgrade to subscription' })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Buy a credit pack' }));
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(body).toEqual({ product: 'credit_pack' });
     });
   });

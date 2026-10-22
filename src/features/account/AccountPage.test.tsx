@@ -40,12 +40,9 @@ describe('/account', () => {
     );
     const { router } = renderRoute('/account');
     const signOutButton = await screen.findByRole('button', { name: 'Sign out' });
-    await waitFor(
-      () => {
-        expect(openedSockets).toHaveLength(1);
-      },
-      { timeout: 3000 },
-    );
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
     await userEvent.click(signOutButton);
     await screen.findByRole('heading', { name: 'Welcome back' });
     expect(loggedOut).toBe(true);
@@ -56,7 +53,7 @@ describe('/account', () => {
     expect(openedSockets.at(-1)?.connected).toBe(false);
   });
 
-  it('offline sign-out: clears the cache, says they may still be signed in, and offers a retry', { timeout: 10_000 }, async () => {
+  it('offline sign-out: clears the cache, says they may still be signed in, and offers a retry', async () => {
     let online = false;
     let calls = 0;
     server.use(
@@ -70,7 +67,7 @@ describe('/account', () => {
     const { router, container } = renderRoute('/account');
     await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
 
-    const alert = await screen.findByRole('alert', {}, { timeout: 5000 });
+    const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent("We couldn't reach the server. You may still be signed in on this device.");
     expect(router.state.location.pathname).toBe('/signin');
     expect(calls).toBe(3);
