@@ -7,7 +7,12 @@ export type CheckoutProduct = CheckoutRequest['product'];
 
 const invalidLink = () => new ApiError({ status: 0, code: 'INTERNAL', title: 'Invalid checkout link' });
 
-/** Only an https link leaves the app; anything else is treated as a failed checkout. */
+const CHECKOUT_HOST = 'lemonsqueezy.com';
+
+/**
+ * Only a Lemon Squeezy https link leaves the app (lemonsqueezy.com or a subdomain of it); anything
+ * else is treated as a failed checkout, so a bad API response can never send the learner elsewhere.
+ */
 export function checkoutUrl(raw: string): string {
   let url: URL;
   try {
@@ -15,7 +20,9 @@ export function checkoutUrl(raw: string): string {
   } catch {
     throw invalidLink();
   }
-  if (url.protocol !== 'https:') throw invalidLink();
+  const host = url.hostname.toLowerCase();
+  const lemonSqueezy = host === CHECKOUT_HOST || host.endsWith(`.${CHECKOUT_HOST}`);
+  if (url.protocol !== 'https:' || !lemonSqueezy) throw invalidLink();
   return url.href;
 }
 

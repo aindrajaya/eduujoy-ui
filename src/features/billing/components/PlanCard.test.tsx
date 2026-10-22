@@ -76,9 +76,25 @@ describe('PlanCard (FR-23)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Nothing was charged');
   });
 
-  it('checkoutUrl accepts https only', () => {
+  it('checkoutUrl accepts https Lemon Squeezy links only', () => {
     expect(checkoutUrl('https://x.lemonsqueezy.com/c')).toBe('https://x.lemonsqueezy.com/c');
-    expect(() => checkoutUrl('http://x.example')).toThrow();
-    expect(() => checkoutUrl('not a url')).toThrow();
+    expect(checkoutUrl('https://lemonsqueezy.com/c')).toBe('https://lemonsqueezy.com/c');
+    for (const bad of [
+      'http://x.lemonsqueezy.com/c',
+      'https://evil.example/c',
+      'https://lemonsqueezy.com.evil.example/c',
+      'https://evillemonsqueezy.com/c',
+      'not a url',
+    ]) {
+      expect(() => checkoutUrl(bad)).toThrow();
+    }
+  });
+
+  it('a foreign https host counts as a failed checkout and is never followed', async () => {
+    server.use(http.post('/v1/billing/checkout', ({ response }) => response(200).json({ url: 'https://evil.example/checkout' })));
+    const { onCheckoutUrl } = renderPlan();
+    await userEvent.click(screen.getByRole('button', { name: 'Buy a credit pack' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('We could not open the checkout. Nothing was charged');
+    expect(onCheckoutUrl).not.toHaveBeenCalled();
   });
 });

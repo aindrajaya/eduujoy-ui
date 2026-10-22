@@ -65,9 +65,9 @@ test.describe('progress, realtime and checkout (U10)', () => {
     let product: unknown;
     await page.route('**/v1/billing/checkout', (route) => {
       product = (route.request().postDataJSON() as { product: string }).product;
-      return json(route, 200, { url: 'https://eduujoy.lemonsqueezy.test/checkout/abc' });
+      return json(route, 200, { url: 'https://eduujoy.lemonsqueezy.com/checkout/abc' });
     });
-    await page.route('https://eduujoy.lemonsqueezy.test/**', (route) =>
+    await page.route('https://eduujoy.lemonsqueezy.com/**', (route) =>
       route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Checkout</title><h1>Test checkout</h1>' }),
     );
 
@@ -82,7 +82,7 @@ test.describe('progress, realtime and checkout (U10)', () => {
     await expect(page.getByText('Your subscription is active', { exact: true })).toBeVisible();
 
     await plan.getByRole('button', { name: 'Buy a credit pack' }).click();
-    await expect(page).toHaveURL('https://eduujoy.lemonsqueezy.test/checkout/abc');
+    await expect(page).toHaveURL('https://eduujoy.lemonsqueezy.com/checkout/abc');
     expect(product).toBe('credit_pack');
   });
 });
