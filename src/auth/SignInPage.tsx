@@ -20,8 +20,11 @@ export default function SignInPage() {
   const navigate = useNavigate();
   const next = safeNext(params.get('next'));
   const expired = params.get('expired') === '1';
+  // Contract 0.6.0: a sensitive action (account delete) needs a fresh sign-in, so a signed-in
+  // learner sent here with reauth=1 stays on the form instead of being redirected.
+  const reauth = params.get('reauth') === '1';
   const signIn = useSignIn();
-  useRedirectIfSignedIn(next, signIn.isIdle || signIn.isError);
+  useRedirectIfSignedIn(next, !reauth && (signIn.isIdle || signIn.isError));
 
   const {
     register,
@@ -51,6 +54,11 @@ export default function SignInPage() {
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue your learning path.">
       <SignOutFailedNotice />
+      {reauth && (
+        <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
+          For your security, sign in again to delete your account.
+        </p>
+      )}
       {expired && (
         <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
           Your session expired. Sign in again to continue.
