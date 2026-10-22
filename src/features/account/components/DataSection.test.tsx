@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse } from 'msw';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { http } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
@@ -25,9 +26,11 @@ function renderData() {
   const onSave = vi.fn();
   const Wrapper = withQueryClient(createTestQueryClient());
   const utils = render(
-    <Wrapper>
-      <DataSection onSave={onSave} />
-    </Wrapper>,
+    <MemoryRouter>
+      <Wrapper>
+        <DataSection onSave={onSave} />
+      </Wrapper>
+    </MemoryRouter>,
   );
   return { onSave, ...utils };
 }

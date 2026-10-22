@@ -1,5 +1,5 @@
 import { LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useSignOut, type SignInLocationState } from '@/auth/queries';
 import { useSession } from '@/auth/session';
 import PlanCard from '@/features/billing/components/PlanCard';
@@ -21,6 +21,7 @@ export default function AccountPage() {
   const { data: me } = useSession();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
 
   const name = me?.user.name ?? me?.user.email.split('@')[0] ?? '';
 
@@ -48,7 +49,12 @@ export default function AccountPage() {
 
       {me && <PlanCard me={me} />}
 
-      <DataSection />
+      <DataSection
+        confirmDelete={params.get('delete') === '1'}
+        onDeleteClosed={() => {
+          if (params.has('delete')) setParams({}, { replace: true });
+        }}
+      />
 
       <button
         type="button"
