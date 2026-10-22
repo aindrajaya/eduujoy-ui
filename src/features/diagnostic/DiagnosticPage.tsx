@@ -127,6 +127,8 @@ export default function DiagnosticPage() {
               topicName={batch.topic?.canonicalName}
               building={createPath.isPending}
               errorMessage={createPath.error ? buildPathError(createPath.error) : undefined}
+              // Until A9 ships, POST /v1/paths answers 404: say so, with no retry.
+              buildingUnavailable={createPath.error?.status === 404}
               onBuildPath={() => {
                 const placementId = batch.placement?.id;
                 if (!placementId) return;
