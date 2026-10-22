@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './ui/tokens.css';
+/* Sketch tokens as Tailwind theme names (bg-sk-surface, ...); their values load with /demo (UD). */
+@import './ui/sketch/theme.css';
 
 /*
  * Entry motion for screens and cards (PRD-UI §4: 150-200 ms ease-out). Transform only: content is

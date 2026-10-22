@@ -34,6 +34,14 @@ const staffRoute =
 // session guards. Protected routes wait for auth/me in their loader (behind the boot splash), so no
 // protected markup renders first; /signin and /signup render at once and redirect via useSession.
 export const routes: RouteObject[] = [
+  // UD: the public demo sits outside the root route, so the root loader (auth/me) never runs on it:
+  // no API call, no cookie, no session, no socket (PRD-UI §7b).
+  {
+    path: '/demo',
+    HydrateFallback: BootSplash,
+    ErrorBoundary: RouteError,
+    lazy: async () => ({ Component: (await import('./features/demo/DemoPage')).default }),
+  },
   {
     id: 'root',
     path: '/',
