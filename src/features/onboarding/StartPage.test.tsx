@@ -81,6 +81,44 @@ describe('/start (US-01)', () => {
     expect(router.state.location.pathname).toBe('/diagnostic/diag-1');
   });
 
+  it('"Create as a new topic" resolves with createNew and starts the diagnostic on it (contract 0.5.0)', async () => {
+    const sent = capture();
+    const requests: TopicResolveRequest[] = [];
+    const created = { id: 'java-island', canonicalName: 'java island trekking' };
+    server.use(
+      http.post('/v1/topics/resolve', async ({ request, response }) => {
+        const body = await request.json();
+        requests.push(body);
+        return body.createNew
+          ? response(200).json({ status: 'created', topic: created })
+          : response(200).json({ status: 'choices', choices });
+      }),
+    );
+    const { user, router } = await openForm();
+    await submitIntake(user, 'java island trekking');
+    await user.click(await screen.findByRole('button', { name: 'Create “java island trekking” as a new topic' }));
+    await screen.findByText('Question 1 of 2');
+    expect(requests.map((r) => r.createNew ?? false)).toEqual([false, true]);
+    expect(requests[1]?.text).toBe('java island trekking');
+    expect(sent.start?.topicId).toBe('java-island');
+    expect(router.state.location.pathname).toBe('/diagnostic/diag-1');
+  });
+
+  it('explains the daily cap when creating a topic is refused (429)', async () => {
+    server.use(
+      http.post('/v1/topics/resolve', async ({ request, response }) =>
+        (await request.json()).createNew
+          ? response.untyped(problemResponse(mockProblem(429, 'RATE_LIMITED', 'Daily new-topic cap')))
+          : response(200).json({ status: 'choices', choices }),
+      ),
+    );
+    const { user } = await openForm();
+    await submitIntake(user, 'java');
+    await user.click(await screen.findByRole('button', { name: 'Create “java” as a new topic' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('You have created as many new topics as allowed today.');
+    expect(screen.getByRole('heading', { name: 'Which topic did you mean?' })).toBeInTheDocument();
+  });
+
   it('"None of these" returns to the form with what was typed', async () => {
     server.use(
       http.post('/v1/topics/resolve', ({ response }) => response(200).json({ status: 'choices', choices })),

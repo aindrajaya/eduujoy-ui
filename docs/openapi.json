@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Eduujoy API",
-    "version": "0.4.0-v0",
+    "version": "0.7.0-v0",
     "summary": "Frozen v0 contract for the Eduujoy MVP.",
     "description": "Frozen v0 contract, written from PRD-API Section 7 (endpoints), Section 8 and master PRD\nSections 8-9 (shapes), and Section 9 (SSE and WebSocket events).\n\nRules:\n- The API must stay backward compatible with this file. Additive changes go through\n  the \"Contract change requests\" section of docs/status/api.md or docs/status/ui.md.\n- The UI builds its MSW mocks from ui/docs/openapi.json (a JSON copy of this file)\n  until each U slice switches to the real API (docs/EXECUTION-PLAN.md).\n- JSON field names are camelCase. The snake_case shapes in master PRD Section 8 are\n  internal model-output contracts; the API maps them to these DTOs.\n- Auth is cookie-based (`ej_at`, `ej_rt`, HttpOnly). Unsafe methods require\n  `X-Requested-With: eduujoy` and an allow-listed `Origin` (CsrfGuard).\n- Every error is `application/problem+json` (RFC 9457).\n- CORS exposes `X-Request-Id` and `Retry-After` to allow-listed origins, so the UI can read\n  both on cross-origin responses (Retry-After on 429 and on 503 AI_BUDGET_EXCEEDED).\n- Realtime payloads (SSE and Socket.IO) are listed under `x-sse-events` and\n  `x-socket-events`, and their payloads are defined in `components.schemas`.\n"
   },
@@ -321,6 +321,75 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/me/export": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "meExport",
+        "summary": "Download all my personal data as JSON (GDPR-level export, master PRD §12; PRD-API §12).",
+        "description": "No re-authentication needed; rate-limited.",
+        "responses": {
+          "200": {
+            "description": "The export, sent as an attachment (`Content-Disposition`).",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "meDelete",
+        "summary": "Delete my account and personal data; signs out (clears both cookies).",
+        "description": "Requires a sign-in (password or Google, not a token refresh) within the last 10 minutes.\nOtherwise 401 with code `REAUTH_REQUIRED`: the client must not try a refresh for it (a\nrefresh keeps the original sign-in time); it asks the learner to sign in again, then retries.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestedWith"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted and signed out; both cookies cleared."
+          },
+          "401": {
+            "description": "Not signed in (`UNAUTHENTICATED`), or the sign-in is older than 10 minutes (`REAUTH_REQUIRED`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       }
@@ -1026,6 +1095,7 @@
         ],
         "operationId": "billingCheckout",
         "summary": "Create a Lemon Squeezy checkout link (FR-23).",
+        "description": "After payment, Lemon Squeezy sends the learner back to `{origin}/account?checkout=success`,\nwhere `{origin}` is the request's allow-listed Origin. The flag is only a hint: the plan\nchanges when the webhook is processed (`entitlement.changed`, or `GET /v1/auth/me`).\nA `subscription` checkout while a subscription is active returns 409 `CONFLICT`; credit\npacks are unaffected. 503 when the payment provider is unavailable.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/XRequestedWith"
@@ -1057,6 +1127,12 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -1710,6 +1786,7 @@
           "CSRF_REJECTED",
           "REFRESH_CONCURRENT",
           "SERVICE_UNAVAILABLE",
+          "REAUTH_REQUIRED",
           "INTERNAL"
         ]
       },
@@ -1929,6 +2006,11 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 120
+          },
+          "createNew": {
+            "type": "boolean",
+            "default": false,
+            "description": "Skip matching and create a topic from `text` (after the learner rejected the choices). Subject to the daily new-topic cap (429)."
           }
         }
       },
@@ -1967,7 +2049,7 @@
         "required": [
           "status"
         ],
-        "description": "`matched` (similarity ≥ 0.88), `choices` (0.75–0.88, at most 3), or `created` (new topic).",
+        "description": "`matched` (similarity at or above the server's match threshold), `choices` (at most 3, between the choice and match thresholds), or `created` (new topic). Thresholds are server-side and may be tuned.",
         "properties": {
           "status": {
             "type": "string",
@@ -3083,6 +3165,13 @@
               "subscription",
               "credit_pack"
             ]
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 1,
+            "description": "Credit packs to buy (credit_pack only; 400 if sent with subscription or outside 1–10). Preset on the Lemon Squeezy checkout; credits come only from the paid order in the webhook."
           }
         }
       },
