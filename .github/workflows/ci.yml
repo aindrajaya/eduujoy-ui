@@ -38,6 +38,8 @@ jobs:
       - run: pnpm build
       - name: Size budgets (PRD-UI §9)
         run: pnpm size
+      - name: No staff code in learner chunks (U11)
+        run: pnpm check:chunks
 
   e2e:
     name: Playwright (mocked API)

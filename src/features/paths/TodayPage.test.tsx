@@ -51,6 +51,15 @@ describe('/today (US-03 home)', () => {
     expect(await screen.findByText('You finished every step')).toBeInTheDocument();
   });
 
+  it('says path building opens soon when GET /v1/paths is not live yet (404), with no error or retry', async () => {
+    server.use(http.get('/v1/paths', ({ response }) => response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Not Found')))));
+    const { container } = renderRoute('/today');
+    expect(await screen.findByText('Your first path will appear here once path building opens')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'See your placement' })).toHaveAttribute('href', '/progress');
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
   it('invites a learner without an active path to start one', async () => {
     server.use(http.get('/v1/paths', ({ response }) => response(200).json({ items: [], nextCursor: null })));
     const { container } = renderRoute('/today');
@@ -73,6 +82,13 @@ describe('/paths', () => {
     expect(link).toHaveAttribute('href', '/paths/path-1');
     expect(link).toHaveTextContent('Active · Advanced beginner → Competent · 1 of 6 steps');
     await expectNoAxeViolations(container);
+  });
+
+  it('says path building opens soon on a 404 from GET /v1/paths', async () => {
+    server.use(http.get('/v1/paths', ({ response }) => response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Not Found')))));
+    renderRoute('/paths');
+    expect(await screen.findByText('Your first path will appear here once path building opens')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('shows an empty state', async () => {

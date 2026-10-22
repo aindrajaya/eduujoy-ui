@@ -205,4 +205,46 @@ describe('useRealtimeEvents (PRD-UI §5)', () => {
     expect(refreshes).toBe(0);
     expect(openedSockets[0]!.connectCalls).toBe(0);
   });
+
+  it('after reconnection gives up, retries once on focus or a visible tab, at most every 5 minutes', async () => {
+    renderRoute('/progress');
+    await screen.findByText('Advanced beginner · C3 Apply');
+    await waitFor(() => {
+      expect(openedSockets).toHaveLength(1);
+    });
+    const socket = openedSockets[0]!;
+    const giveUp = () => {
+      // The endpoint is not live (e.g. 404 until A11): Socket.IO stops after its attempts.
+      socket.connected = false;
+      socket.serverEmit('reconnect_failed');
+    };
+    let now = Date.parse('2026-10-22T12:00:00Z');
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+
+    act(() => {
+      giveUp();
+    });
+    expect(socket.connectCalls).toBe(0);
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    expect(socket.connectCalls).toBe(1);
+
+    // It failed again: focus and a visible tab within 5 minutes do not try again (no loop).
+    act(() => {
+      giveUp();
+    });
+    now += 4 * 60_000;
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+      setHidden(false);
+    });
+    expect(socket.connectCalls).toBe(1);
+
+    now += 60_000;
+    act(() => {
+      setHidden(false);
+    });
+    expect(socket.connectCalls).toBe(2);
+  });
 });
