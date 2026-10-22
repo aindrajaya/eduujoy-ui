@@ -129,4 +129,34 @@ test.describe('account data and checkout (contract 0.6.0, 0.7.0)', () => {
     await expect(page).toHaveURL('https://eduujoy.lemonsqueezy.com/checkout/three');
     expect(body).toEqual({ product: 'credit_pack', quantity: 3 });
   });
+
+  test('the checkout row fits a 375 px screen with 44 px tap targets (audit)', async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockAuth(page, { signedIn: true });
+    await page.goto('/account');
+    const plan = page.getByRole('region', { name: 'Your plan' });
+    // The longest label the row can show.
+    await plan.getByRole('combobox', { name: 'Credit packs' }).selectOption('10');
+    await expect(plan.getByRole('button', { name: 'Buy 10 credit packs' })).toBeVisible();
+    const shot = testInfo.outputPath('account-375.png');
+    await page.screenshot({ path: shot, fullPage: true });
+    await testInfo.attach('account-375', { path: shot, contentType: 'image/png' });
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+    const controls = [
+      plan.getByRole('button', { name: 'Upgrade to subscription' }),
+      plan.getByRole('combobox', { name: 'Credit packs' }),
+      plan.getByRole('button', { name: 'Buy 10 credit packs' }),
+    ];
+    for (const control of controls) {
+      const box = await control.boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) continue;
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(375);
+    }
+  });
 });
