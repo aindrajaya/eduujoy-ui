@@ -58,7 +58,7 @@ export default function DemoResult({ bank, placement, graded, prefs, onRetake }:
           Where you sit
         </h2>
         <DemoGrid stage={stage} bloom={verified ?? 'C1'} />
-        <p className="sk-annotation">
+        <p className="sk-title">
           You are here: {STAGE_LABEL[stage]}, {verified ?? 'C1'} {BLOOM_LABEL[verified ?? 'C1']}
         </p>
       </section>
