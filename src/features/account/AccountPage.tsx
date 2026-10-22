@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useSignOut, type SignInLocationState } from '@/auth/queries';
 import { useSession } from '@/auth/session';
 import PlanCard from '@/features/billing/components/PlanCard';
+import DataSection from './components/DataSection';
 
 function initials(name: string): string {
   const letters = name
@@ -46,6 +47,8 @@ export default function AccountPage() {
       </header>
 
       {me && <PlanCard me={me} />}
+
+      <DataSection />
 
       <button
         type="button"
