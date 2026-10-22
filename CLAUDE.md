@@ -5,7 +5,7 @@ API shapes come only from docs/openapi.json; refresh it with `pnpm api:sync` (co
 - Frozen contract: ../docs/contract/openapi.v0.yaml (JSON copy: docs/openapi.json). Build MSW mocks from it until EXECUTION-PLAN says a slice switches to the real API; request changes under "Contract change requests" in ../docs/status/ui.md.
 - Package manager is pnpm; do not commit package-lock.json or yarn.lock.
 - Run git, pnpm and tests from inside ui/ (separate repo).
-- Components call feature hooks in queries.ts, never axios directly.
+- Components call feature hooks in queries.ts, never call fetch directly; always use src/api.
 - No tokens or session data in localStorage; auth state comes from /v1/auth/me only.
 - Keep every route lazy; run size-limit before finishing.
 - Run the slice's Verify commands; if the PRD is ambiguous, stop and list the question.
