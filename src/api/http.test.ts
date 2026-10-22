@@ -53,6 +53,27 @@ describe('createHttpClient', () => {
     await expect(client.get('/down')).rejects.toMatchObject({ code: 'ERR_NETWORK' });
   });
 
+  it('refuses absolute URLs outside the API origin, allows its own', async () => {
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/own`, () => {
+        calls += 1;
+        return HttpResponse.json({ ok: true });
+      }),
+      http.get('http://elsewhere.test/steal', () => {
+        calls += 100;
+        return HttpResponse.json({});
+      }),
+    );
+    const client = createHttpClient({ baseURL: BASE, withCredentials: true });
+    await expect(client.get(`${BASE}/own`)).resolves.toMatchObject({ data: { ok: true } });
+    for (const url of ['http://elsewhere.test/steal', '//elsewhere.test/steal']) {
+      await expect(client.get(url)).rejects.toMatchObject({ code: 'ERR_BAD_REQUEST' });
+    }
+    await expect(createHttpClient().get('http://elsewhere.test/steal')).rejects.toMatchObject({ code: 'ERR_BAD_REQUEST' });
+    expect(calls).toBe(1);
+  });
+
   it('runs request interceptors before sending and lets a response interceptor replay', async () => {
     let calls = 0;
     server.use(
