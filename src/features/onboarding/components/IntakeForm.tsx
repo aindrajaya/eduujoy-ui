@@ -1,9 +1,10 @@
 import { ArrowRight, Clock, Sparkles, Target } from 'lucide-react';
-import { useEffect } from 'react';
-import { useForm, type FieldPath } from 'react-hook-form';
+import { useEffect, useId } from 'react';
+import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import type { ApiError } from '@/api/errors';
 import { lazyResolver } from '@/lib/forms';
 import TextField from '@/ui/TextField';
+import { EXPERIENCE } from '../experience';
 import type { IntakeValues } from '../schema';
 
 const resolver = lazyResolver<IntakeValues>(() =>
@@ -17,8 +18,9 @@ const SERVER_FIELDS: Record<string, FieldPath<IntakeValues>> = {
   goal: 'goal',
   weeklyHours: 'weeklyHours',
   preferredFormats: 'formats',
-  'selfReport.years': 'years',
-  'selfReport.projectsShipped': 'projectsShipped',
+  selfReport: 'experience',
+  'selfReport.years': 'experience',
+  'selfReport.projectsShipped': 'experience',
 };
 
 const FORMATS = [
@@ -26,8 +28,6 @@ const FORMATS = [
   { value: 'text', label: 'Articles and docs' },
   { value: 'papers', label: 'Research papers' },
 ] as const;
-
-const optionalNumber = (v: unknown) => (v === '' || v === null || v === undefined ? undefined : Number(v));
 
 export interface IntakeFormProps {
   defaultValues?: Partial<IntakeValues>;
@@ -38,12 +38,13 @@ export interface IntakeFormProps {
   errorMessage?: string;
 }
 
-/** US-01 intake: topic, goal, weekly hours, preferred formats, optional experience (FR-01, FR-04). */
+/** US-01 intake: topic, goal, weekly hours, preferred formats and experience (FR-01, FR-04). */
 export default function IntakeForm({ defaultValues, onSubmit, submitting = false, error, errorMessage }: IntakeFormProps) {
   const {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors },
   } = useForm<IntakeValues>({
     resolver,
@@ -51,6 +52,11 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
     reValidateMode: 'onChange',
     defaultValues: { topic: '', goal: '', weeklyHours: 3, formats: ['video', 'text'], ...defaultValues },
   });
+
+  // The legend names the topic as typed (one watched field, not the whole form; PRD-UI §7).
+  const topicName = useWatch({ control, name: 'topic' });
+  const experienceHelpId = useId();
+  const experienceErrorId = useId();
 
   useEffect(() => {
     if (!error) return;
@@ -131,31 +137,34 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
               </div>
             </fieldset>
 
-            <details className="rounded-xl border border-border p-4">
-              <summary className="min-h-11 cursor-pointer content-center font-semibold text-text">
-                Add your experience (optional)
-              </summary>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <TextField
-                  label="Years of experience"
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  max={50}
-                  error={errors.years?.message}
-                  {...register('years', { setValueAs: optionalNumber })}
-                />
-                <TextField
-                  label="Projects shipped"
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  max={1000}
-                  error={errors.projectsShipped?.message}
-                  {...register('projectsShipped', { setValueAs: optionalNumber })}
-                />
+            <fieldset
+              aria-describedby={`${experienceHelpId}${errors.experience ? ` ${experienceErrorId}` : ''}`}
+              aria-invalid={errors.experience ? true : undefined}
+              className="space-y-2"
+            >
+              <legend className="mb-1 text-sm font-semibold text-text">
+                How much have you worked with {topicName.trim() || 'this topic'}?
+              </legend>
+              <p id={experienceHelpId} className="text-sm text-text-muted">
+                This only sets where the questions start; your answers decide your level.
+              </p>
+              <div className="space-y-2">
+                {EXPERIENCE.map(({ value, label }) => (
+                  <label
+                    key={value}
+                    className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-border px-4 py-2 has-checked:border-primary has-checked:bg-primary-soft"
+                  >
+                    <input type="radio" value={value} className="h-4 w-4 shrink-0 accent-primary" {...register('experience')} />
+                    <span className="text-base text-text">{label}</span>
+                  </label>
+                ))}
               </div>
-            </details>
+              {errors.experience && (
+                <p id={experienceErrorId} className="text-sm text-danger">
+                  {errors.experience.message}
+                </p>
+              )}
+            </fieldset>
 
             {errorMessage && (
               <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
