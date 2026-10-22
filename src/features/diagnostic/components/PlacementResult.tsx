@@ -1,4 +1,5 @@
 import { ArrowRight, Gauge } from 'lucide-react';
+import { Link } from 'react-router';
 import type { Placement } from '@/api/types';
 import { BLOOM_LABEL, formatConfidence, STAGE_LABEL } from '@/lib/levels';
 
@@ -8,10 +9,19 @@ export interface PlacementResultProps {
   onBuildPath: () => void;
   building?: boolean;
   errorMessage?: string;
+  /** Path building is not live on the API yet (POST /v1/paths 404): no button, just where to go. */
+  buildingUnavailable?: boolean;
 }
 
 /** US-02 result: stage, Bloom level, confidence and the one-line reason, then build the path. */
-export default function PlacementResult({ placement, topicName, onBuildPath, building = false, errorMessage }: PlacementResultProps) {
+export default function PlacementResult({
+  placement,
+  topicName,
+  onBuildPath,
+  building = false,
+  errorMessage,
+  buildingUnavailable = false,
+}: PlacementResultProps) {
   const { stage, bloom } = placement.position;
   return (
     <section aria-labelledby="placement-title" className="space-y-6">
@@ -48,21 +58,37 @@ export default function PlacementResult({ placement, topicName, onBuildPath, bui
         {placement.reason}
       </p>
 
-      {errorMessage && (
-        <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
-          {errorMessage}
-        </p>
-      )}
+      {buildingUnavailable ? (
+        <div role="status" className="space-y-3 rounded-card bg-primary-soft p-4 text-text">
+          <p className="font-semibold">Path building is coming soon. Your placement is saved.</p>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/progress" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
+              See your progress
+            </Link>
+            <Link to="/today" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
+              Go to Today
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <>
+          {errorMessage && (
+            <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+              {errorMessage}
+            </p>
+          )}
 
-      <button
-        type="button"
-        onClick={onBuildPath}
-        disabled={building}
-        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {building ? 'Starting your path…' : 'Build my path'}
-        {!building && <ArrowRight className="h-5 w-5" aria-hidden="true" />}
-      </button>
+          <button
+            type="button"
+            onClick={onBuildPath}
+            disabled={building}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {building ? 'Starting your path…' : 'Build my path'}
+            {!building && <ArrowRight className="h-5 w-5" aria-hidden="true" />}
+          </button>
+        </>
+      )}
     </section>
   );
 }

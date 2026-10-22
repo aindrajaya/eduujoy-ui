@@ -1,4 +1,5 @@
 import { redirect, type RouteObject } from 'react-router';
+import type { Role } from './api/types';
 import BootSplash from './app/BootSplash';
 import RouteError from './app/RouteError';
 import { HOME, loadSession, requireAuth } from './auth/guards';
@@ -19,6 +20,15 @@ function prefetchPathData(pathId: string | null): null {
     .catch(() => undefined);
   return null;
 }
+
+const STAFF: readonly Role[] = ['reviewer', 'admin'];
+const ADMIN: readonly Role[] = ['admin'];
+
+// U11: staff screens. The role check lives in its own module (auth/roleRoute.ts) so the shell, and
+// with it the /signin budget, does not carry it; see that file for why lazy() checks the role.
+const staffRoute =
+  (roles: readonly Role[], load: () => Promise<{ default: NonNullable<RouteObject['Component']> }>) => async () =>
+    (await import('./auth/roleRoute')).roleRoute(roles, load);
 
 // Every screen is a lazy chunk. The shell holds only the boot splash, the error boundary and the
 // session guards. Protected routes wait for auth/me in their loader (behind the boot splash), so no
@@ -88,6 +98,14 @@ export const routes: RouteObject[] = [
             lazy: async () => ({
               Component: (await import('./features/checkpoints/CheckpointPage')).default,
             }),
+          },
+          {
+            path: 'admin',
+            children: [
+              { index: true, loader: () => redirect('/admin/review') },
+              { path: 'review', lazy: staffRoute(STAFF, () => import('./features/admin/ReviewQueuePage')) },
+              { path: 'metrics', lazy: staffRoute(ADMIN, () => import('./features/admin/MetricsPage')) },
+            ],
           },
           {
             path: 'steps/:id',

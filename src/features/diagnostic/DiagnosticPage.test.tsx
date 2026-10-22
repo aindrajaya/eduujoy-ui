@@ -101,6 +101,25 @@ describe('/diagnostic/:id (US-02)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Path building has reached today’s limit. Try again in about 2 hours.');
   });
 
+  it('says path building is coming soon when POST /v1/paths is not live yet (404), with no retry', async () => {
+    let posts = 0;
+    server.use(
+      http.get('/v1/diagnostics/{id}', ({ response }) => response(200).json({ ...mockDiagnosticResume, ...mockDiagnosticCompleted, items: [] })),
+      http.post('/v1/paths', ({ response }) => {
+        posts += 1;
+        return response.untyped(problemResponse(mockProblem(404, 'NOT_FOUND', 'Not Found')));
+      }),
+    );
+    const { container } = renderRoute('/diagnostic/diag-1');
+    await userEvent.click(await screen.findByRole('button', { name: 'Build my path' }));
+    expect(await screen.findByText('Path building is coming soon. Your placement is saved.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'See your progress' })).toHaveAttribute('href', '/progress');
+    expect(screen.getByRole('link', { name: 'Go to Today' })).toHaveAttribute('href', '/today');
+    expect(screen.queryByRole('button', { name: 'Build my path' })).not.toBeInTheDocument();
+    expect(posts).toBe(1);
+    await expectNoAxeViolations(container);
+  });
+
   it('explains when the diagnostic is not available', async () => {
     const { container } = renderRoute('/diagnostic/unknown');
     expect(await screen.findByText('This diagnostic isn’t available here')).toBeInTheDocument();

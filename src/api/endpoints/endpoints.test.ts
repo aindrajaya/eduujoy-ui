@@ -35,6 +35,10 @@ describe('endpoints', () => {
   it('auth: builds the Google redirect URL on the API host', () => {
     expect(auth.googleSignInUrl()).toBe(`${env.apiUrl}/v1/auth/google`);
     expect(auth.googleSignInUrl('/steps/2')).toBe(`${env.apiUrl}/v1/auth/google?returnTo=%2Fsteps%2F2`);
+    // Contract 0.8.0: a fresh sign-in for a sensitive action.
+    expect(auth.googleSignInUrl('/account?delete=1', true)).toBe(
+      `${env.apiUrl}/v1/auth/google?returnTo=%2Faccount%3Fdelete%3D1&reauth=true`,
+    );
   });
 
   it('topics and diagnostics', async () => {

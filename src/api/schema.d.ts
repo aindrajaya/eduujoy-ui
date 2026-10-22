@@ -1342,6 +1342,13 @@ export interface operations {
     authGoogleStart: {
         parameters: {
             query?: {
+                /**
+                 * @description Re-authentication for a sensitive action (DELETE /v1/me). Google is asked for a fresh
+                 *     sign-in (prompt=login, max_age=0), and the API counts the session as freshly signed in
+                 *     only if the ID token's auth_time is within the last 10 minutes; otherwise the sign-in
+                 *     succeeds but DELETE /v1/me still returns REAUTH_REQUIRED.
+                 */
+                reauth?: boolean;
                 /** @description Same-site path on APP_ORIGIN to land on after sign-in; unsafe or missing values fall back to /today. */
                 returnTo?: string;
             };
@@ -1806,6 +1813,7 @@ export interface operations {
             /** @description The export, sent as an attachment (`Content-Disposition`). */
             200: {
                 headers: {
+                    /** @description Attachment file name. Exposed to allow-listed origins via CORS. */
                     "Content-Disposition"?: string;
                     [name: string]: unknown;
                 };
