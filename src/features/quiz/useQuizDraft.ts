@@ -10,7 +10,7 @@ export const DRAFT_DEBOUNCE_MS = 1000;
  * the submit is confirmed. Other users' drafts on this device are removed on mount. Session
  * expiry keeps the learner's own draft (PRD-UI §6).
  */
-export function useQuizDraft(userId: string | undefined): void {
+export function useQuizDraft(userId: string | undefined, { clearOthers = true }: { clearOthers?: boolean } = {}): void {
   const state = useQuizState();
   const dispatch = useQuizDispatch();
   const restored = useRef(false);
@@ -19,11 +19,12 @@ export function useQuizDraft(userId: string | undefined): void {
   useEffect(() => {
     if (!userId || restored.current) return;
     restored.current = true;
-    // A different user on this device: earlier users' drafts go before anything is restored.
-    clearForeignDrafts(userId);
+    // A different user on this device: earlier users' drafts go before anything is restored. The
+    // public demo (UD) keeps them: a visitor's demo must not delete a signed-in learner's drafts.
+    if (clearOthers) clearForeignDrafts(userId);
     const snapshot = readDraft(userId, quizId);
     if (snapshot) dispatch({ type: 'RESTORE', snapshot });
-  }, [dispatch, quizId, userId]);
+  }, [clearOthers, dispatch, quizId, userId]);
 
   useEffect(() => {
     if (!userId || !restored.current) return;
