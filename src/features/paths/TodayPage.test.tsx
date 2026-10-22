@@ -80,7 +80,7 @@ describe('/paths', () => {
     const { container } = renderRoute('/paths');
     const link = await screen.findByRole('link', { name: /Product Design \(UI\/UX\)/ });
     expect(link).toHaveAttribute('href', '/paths/path-1');
-    expect(link).toHaveTextContent('Active · Advanced beginner → Competent · 1 of 6 steps');
+    expect(link).toHaveTextContent('ActiveAdvanced beginner → Competent · 1 of 6 steps');
     await expectNoAxeViolations(container);
   });
 
