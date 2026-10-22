@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react';
 import { useEffect, useId, useRef } from 'react';
 import ErrorNote from '@/ui/ErrorNote';
 
@@ -73,8 +74,9 @@ export default function DeleteAccountDialog({
           type="button"
           onClick={onConfirm}
           disabled={deleting}
-          className="sk-btn flex-1"
+          className="sk-btn sk-btn-ghost flex-1 text-text"
         >
+          <Trash2 className="h-5 w-5" aria-hidden="true" />
           {deleting ? 'Deleting…' : 'Delete my account'}
         </button>
         <button
@@ -82,7 +84,7 @@ export default function DeleteAccountDialog({
           type="button"
           onClick={onCancel}
           disabled={deleting}
-          className="sk-btn sk-btn-ghost flex-1"
+          className="sk-btn flex-1"
         >
           Keep my account
         </button>
