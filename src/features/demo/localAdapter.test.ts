@@ -3,8 +3,10 @@ import type { Answer } from '@/features/quiz/types';
 import { isCorrect, learningScience as bank } from './bank';
 import { createLocalDiagnosticAdapter, DemoAttemptNotFound, type DemoState } from './localAdapter';
 import type { DemoSelfReport } from './placement';
+import type { DemoPrefs } from './prefs';
 
 const selfReport: DemoSelfReport = { years: 'under1', plannedOthers: false };
+const prefs: DemoPrefs = { goal: 'exam', hours: '3to5', format: 'mix' };
 
 /** A seeded generator, so a "random" run is reproducible. */
 function seeded(seed: number) {
@@ -50,7 +52,7 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
   it.each([1, 2, 3, 4, 5, 6, 7, 8])('a full run takes 8–12 items and ends in a placement (seed %i)', async (seed) => {
     const port = adapter(seed);
     const rng = seeded(seed * 7);
-    let state = await port.start(selfReport);
+    let state = await port.start(selfReport, prefs);
     for (let batch = 1; state.status === 'in_progress'; batch += 1) {
       expect(state.items.length).toBeGreaterThan(0);
       expect(state.items.length).toBeLessThanOrEqual(4);
@@ -68,7 +70,7 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
       [() => false, null, 'novice'],
     ] as const) {
       const port = adapter();
-      let state = await port.start(selfReport);
+      let state = await port.start(selfReport, prefs);
       for (let k = 0; state.status === 'in_progress'; k += 1) {
         state = await port.submitAnswers(state.id, state.items, answer(state, choose), `k${String(k)}`);
       }
@@ -79,7 +81,7 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
 
   it('a repeated idempotency key replays the first result, even while the first is in flight', async () => {
     const port = adapter();
-    const state = await port.start(selfReport);
+    const state = await port.start(selfReport, prefs);
     const answers = answer(state, () => true);
     const [a, b] = await Promise.all([
       port.submitAnswers(state.id, state.items, answers, 'same-key'),
@@ -93,7 +95,7 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
 
   it('a reload resumes the outstanding batch from this browser', async () => {
     const port = adapter();
-    const started = await port.start(selfReport);
+    const started = await port.start(selfReport, prefs);
     const after = await port.submitAnswers(started.id, started.items, answer(started, () => true), 'k1');
     const reloaded = adapter();
     expect(reloaded.currentId()).toBe(started.id);
@@ -104,25 +106,27 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
     const port = adapter();
     await expect(port.load('nope')).rejects.toBeInstanceOf(DemoAttemptNotFound);
     await expect(port.submitAnswers('nope', [], {}, 'k')).rejects.toBeInstanceOf(DemoAttemptNotFound);
-    const state = await port.start(selfReport);
+    const state = await port.start(selfReport, prefs);
     await port.submitAnswers(state.id, state.items, {}, 'k1');
     await expect(port.submitAnswers(state.id, state.items, {}, 'k2')).rejects.toThrow('no longer open');
   });
 
   it('reset forgets the attempt, so a retake starts fresh', async () => {
     const port = adapter();
-    await port.start(selfReport);
+    await port.start(selfReport, prefs);
     window.localStorage.setItem('quiz:demo:demo:x:y', '{}');
+    window.localStorage.setItem('demo:setup', '{"step":2}');
     window.localStorage.setItem('quiz:u1:diagnostic:1', '{}');
     port.reset();
     expect(port.currentId()).toBeNull();
     expect(window.localStorage.getItem('quiz:demo:demo:x:y')).toBeNull();
+    expect(window.localStorage.getItem('demo:setup')).toBeNull();
     expect(window.localStorage.getItem('quiz:u1:diagnostic:1')).toBe('{}');
   });
 
   it('counts unanswered items as skipped, never correct', async () => {
     const port = adapter();
-    const state = await port.start(selfReport);
+    const state = await port.start(selfReport, prefs);
     const next = await port.submitAnswers(state.id, state.items, {}, 'k1');
     expect(next.graded.every((g) => g.skipped && !g.correct)).toBe(true);
   });
