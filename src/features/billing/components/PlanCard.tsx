@@ -1,8 +1,24 @@
+import type { ApiError } from '@/api/errors';
 import type { Me } from '@/api/types';
+import { formatRetryWait } from '@/lib/time';
 import { useId, useState } from 'react';
 import { MAX_CREDIT_PACKS, useCheckout, type CheckoutProduct } from '../queries';
 
 // Billing periods end at a UTC instant; show that day, not the viewer's local one.
+function checkoutErrorCopy(error: ApiError): string {
+  // Contract 0.6.0: a second subscription while one is active.
+  if (error.code === 'CONFLICT') return 'You already have an active subscription. Nothing was charged.';
+  // Contract 0.6.0: the payment provider is down (Retry-After).
+  if (error.code === 'SERVICE_UNAVAILABLE') {
+    const when = error.retryAfterMs !== undefined ? formatRetryWait(error.retryAfterMs) : 'in a few minutes';
+    return `Checkout is briefly unavailable. Try again ${when}. Nothing was charged.`;
+  }
+  if (error.status === 0 && error.code !== 'INTERNAL') {
+    return 'We could not reach the server. Check your connection and try again. Nothing was charged.';
+  }
+  return 'We could not open the checkout. Nothing was charged; please try again.';
+}
+
 const periodDate = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(iso));
 
@@ -103,9 +119,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
       <p className="text-xs text-text-muted">Payments are handled by Lemon Squeezy. You will leave Eduujoy to pay.</p>
       {checkout.error && !packsError && (
         <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
-          {checkout.error.status === 0 && checkout.error.code !== 'INTERNAL'
-            ? 'We could not reach the server. Check your connection and try again. Nothing was charged.'
-            : 'We could not open the checkout. Nothing was charged; please try again.'}
+          {checkoutErrorCopy(checkout.error)}
         </p>
       )}
     </section>

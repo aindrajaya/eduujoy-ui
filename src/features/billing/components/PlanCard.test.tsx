@@ -119,6 +119,29 @@ describe('PlanCard (FR-23)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Nothing was charged');
   });
 
+  it('explains a second subscription (409) and a provider outage (503) (contract 0.6.0)', async () => {
+    server.use(
+      http.post('/v1/billing/checkout', ({ response }) =>
+        response.untyped(problemResponse(mockProblem(409, 'CONFLICT', 'Already subscribed'))),
+      ),
+    );
+    renderPlan();
+    await userEvent.click(screen.getByRole('button', { name: 'Upgrade to subscription' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('You already have an active subscription. Nothing was charged.');
+
+    server.use(
+      http.post('/v1/billing/checkout', ({ response }) =>
+        response.untyped(
+          problemResponse(mockProblem(503, 'SERVICE_UNAVAILABLE', 'Provider down'), { 'Retry-After': '120' }),
+        ),
+      ),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Buy a credit pack' }));
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Checkout is briefly unavailable. Try again in about 2 minutes. Nothing was charged.');
+    });
+  });
+
   it('checkoutUrl accepts https Lemon Squeezy links only', () => {
     expect(checkoutUrl('https://x.lemonsqueezy.com/c')).toBe('https://x.lemonsqueezy.com/c');
     expect(checkoutUrl('https://lemonsqueezy.com/c')).toBe('https://lemonsqueezy.com/c');
