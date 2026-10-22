@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockCheckpointFailed, mockCheckpointResult, mockMe } from '@/api/mocks/data';
 import type { Me } from '@/api/types';
 import { sessionKeys } from '@/auth/session';
+import { adminKeys } from '@/features/admin/keys';
 import { pathKeys } from '@/features/paths/keys';
 import { progressKeys } from '@/features/progress/keys';
 import { createTestQueryClient } from '@/test/providers';
@@ -78,6 +79,13 @@ describe('applyRealtimeEvent (PRD-UI §5)', () => {
     const ctx = context();
     applyRealtimeEvent(ctx, 'entitlement.changed', { plan: 'subscription', quota: mockMe.quota });
     expect(ctx.client.getQueryData(sessionKeys.me())).toBeUndefined();
+    expect(getToasts()).toHaveLength(0);
+  });
+
+  it('review-queue.count refreshes the open review queue', () => {
+    const ctx = context();
+    applyRealtimeEvent(ctx, 'review-queue.count', { openCount: 4 });
+    expect(ctx.invalidated).toEqual([[...adminKeys.queue('open')]]);
     expect(getToasts()).toHaveLength(0);
   });
 });
