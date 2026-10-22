@@ -136,4 +136,28 @@ describe('answerSummary', () => {
   ])('%j → %s', (answer, expected) => {
     expect(answerSummary(q, answer)).toBe(expected);
   });
+
+  it('names a linked pair from its parts and an order with arrows', () => {
+    const linked: QuizQuestion = {
+      id: 'l',
+      kind: 'linked_choice',
+      prompt: 'Pick',
+      parts: [
+        { id: 'p1', prompt: 'Which?', options: [{ id: 'p1-a', label: 'Plan A' }] },
+        { id: 'p2', prompt: 'Why?', options: [{ id: 'p2-a', label: 'Spacing' }] },
+      ],
+    };
+    expect(answerSummary(linked, { optionIds: ['p1-a', 'p2-a'] })).toBe('Plan A, Spacing');
+    const order: QuizQuestion = {
+      id: 'o',
+      kind: 'order',
+      prompt: 'Arrange',
+      options: [
+        { id: 'x', label: 'Read' },
+        { id: 'y', label: 'Quiz' },
+      ],
+    };
+    expect(answerSummary(order, { optionIds: ['y', 'x'] })).toBe('Quiz → Read');
+    expect(answerSummary({ id: 'n', kind: 'linked_choice', prompt: 'No parts' }, { optionIds: ['q'] })).toBe('q');
+  });
 });
