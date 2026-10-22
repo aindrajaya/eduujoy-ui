@@ -9,7 +9,8 @@ import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
 import StateMessage from '@/ui/StateMessage';
 import StickyActionBar from '@/ui/StickyActionBar';
-import { currentStep, pathQuery, stepHref, useActivePaths, usePath } from './pathQueries';
+import PathBuildingSoon from './components/PathBuildingSoon';
+import { currentStep, isPathBuildingClosed, pathQuery, stepHref, useActivePaths, usePath } from './pathQueries';
 
 function TodaySkeleton() {
   return (
@@ -121,6 +122,14 @@ export default function TodayPage() {
   const summary = active.data?.[0];
   const path = usePath(summary && summary.currentStep === undefined ? summary.id : undefined);
   usePrefetchStepScreen(summary?.id);
+
+  if (isPathBuildingClosed(active.error)) {
+    return (
+      <div className="p-6">
+        <PathBuildingSoon />
+      </div>
+    );
+  }
 
   if (active.isSuccess && !summary) {
     return (
