@@ -6,7 +6,8 @@
       "url": [
         "http://localhost:4173/signin?mock=signed-out",
         "http://localhost:4173/today",
-        "http://localhost:4173/steps/step-2?path=path-1"
+        "http://localhost:4173/steps/step-2?path=path-1",
+        "http://localhost:4173/demo"
       ],
       "numberOfRuns": 3,
       "settings": {
