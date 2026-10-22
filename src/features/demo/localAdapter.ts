@@ -3,6 +3,7 @@ import type { DiagnosticPort } from '@/features/diagnostic/port';
 import type { QuizQuestion } from '@/features/quiz/types';
 import { isCorrect, toQuestion, type Bank } from './bank';
 import { place, type DemoPlacement, type DemoSelfReport, type Graded } from './placement';
+import { DEMO_SETUP_KEY, isPrefs, type DemoPrefs } from './prefs';
 import { firstBatch, secondBatch, thirdBatch, type Rng } from './selector';
 
 /** What the demo screens see: the outstanding batch, or the placement once complete. */
@@ -12,6 +13,8 @@ export interface DemoState {
   items: QuizQuestion[];
   progress: { answered: number; estimatedTotal: number };
   selfReport: DemoSelfReport;
+  /** Shapes the result screen only; the placement ignores it. */
+  prefs: DemoPrefs;
   graded: Graded[];
   placement?: DemoPlacement;
 }
@@ -20,6 +23,7 @@ export interface DemoState {
 interface StoredAttempt {
   id: string;
   selfReport: DemoSelfReport;
+  prefs: DemoPrefs;
   graded: Graded[];
   /** Item ids of the outstanding batch; empty once complete. */
   current: string[];
@@ -38,6 +42,7 @@ const isAttempt = (value: unknown): value is StoredAttempt => {
   return (
     typeof a.id === 'string' &&
     typeof a.selfReport === 'object' &&
+    isPrefs(a.prefs) &&
     Array.isArray(a.graded) &&
     Array.isArray(a.current) &&
     typeof a.batches === 'number' &&
@@ -61,7 +66,7 @@ export interface LocalAdapterOptions {
 }
 
 export interface LocalDiagnosticAdapter extends DiagnosticPort<DemoState> {
-  start: (selfReport: DemoSelfReport) => Promise<DemoState>;
+  start: (selfReport: DemoSelfReport, prefs: DemoPrefs) => Promise<DemoState>;
   /** The attempt this browser is on, if any, so /demo can resume after a reload. */
   currentId: () => string | null;
   /** Retake: forgets the attempt (the next one gets a new id and new idempotency keys). */
@@ -106,16 +111,26 @@ export function createLocalDiagnosticAdapter({
       // Two batches make the usual 8; a third batch is counted once it is asked.
       progress: { answered, estimatedTotal: attempt.batches > 2 ? answered + attempt.current.length : 8 },
       selfReport: attempt.selfReport,
+      prefs: attempt.prefs,
       graded: attempt.graded,
       ...(complete ? { placement: place(attempt.graded, attempt.selfReport) } : {}),
     };
   }
 
   return {
-    start(selfReport) {
+    start(selfReport, prefs) {
       const items = firstBatch(bank, rng);
-      const attempt: StoredAttempt = { id: newId(), selfReport, graded: [], current: items.map((i) => i.id), batches: 1, replies: {} };
+      const attempt: StoredAttempt = {
+        id: newId(),
+        selfReport,
+        prefs,
+        graded: [],
+        current: items.map((i) => i.id),
+        batches: 1,
+        replies: {},
+      };
       save(attempt);
+      removeItem(DEMO_SETUP_KEY);
       return wait(stateOf(attempt));
     },
 
@@ -159,6 +174,7 @@ export function createLocalDiagnosticAdapter({
 
     reset() {
       removeItem(DEMO_ATTEMPT_KEY);
+      removeItem(DEMO_SETUP_KEY);
       for (const key of keysWithPrefix(`quiz:${DEMO_DRAFT_OWNER}:`)) removeItem(key);
     },
   };
