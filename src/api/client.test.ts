@@ -258,6 +258,27 @@ describe('createApiClient', () => {
     expect(res.data).toEqual({ ok: true });
   });
 
+  it('never refreshes for 401 REAUTH_REQUIRED and does not report a sign-out (contract 0.6.0)', async () => {
+    const onSessionExpired = vi.fn();
+    let refreshes = 0;
+    server.use(
+      http.delete(`${BASE}/v1/me`, () =>
+        HttpResponse.json(
+          { type: 'x', title: 'Sign in again', status: 401, code: 'REAUTH_REQUIRED', requestId: 'r7' },
+          { status: 401, headers: { 'Content-Type': 'application/problem+json' } },
+        ),
+      ),
+      http.post(`${BASE}/v1/auth/refresh`, () => {
+        refreshes += 1;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const api = createApiClient({ baseURL: BASE, onSessionExpired });
+    await expect(api.delete('/v1/me')).rejects.toMatchObject({ status: 401, code: 'REAUTH_REQUIRED' });
+    expect(refreshes).toBe(0);
+    expect(onSessionExpired).not.toHaveBeenCalled();
+  });
+
   it('does not report session expiry when refresh fails for network reasons', async () => {
     const onSessionExpired = vi.fn();
     server.use(
