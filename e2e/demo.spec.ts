@@ -1,12 +1,11 @@
-import { createRequire } from 'node:module';
 import { expect, test, type Page } from '@playwright/test';
+import axe from 'axe-core';
 import { mockAuth } from './api';
 
 // UD done-when (PRD-UI §7b): 8–12 items, reload restores, double tap yields one result, a
 // keyboard-only run passes, axe is clean in both themes, and /demo makes no request to the API or a
 // third party.
 
-const axePath = createRequire(import.meta.url).resolve('axe-core/axe.min.js');
 const H1 = 'Find your starting point in learning science';
 
 /** Every request the page makes, to prove /demo stays on its own static files. */
@@ -17,7 +16,7 @@ function watchRequests(page: Page) {
 }
 
 async function expectNoAxeViolations(page: Page) {
-  await page.addScriptTag({ path: axePath });
+  await page.addScriptTag({ content: axe.source });
   const violations = await page.evaluate(async () => {
     const axe = (window as unknown as { axe: { run: (ctx: Document, opts: object) => Promise<{ violations: { id: string; nodes: unknown[] }[] }> } }).axe;
     const result = await axe.run(document, {
