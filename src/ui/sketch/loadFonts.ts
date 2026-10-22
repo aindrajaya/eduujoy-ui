@@ -6,7 +6,9 @@ import { afterFirstPaint } from '@/lib/idle';
  * /demo's LCP in Lighthouse. Headings and text paint in the fallback stacks first, then swap.
  * Called by the screens that use the sketch styles (UD: /demo), never by the shell.
  */
-export function loadSketchFonts(delayMs = 0): () => void {
+// 1 s, not 0: with an immediate idle callback the font requests could still start before the LCP
+// paint, and /demo measured 2.31–2.76 s (same session; 2.31–2.32 s with the 1 s delay).
+export function loadSketchFonts(delayMs = 1000): () => void {
   return afterFirstPaint(() => {
     void import('./fonts.css');
   }, delayMs);
