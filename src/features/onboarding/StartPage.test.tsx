@@ -18,9 +18,7 @@ async function openForm(path = '/start') {
   const user = userEvent.setup();
   const view = renderRoute(path);
   await user.click(await screen.findByRole('button', { name: /get started/i }));
-  await waitForElementToBeRemoved(() => screen.queryByRole('heading', { name: /welcome to eduujoy/i }), {
-    timeout: 5000,
-  });
+  await waitForElementToBeRemoved(() => screen.queryByRole('heading', { name: /welcome to eduujoy/i }));
   return { user, ...view };
 }
 
@@ -42,7 +40,7 @@ function capture() {
 }
 
 describe('/start (US-01)', () => {
-  it('a matched topic starts the diagnostic and hands off to /diagnostic/:id', { timeout: 15_000 }, async () => {
+  it('a matched topic starts the diagnostic and hands off to /diagnostic/:id', async () => {
     const sent = capture();
     server.use(
       http.post('/v1/topics/resolve', async ({ request, response }) => {
@@ -66,7 +64,7 @@ describe('/start (US-01)', () => {
     });
   });
 
-  it('an ambiguous topic offers choices; the pick is used', { timeout: 15_000 }, async () => {
+  it('an ambiguous topic offers choices; the pick is used', async () => {
     const sent = capture();
     server.use(
       http.post('/v1/topics/resolve', ({ response }) => response(200).json({ status: 'choices', choices })),
@@ -83,7 +81,7 @@ describe('/start (US-01)', () => {
     expect(router.state.location.pathname).toBe('/diagnostic/diag-1');
   });
 
-  it('"None of these" returns to the form with what was typed', { timeout: 15_000 }, async () => {
+  it('"None of these" returns to the form with what was typed', async () => {
     server.use(
       http.post('/v1/topics/resolve', ({ response }) => response(200).json({ status: 'choices', choices })),
     );
@@ -94,7 +92,7 @@ describe('/start (US-01)', () => {
     expect(screen.getByLabelText("What's your goal?")).toHaveValue('Run usability studies');
   });
 
-  it('a newly created topic continues like a match', { timeout: 15_000 }, async () => {
+  it('a newly created topic continues like a match', async () => {
     const sent = capture();
     server.use(
       http.post('/v1/topics/resolve', ({ response }) =>
@@ -107,7 +105,7 @@ describe('/start (US-01)', () => {
     expect(sent.start?.topicId).toBe('new-topic');
   });
 
-  it('shows API field errors on the topic and network failures as a message', { timeout: 15_000 }, async () => {
+  it('shows API field errors on the topic and network failures as a message', async () => {
     server.use(
       http.post('/v1/topics/resolve', ({ response }) =>
         response.untyped(
@@ -126,10 +124,10 @@ describe('/start (US-01)', () => {
     await user.clear(screen.getByLabelText('What do you want to learn?'));
     await user.type(screen.getByLabelText('What do you want to learn?'), 'ux research');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(await screen.findByText(/Could not reach the server/, {}, { timeout: 8000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Could not reach the server/)).toBeInTheDocument();
   });
 
-  it('says topic search is briefly unavailable when resolve returns 503 (contract 0.4.0)', { timeout: 15_000 }, async () => {
+  it('says topic search is briefly unavailable when resolve returns 503 (contract 0.4.0)', async () => {
     const sent = capture();
     const { user } = await openForm();
     // The default MSW handler simulates the outage for this topic.
@@ -138,7 +136,7 @@ describe('/start (US-01)', () => {
     expect(sent.start).toBeUndefined();
   });
 
-  it('a 503 while starting the diagnostic keeps the generic copy', { timeout: 15_000 }, async () => {
+  it('a 503 while starting the diagnostic keeps the generic copy', async () => {
     server.use(
       http.post('/v1/diagnostics', ({ response }) =>
         response.untyped(problemResponse(mockProblem(503, 'SERVICE_UNAVAILABLE', 'Down'))),
@@ -146,6 +144,6 @@ describe('/start (US-01)', () => {
     );
     const { user } = await openForm();
     await submitIntake(user);
-    expect(await screen.findByRole('alert', {}, { timeout: 8000 })).toHaveTextContent('Something went wrong. Please try again.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong. Please try again.');
   });
 });

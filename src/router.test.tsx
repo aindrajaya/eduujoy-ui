@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { mockProblem } from './api/mocks/data';
 import { http, problemResponse } from './api/mocks/handlers';
@@ -65,16 +65,18 @@ describe('router', () => {
 
   it('keeps signed-in users away from /signin', async () => {
     const { router } = renderRoute('/signin?next=%2Fprogress');
-    await screen.findByRole('heading', { level: 1, name: 'Progress' });
-    expect(router.state.location.pathname).toBe('/progress');
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/progress');
+    });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Progress' })).toBeInTheDocument();
   });
 
   // The session query retries network errors twice (1 s, then 2 s) before the error shows.
-  it('shows a retryable error when the API is unreachable', { timeout: 10_000 }, async () => {
+  it('shows a retryable error when the API is unreachable', async () => {
     server.use(http.get('/v1/auth/me', ({ response }) => response.untyped(Response.error())));
     renderRoute('/today');
     expect(
-      await screen.findByRole('heading', { name: 'Can’t reach Eduujoy' }, { timeout: 8000 }),
+      await screen.findByRole('heading', { name: 'Can’t reach Eduujoy' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });

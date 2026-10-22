@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/api/errors';
@@ -28,9 +28,12 @@ describe('IntakeForm', () => {
     await user.clear(screen.getByLabelText('Hours per week'));
     await user.type(screen.getByLabelText('Hours per week'), '60');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(await screen.findByLabelText('What do you want to learn?')).toHaveAccessibleDescription(
-      'Name a topic (at least 2 characters)',
-    );
+    // The schema loads lazily, so the errors appear after the first submit settles.
+    await waitFor(() => {
+      expect(screen.getByLabelText('What do you want to learn?')).toHaveAccessibleDescription(
+        'Name a topic (at least 2 characters)',
+      );
+    });
     expect(screen.getByLabelText('Hours per week')).toHaveAccessibleDescription('Between 1 and 40 hours a week');
     expect(onSubmit).not.toHaveBeenCalled();
     await expectNoAxeViolations(container);
@@ -45,7 +48,7 @@ describe('IntakeForm', () => {
     await user.click(screen.getByText('Add your experience (optional)'));
     await user.type(screen.getByLabelText('Years of experience'), '2');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledOnce();
     });
     expect(onSubmit.mock.calls[0]?.[0]).toEqual({

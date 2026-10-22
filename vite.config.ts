@@ -86,6 +86,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     restoreMocks: true,
+    // Route tests import lazy chunks and run axe; 5 s was too tight on a loaded machine.
+    testTimeout: 30_000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
