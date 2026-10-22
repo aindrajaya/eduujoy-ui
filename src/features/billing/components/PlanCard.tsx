@@ -1,10 +1,12 @@
 import type { ApiError } from '@/api/errors';
 import type { Me } from '@/api/types';
+import { CircleAlert } from 'lucide-react';
 import { formatRetryWait } from '@/lib/time';
 import { useId, useState } from 'react';
 import { saveCheckoutBaseline } from '../checkoutBaseline';
 import { planSummary } from '../planSummary';
 import { MAX_CREDIT_PACKS, useCheckout, type CheckoutProduct } from '../queries';
+import ErrorNote from '@/ui/ErrorNote';
 
 // Billing periods end at a UTC instant; show that day, not the viewer's local one.
 function checkoutErrorCopy(error: ApiError): string {
@@ -43,24 +45,24 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
   const left = Math.max(0, quota.monthlyPaths - quota.usedPaths);
 
   return (
-    <section aria-labelledby="plan-title" className="space-y-4 rounded-card border border-border p-4">
+    <section aria-labelledby="plan-title" className="sk-card space-y-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 id="plan-title" className="text-lg font-bold text-text">
+        <h2 id="plan-title" className="sk-display-md text-text">
           Your plan
         </h2>
-        <span className="rounded-chip bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
+        <span className="rounded-chip border-2 border-ink bg-surface px-3 py-1 text-sm font-semibold text-text">
           {plan === 'subscription' ? 'Subscription' : 'Free'}
         </span>
       </div>
       <p className="font-semibold text-text">{planSummary(plan, quota.credits)}</p>
       <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-lg bg-surface-muted p-3">
+        <div className="rounded-lg border-2 border-ink bg-surface p-3">
           <dt className="text-text-muted">Paths left this month</dt>
           <dd className="text-xl font-bold text-text">
             {left} <span className="text-sm font-normal text-text-muted">of {quota.monthlyPaths}</span>
           </dd>
         </div>
-        <div className="rounded-lg bg-surface-muted p-3">
+        <div className="rounded-lg border-2 border-ink bg-surface p-3">
           <dt className="text-text-muted">Credits</dt>
           <dd className="text-xl font-bold text-text">{quota.credits}</dd>
         </div>
@@ -76,7 +78,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
               checkout.mutate({ product: 'subscription' });
             }}
             disabled={checkout.isPending}
-            className="min-h-11 flex-1 rounded-xl bg-primary px-5 font-semibold text-on-primary disabled:opacity-60"
+            className="sk-btn sk-btn-primary flex-1"
           >
             {pending('subscription') ? 'Opening checkout…' : 'Upgrade to subscription'}
           </button>
@@ -94,7 +96,7 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
               }}
               aria-invalid={packsError ? true : undefined}
               aria-describedby={packsError ? packsErrorId : undefined}
-              className="min-h-11 rounded-xl border-2 border-border bg-surface px-3 font-semibold text-text"
+              className="quiz-field min-h-11 px-3 font-semibold text-text"
             >
               {Array.from({ length: MAX_CREDIT_PACKS }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
@@ -110,22 +112,23 @@ export default function PlanCard({ me, onCheckoutUrl }: PlanCardProps) {
               checkout.mutate({ product: 'credit_pack', quantity: packs });
             }}
             disabled={checkout.isPending}
-            className="min-h-11 flex-1 rounded-xl border-2 border-primary px-5 font-semibold text-primary disabled:opacity-60"
+            className="sk-btn flex-1"
           >
             {pending('credit_pack') ? 'Opening checkout…' : packs === 1 ? 'Buy a credit pack' : `Buy ${packs} credit packs`}
           </button>
         </div>
       </div>
       {packsError && (
-        <p id={packsErrorId} className="text-sm text-danger">
+        <p id={packsErrorId} className="flex items-center gap-2 text-sm text-danger">
+          <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
           {packsError}
         </p>
       )}
       <p className="text-xs text-text-muted">Payments are handled by Lemon Squeezy. You will leave Eduujoy to pay.</p>
       {checkout.error && !packsError && (
-        <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+        <ErrorNote>
           {checkoutErrorCopy(checkout.error)}
-        </p>
+        </ErrorNote>
       )}
     </section>
   );

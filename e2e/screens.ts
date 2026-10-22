@@ -1,6 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 import {
   mockCheckpointFailed,
+  mockCostMetrics,
+  mockLatencyMetrics,
+  mockMe,
+  mockReviewItems,
   mockDiagnosticBatch,
   mockDiagnosticCompleted,
   mockGradeJobEvents,
@@ -161,7 +165,7 @@ export const SCREENS: readonly Screen[] = [
   },
   {
     name: 'paths',
-    parts: [1, 2],
+    parts: [1, 2, 4],
     url: '/paths',
     setup: signedInWithPath,
     ready: async (page) => {
@@ -259,7 +263,7 @@ export const SCREENS: readonly Screen[] = [
     setup: intake,
     ready: h1('Welcome to Eduujoy'),
   },
-  { name: 'start-intake', parts: [3], url: '/start', setup: intake, ready: openIntake },
+  { name: 'start-intake', parts: [3, 4], url: '/start', setup: intake, ready: openIntake },
   {
     name: 'start-intake-errors',
     parts: [3],
@@ -340,7 +344,7 @@ export const SCREENS: readonly Screen[] = [
   },
   {
     name: 'checkpoint-not-passed',
-    parts: [3],
+    parts: [3, 4],
     url: '/checkpoints/step-2?path=path-1&job=grade-1',
     setup: (page) =>
       checkpointGraded(page, [
@@ -349,6 +353,93 @@ export const SCREENS: readonly Screen[] = [
     ready: h1('Not passed yet'),
   },
   { name: 'progress', parts: [1, 4], url: '/progress', setup: signedInWithPath, ready: h1(/progress/i) },
+  {
+    name: 'progress-empty',
+    parts: [4],
+    url: '/progress',
+    // Until A11: the API has no progress endpoints and answers 404.
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      await page.route('**/v1/progress', (route) => problem(route, mockProblem(404, 'NOT_FOUND', 'Not Found')));
+    },
+    ready: async (page) => {
+      await expect(page.getByText('Your progress grid appears after your first path')).toBeVisible();
+    },
+  },
+  {
+    name: 'signin-expired',
+    parts: [4],
+    url: '/signin?expired=1&next=%2Ftoday',
+    setup: (page) => mockAuth(page, { signedIn: false }).then(() => undefined),
+    ready: async (page) => {
+      await expect(page.getByText('Your session expired. Sign in again to continue.')).toBeVisible();
+    },
+  },
+  {
+    name: 'signin-error',
+    parts: [4],
+    url: '/signin',
+    setup: (page) => mockAuth(page, { signedIn: false }).then(() => undefined),
+    ready: async (page) => {
+      await page.getByLabel('Email').fill('jane.doe@example.com');
+      await page.getByLabel('Password').fill('not-the-password');
+      await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+      await expect(page.getByRole('alert')).toBeVisible();
+    },
+  },
+  {
+    name: 'signup',
+    parts: [4],
+    url: '/signup',
+    setup: (page) => mockAuth(page, { signedIn: false }).then(() => undefined),
+    ready: async (page) => {
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(page.getByRole('button', { name: /create/i }).first()).toBeVisible();
+    },
+  },
+  {
+    name: 'account-delete-dialog',
+    parts: [4],
+    url: '/account',
+    setup: signedInWithPath,
+    ready: async (page) => {
+      await page.getByRole('button', { name: 'Delete my account' }).click();
+      await expect(page.getByRole('dialog', { name: 'Delete your account?' })).toBeVisible();
+    },
+  },
+  {
+    name: 'not-found',
+    parts: [4],
+    url: '/no-such-page',
+    setup: (page) => mockAuth(page, { signedIn: true }).then(() => undefined),
+    ready: h1('Page not found'),
+  },
+  {
+    name: 'admin-review',
+    parts: [4],
+    url: '/admin/review',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true, me: { ...mockMe, roles: ['learner', 'reviewer', 'admin'] } });
+      await page.route('**/v1/admin/review-queue?*', (route) => {
+        const items = mockReviewItems.filter((i) => i.status === 'open');
+        return json(route, 200, { items, openCount: items.length, nextCursor: null });
+      });
+    },
+    ready: h1('Review queue'),
+  },
+  {
+    name: 'admin-metrics',
+    parts: [4],
+    url: '/admin/metrics',
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true, me: { ...mockMe, roles: ['learner', 'admin'] } });
+      await page.route('**/v1/admin/metrics/cost?*', (route) => json(route, 200, mockCostMetrics));
+      await page.route('**/v1/admin/metrics/latency?*', (route) => json(route, 200, mockLatencyMetrics));
+    },
+    ready: async (page) => {
+      await expect(page.getByRole('table', { name: /AI cost per pipeline stage/ })).toBeVisible();
+    },
+  },
   {
     name: 'account',
     parts: [1, 4],

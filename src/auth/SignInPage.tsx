@@ -1,11 +1,12 @@
 import { Lock, Mail } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import type { ApiError } from '@/api/errors';
+import ErrorNote from '@/ui/ErrorNote';
 import TextField from '@/ui/TextField';
 import AuthLayout from './AuthLayout';
 import { authErrorMessage } from './errors';
 import GoogleButton from './GoogleButton';
-import SignOutFailedNotice from './SignOutFailedNotice';
 import { safeNext } from './guards';
 import { useRedirectIfSignedIn } from './useRedirectIfSignedIn';
 import { useSignIn, type SignInLocationState } from './queries';
@@ -14,6 +15,7 @@ import { useAuthForm } from './useAuthForm';
 
 const FIELDS = ['email', 'password'] as const;
 const loadValidator = () => import('./validation').then((m) => m.validateSignIn);
+const SignInNotices = lazy(() => import('./SignInNotices'));
 
 export default function SignInPage() {
   const [params] = useSearchParams();
@@ -23,7 +25,9 @@ export default function SignInPage() {
   // Contract 0.6.0: a sensitive action (account delete) needs a fresh sign-in, so a signed-in
   // learner sent here with reauth=1 stays on the form instead of being redirected.
   const reauth = params.get('reauth') === '1';
-  const accountDeleted = (useLocation().state as SignInLocationState | null)?.accountDeleted === true;
+  const locationState = useLocation().state as SignInLocationState | null;
+  const accountDeleted = locationState?.accountDeleted === true;
+  const signOutFailed = locationState?.signOutFailed === true;
   const signIn = useSignIn();
   useRedirectIfSignedIn(next, !reauth && (signIn.isIdle || signIn.isError));
 
@@ -44,21 +48,11 @@ export default function SignInPage() {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue your learning path.">
-      <SignOutFailedNotice />
-      {accountDeleted && (
-        <p role="status" className="mb-4 rounded-lg bg-success-soft p-3 text-sm text-success">
-          Your account and personal data have been deleted.
-        </p>
-      )}
-      {reauth && (
-        <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
-          For your security, sign in again to delete your account.
-        </p>
-      )}
-      {expired && (
-        <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
-          Your session expired. Sign in again to continue.
-        </p>
+      {/* Notices only follow a redirect here, so they load on demand: a plain /signin pays nothing. */}
+      {(accountDeleted || reauth || expired || signOutFailed) && (
+        <Suspense fallback={null}>
+          <SignInNotices accountDeleted={accountDeleted} reauth={reauth} expired={expired} />
+        </Suspense>
       )}
       <form onSubmit={(e) => void onSubmit(e)} onFocus={form.preload} noValidate className="space-y-5">
         <TextField
@@ -79,14 +73,14 @@ export default function SignInPage() {
           {...form.field('password')}
         />
         {formError && (
-          <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+          <ErrorNote>
             {formError}
-          </p>
+          </ErrorNote>
         )}
         <button
           type="submit"
           disabled={busy}
-          className="flex min-h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-3 text-base font-bold text-white shadow-lg transition-shadow hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-75"
+          className="sk-btn sk-btn-primary w-full"
         >
           {busy ? 'Signing in…' : 'Sign in'}
         </button>

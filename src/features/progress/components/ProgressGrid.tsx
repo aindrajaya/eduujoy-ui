@@ -27,7 +27,7 @@ const same = (a: Position, b: Position) => a.stage === b.stage && a.bloom === b.
 export default function ProgressGrid({ topicName, current, history }: ProgressGridProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[20rem] table-fixed border-separate border-spacing-1 text-xs">
+      <table className="w-full min-w-80 table-fixed border-separate border-spacing-1 text-xs">
         <caption className="sr-only">
           {topicName}: your position by skill stage (rows) and thinking level (columns)
         </caption>
@@ -57,24 +57,18 @@ export default function ProgressGrid({ topicName, current, history }: ProgressGr
                 const here = same(cell, current);
                 const earlier = history.filter((h) => same(h.position, cell) && !here);
                 return (
+                  // Now: hatched in the stage colour (no glyph: hatching never sits under text). Earlier:
+                  // a dashed outline. Each says what it marks to screen readers (README "Accessibility").
                   <td
                     key={bloom}
-                    className={`h-10 rounded-md text-center align-middle ${
-                      here ? 'bg-primary text-on-primary' : earlier.length ? 'bg-primary-soft text-primary' : 'bg-surface-muted'
-                    }`}
+                    data-stage={stage}
+                    data-here={here || undefined}
+                    className={`sk-grid-cell text-center align-middle ${earlier.length ? 'border-dashed border-ink' : ''}`}
                   >
                     {here ? (
-                      <>
-                        <span aria-hidden="true" className="font-bold">
-                          ●
-                        </span>
-                        <span className="sr-only">You are here</span>
-                      </>
+                      <span className="sr-only">You are here</span>
                     ) : earlier.length ? (
-                      <>
-                        <span aria-hidden="true">○</span>
-                        <span className="sr-only">Earlier: {earlier.map((e) => e.label).join(', ')}</span>
-                      </>
+                      <span className="sr-only">Earlier: {earlier.map((e) => e.label).join(', ')}</span>
                     ) : null}
                   </td>
                 );
@@ -84,8 +78,12 @@ export default function ProgressGrid({ topicName, current, history }: ProgressGr
         </tbody>
       </table>
       <p className="mt-2 flex gap-4 text-xs text-text-muted" aria-hidden="true">
-        <span>● Now</span>
-        <span>○ Earlier</span>
+        <span className="flex items-center gap-1">
+          <span className="sk-grid-cell inline-block h-4 w-6" data-here data-stage={current.stage} /> Now
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="sk-grid-cell inline-block h-4 w-6 border-dashed border-ink" /> Earlier
+        </span>
       </p>
     </div>
   );

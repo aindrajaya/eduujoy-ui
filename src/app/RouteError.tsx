@@ -23,7 +23,7 @@ export default function RouteError() {
   const { title, message, retry } = describe(useRouteError());
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-bg p-6 text-center">
-      <h1 className="text-2xl font-bold text-text">{title}</h1>
+      <h1 className="text-text">{title}</h1>
       <p role="alert" className="text-text-muted">
         {message}
       </p>
@@ -34,7 +34,7 @@ export default function RouteError() {
             onClick={() => {
               window.location.reload();
             }}
-            className="min-h-11 rounded-xl bg-primary px-5 font-semibold text-on-primary"
+            className="sk-btn sk-btn-primary"
           >
             Try again
           </button>
