@@ -6,7 +6,7 @@ import LoadingScreen from './LoadingScreen';
 describe('LoadingScreen', () => {
   it('announces the default wait message as a status', async () => {
     const { container } = render(<LoadingScreen />);
-    expect(screen.getByRole('status')).toHaveTextContent('Analyzing your goals...');
+    expect(screen.getByRole('status')).toHaveTextContent('Reading your goal…');
     await expectNoAxeViolations(container);
   });
 

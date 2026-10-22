@@ -62,12 +62,12 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
   return (
     <figure className="space-y-2">
       {startS !== undefined && (
-        <p className="text-sm font-semibold text-primary">
+        <p className="sk-annotation text-primary">
           Watch {formatTimestamp(startS)}
           {endS !== undefined && endS > startS ? `–${formatTimestamp(endS)}` : ' onwards'}
         </p>
       )}
-      <div ref={frame} className="relative aspect-video w-full overflow-hidden rounded-card bg-black">
+      <div ref={frame} className="relative aspect-video w-full overflow-hidden rounded-card border-2 border-ink bg-surface-muted shadow-lg">
         {playing ? (
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`}
@@ -100,8 +100,8 @@ export default function YouTubeEmbed({ videoId, title, start, end }: YouTubeEmbe
               />
             )}
             <span className="absolute inset-0 flex items-center justify-center">
-              <span className="flex h-14 w-20 items-center justify-center rounded-xl bg-black/75 transition-colors group-hover:bg-red-600">
-                <Play className="h-7 w-7 fill-white text-white" aria-hidden="true" />
+              <span className="flex h-14 w-20 items-center justify-center rounded-xl border-2 border-ink bg-surface text-text shadow-lg transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                <Play className="h-7 w-7 fill-current" aria-hidden="true" />
               </span>
             </span>
           </button>
