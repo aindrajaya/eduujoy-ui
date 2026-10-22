@@ -58,8 +58,9 @@ export default tseslint.config(
     },
   },
   {
-    // Quiz drafts (PRD-UI §7) are the one sanctioned use of browser storage; tests may inspect it.
-    files: ['src/lib/storage.ts', '**/*.test.{ts,tsx}', 'e2e/**'],
+    // Sanctioned browser storage: quiz drafts (PRD-UI §7) and the checkout baseline (plan and credit
+    // counts, no session data); tests may inspect it.
+    files: ['src/lib/storage.ts', 'src/features/billing/checkoutBaseline.ts', '**/*.test.{ts,tsx}', 'e2e/**'],
     rules: { 'no-restricted-syntax': 'off' },
   },
   {
