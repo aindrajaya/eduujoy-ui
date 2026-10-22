@@ -51,7 +51,7 @@ export default function OrderList({ order, options, labelledBy, onChange }: Orde
     <div>
       <ol aria-labelledby={labelledBy} className="space-y-2">
         {order.map((id, i) => (
-          <li key={id} className="quiz-field flex min-h-11 items-center gap-2 rounded-xl border-2 border-border p-2 pl-3">
+          <li key={id} className="quiz-field flex min-h-11 items-center gap-2 p-2 pl-3">
             <span className="w-6 shrink-0 text-sm font-bold text-text-muted" aria-hidden="true">
               {i + 1}
             </span>
@@ -64,7 +64,7 @@ export default function OrderList({ order, options, labelledBy, onChange }: Orde
               onClick={() => {
                 move(id, 'up');
               }}
-              className="quiz-action quiz-action-ghost flex h-11 w-11 items-center justify-center rounded-control text-text disabled:opacity-40"
+              className="sk-btn sk-btn-ghost h-11 w-11 px-0 text-text disabled:opacity-40"
             >
               <ArrowUp className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -76,7 +76,7 @@ export default function OrderList({ order, options, labelledBy, onChange }: Orde
               onClick={() => {
                 move(id, 'down');
               }}
-              className="quiz-action quiz-action-ghost flex h-11 w-11 items-center justify-center rounded-control text-text disabled:opacity-40"
+              className="sk-btn sk-btn-ghost h-11 w-11 px-0 text-text disabled:opacity-40"
             >
               <ArrowDown className="h-5 w-5" aria-hidden="true" />
             </button>

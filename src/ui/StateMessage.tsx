@@ -15,10 +15,10 @@ export default function StateMessage({ title, children, icon, tone = 'neutral', 
   return (
     <div
       role={tone === 'danger' ? 'alert' : undefined}
-      className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border p-8 text-center"
+      className="flex flex-col items-center gap-3 rounded-card border-2 border-dashed border-ink bg-surface p-8 text-center"
     >
       <Icon className={`h-8 w-8 ${tone === 'danger' ? 'text-danger' : 'text-text-muted'}`} aria-hidden="true" />
-      <p className="font-semibold text-text">{title}</p>
+      <p className="sk-display-md text-text">{title}</p>
       {children && <div className="text-text-muted">{children}</div>}
       {action}
     </div>

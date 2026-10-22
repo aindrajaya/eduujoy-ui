@@ -11,10 +11,10 @@ export default function BootSplash() {
     <div
       role="status"
       aria-label={waking ? 'Waking up the server' : 'Loading Eduujoy'}
-      className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500"
+      className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-bg"
     >
-      <span className="animate-pulse text-3xl font-bold tracking-tight text-white">Eduujoy</span>
-      <span className={`text-base text-white ${waking ? '' : 'invisible'}`}>Waking up the server…</span>
+      <span className="animate-pulse font-display text-3xl text-text">Eduujoy</span>
+      <span className={`text-base text-text-muted ${waking ? '' : 'invisible'}`}>Waking up the server…</span>
     </div>
   );
 }
