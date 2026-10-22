@@ -5,29 +5,24 @@
 // - arbitrary lengths in class names (p-[13px], min-w-[20rem]), except calc()/env()/var();
 // - the display font (Excalifont: h1, font-display, sk-display-*, sk-annotation) below 18px, or on an
 //   element whose content holds numbers (digits, or a count, step number, minutes, score...).
-// The scope grows with each U12a part; at the end it is all of src/.
+// Since U12a-4 the scope is all of src/ (it grew part by part).
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const SCOPE = [
-  // U12a-1: the shell and shared components (plus the demo, built on the sketch from the start).
+  // U12a-4: everything; the restyle is complete.
   'index.html',
-  'src/index.css',
-  'src/app',
-  'src/ui',
-  'src/features/quiz',
-  'src/features/demo',
-  // U12a-2: Today, Paths, steps (and path generation).
-  'src/features/paths',
-  'src/features/steps',
-  // U12a-3: /start, the diagnostic, checkpoints and their results.
-  'src/features/onboarding',
-  'src/features/diagnostic',
-  'src/features/checkpoints',
+  'src',
 ];
 
 // Generated from tokens.json, or brand marks that must keep their own colours.
-const ALLOWED_FILES = new Set(['src/ui/sketch/tokens.css', 'src/ui/sketch/fonts.css', 'src/ui/sketch/theme.css']);
+const ALLOWED_FILES = new Set([
+  'src/ui/sketch/tokens.css',
+  'src/ui/sketch/fonts.css',
+  'src/ui/sketch/theme.css',
+  // Google's mark must keep its brand colours (Google sign-in branding guidelines).
+  'src/auth/GoogleButton.tsx',
+]);
 // theme-color metas cannot read CSS variables; their values are tokens.json's bg.
 const ALLOWED_LINE = /<meta name="theme-color"/;
 
