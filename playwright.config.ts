@@ -8,6 +8,8 @@ const BASE_URL = `http://localhost:${PORT}`;
 // also run against the seeded staging API (PRD-UI §10).
 export default defineConfig({
   testDir: 'e2e',
+  // U12a review images run on their own (playwright.screenshots.config.ts).
+  testIgnore: ['screenshots/**'],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
