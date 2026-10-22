@@ -18,9 +18,12 @@ for (const screen of SCREENS.filter((s) => s.parts.includes(PART))) {
         await page.goto(screen.url);
         await screen.ready(page);
         if (screen.fonts !== false) await waitForSketchFonts(page);
+        // A full-page capture freezes sticky and fixed bars where the first viewport ended, on top
+        // of content. Growing the viewport to the page height puts them where they really sit.
+        const height = await page.evaluate(() => document.documentElement.scrollHeight);
+        await page.setViewportSize({ width, height: Math.max(height, HEIGHT[width] ?? 800) });
         await page.screenshot({
           path: `docs/screenshots/U12a-${String(PART)}/${screen.name}-${String(width)}-${theme}.png`,
-          fullPage: true,
           animations: 'disabled',
           caret: 'hide',
         });

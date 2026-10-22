@@ -18,6 +18,12 @@ export interface Screen {
 
 const never = () => new Promise<never>(() => undefined);
 
+/** A neutral 16:9 stand-in for a YouTube thumbnail (test data only, never shipped). */
+const THUMBNAIL = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">
+<rect width="480" height="270" fill="#5c6b7a"/><rect x="40" y="40" width="180" height="190" fill="#8a9aa9"/>
+<rect x="250" y="70" width="190" height="20" fill="#c9d3dc"/><rect x="250" y="110" width="150" height="14" fill="#c9d3dc"/>
+<rect x="250" y="140" width="170" height="14" fill="#c9d3dc"/></svg>`;
+
 async function signedInWithPath(page: Page) {
   await mockAuth(page, { signedIn: true });
   await page.route('**/v1/paths?*', (route) => json(route, 200, { items: [mockPathSummary], nextCursor: null }));
@@ -25,8 +31,10 @@ async function signedInWithPath(page: Page) {
   await page.route('**/v1/steps/*', (route) => json(route, 200, mockPath.steps[1]));
   await page.route('**/v1/progress', (route) => json(route, 200, mockProgress));
   await page.route('**/v1/progress/*/history', (route) => json(route, 200, mockProgressHistory));
-  // YouTube stays offline: an empty thumbnail keeps the facade's own frame on screen.
-  await page.route('https://i.ytimg.com/**', (route) => route.fulfill({ status: 200, contentType: 'image/jpeg', body: '' }));
+  // YouTube stays offline: a local placeholder stands in for the thumbnail, so the facade looks real.
+  await page.route('https://i.ytimg.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'image/svg+xml', body: THUMBNAIL }),
+  );
 }
 
 const h1 = (name: string | RegExp) => async (page: Page) => {
