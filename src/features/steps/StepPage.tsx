@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, Clock, ThumbsDown, ThumbsUp, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import type { Path, PathStep, StepPatchRequest } from '@/api/types';
@@ -80,13 +80,13 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
         </Link>
 
         <header className="space-y-3">
-          <p className="text-sm font-semibold text-text-muted uppercase">
+          <p className="text-sm font-semibold text-text-muted">
             Step {step.n} of {path.steps.length}
             {step.remedial ? ' · Review step' : ''}
           </p>
-          <h1 className="text-2xl font-bold text-text md:text-3xl">{step.objective}</h1>
+          <h1 className="text-text md:text-3xl">{step.objective}</h1>
           <p className="flex flex-wrap items-center gap-3 text-sm text-text-muted">
-            <span className="rounded-chip bg-primary-soft px-3 py-1 font-semibold text-primary">
+            <span className="sk-bloom-chip py-1 font-semibold text-text">
               {step.bloom} · {BLOOM_LABEL[step.bloom]}
             </span>
             <span className="flex items-center gap-1">
@@ -95,12 +95,13 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
             </span>
           </p>
           {step.status === 'locked' && (
-            <p role="note" className="rounded-lg bg-warning-soft p-3 text-sm text-warning">
+            <p role="note" className="flex items-start gap-2 rounded-lg border-2 border-warning bg-surface p-3 text-sm text-warning">
+              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               This step opens after the ones before it. You can look ahead.
             </p>
           )}
           {step.remedial && (
-            <p role="note" className="rounded-lg bg-primary-soft p-3 text-sm text-text">
+            <p role="note" className="rounded-lg border-2 border-primary bg-surface p-3 text-sm text-text">
               We added this review step after two missed checkpoints. It is one level lower, with a different resource.
             </p>
           )}
@@ -109,14 +110,14 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
               {step.status === 'completed' ? 'Checkpoint passed' : 'Last checkpoint score'}: {lastScore}%
             </p>
           )}
-          <p className="rounded-card bg-surface-muted p-4 text-text">
+          <p className="rounded-card border-2 border-ink bg-surface-muted p-4 text-text">
             <span className="font-semibold">Done when: </span>
             {step.doneWhen}
           </p>
         </header>
 
         <section aria-labelledby="actions-title" className="space-y-3">
-          <h2 id="actions-title" className="text-lg font-bold text-text">
+          <h2 id="actions-title" className="sk-display-lg text-text">
             Actions
           </h2>
           <ol className="space-y-2">
@@ -141,7 +142,7 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
         </section>
 
         <section aria-labelledby="resources-title" className="space-y-4">
-          <h2 id="resources-title" className="text-lg font-bold text-text">
+          <h2 id="resources-title" className="sk-display-lg text-text">
             Resources
           </h2>
           {step.resources.map((resource) => (
@@ -160,8 +161,8 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
           ))}
         </section>
 
-        <section aria-labelledby="feel-title" className="space-y-3 rounded-card border border-border p-4">
-          <h2 id="feel-title" className="font-semibold text-text">
+        <section aria-labelledby="feel-title" className="sk-card space-y-3">
+          <h2 id="feel-title" className="sk-title text-text">
             How did this step feel?
           </h2>
           <div role="radiogroup" aria-labelledby="feel-title" className="flex flex-wrap gap-2">
@@ -175,7 +176,7 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
                   setDifficulty(value);
                 }}
                 className={`min-h-11 rounded-chip border-2 px-4 font-semibold ${
-                  step.difficulty === value ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text'
+                  step.difficulty === value ? 'border-primary border-[length:var(--sk-stroke-strong)] text-primary' : 'border-ink text-text'
                 }`}
               >
                 {label}
@@ -191,7 +192,7 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
               onClick={() => {
                 thumb('step', step.id, 'up');
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-control ${thumbs[step.id] === 'up' ? 'bg-success-soft text-success' : ''}`}
+              className={`flex h-11 w-11 items-center justify-center rounded-control ${thumbs[step.id] === 'up' ? 'border-2 border-primary text-primary' : ''}`}
             >
               <ThumbsUp className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -202,7 +203,7 @@ function StepView({ path, step }: { path: Path; step: PathStep }) {
               onClick={() => {
                 thumb('step', step.id, 'down');
               }}
-              className={`flex h-11 w-11 items-center justify-center rounded-control ${thumbs[step.id] === 'down' ? 'bg-danger-soft text-danger' : ''}`}
+              className={`flex h-11 w-11 items-center justify-center rounded-control ${thumbs[step.id] === 'down' ? 'border-2 border-primary text-primary' : ''}`}
             >
               <ThumbsDown className="h-5 w-5" aria-hidden="true" />
             </button>

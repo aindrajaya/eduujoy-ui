@@ -22,7 +22,7 @@ export default function PathsPage() {
   const query = usePaths();
   return (
     <div className="animate-fade-in p-4 md:p-6">
-      <h1 className="mb-6 text-2xl font-bold text-text md:text-3xl">Your Paths</h1>
+      <h1 className="mb-6 text-text md:text-3xl">Your paths</h1>
       {isPathBuildingClosed(query.error) ? (
         <PathBuildingSoon />
       ) : (
@@ -56,10 +56,10 @@ export default function PathsPage() {
               <li key={p.id}>
                 <Link
                   to={`/paths/${encodeURIComponent(p.id)}`}
-                  className="flex items-center justify-between gap-3 rounded-card border border-border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md"
+                  className="sk-card flex items-center justify-between gap-3 hover:bg-surface-muted"
                 >
                   <span className="min-w-0">
-                    <span className="block font-bold text-text">{p.topic.canonicalName}</span>
+                    <span className="sk-title block text-text">{p.topic.canonicalName}</span>
                     <span className="text-sm text-text-muted">
                       {STATUS[p.status]} · {STAGE_LABEL[p.from.stage]} → {STAGE_LABEL[p.to.stage]}
                       {p.stepsTotal ? ` · ${p.stepsDone ?? 0} of ${p.stepsTotal} steps` : ''}
