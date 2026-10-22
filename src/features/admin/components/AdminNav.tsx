@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router';
 import { hasRole, useSession } from '@/auth/session';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `inline-flex min-h-11 items-center rounded-chip px-4 font-semibold ${isActive ? 'bg-primary-soft text-primary' : 'text-text-muted'}`;
+  `inline-flex min-h-11 items-center rounded-chip px-4 font-semibold ${isActive ? 'border-2 border-primary bg-surface text-primary' : 'border-2 border-transparent text-text-muted'}`;
 
 /** Header for the staff screens: back to the app, and the screens this role may open. */
 export default function AdminNav({ openCount }: { openCount?: number }) {
