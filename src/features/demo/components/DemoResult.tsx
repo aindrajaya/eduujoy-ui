@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { BLOOM_LABEL, STAGE_LABEL } from '@/lib/levels';
 import BloomChip from '@/ui/sketch/BloomChip';
 import StageBadge from '@/ui/sketch/StageBadge';
@@ -30,6 +31,7 @@ export interface DemoResultProps {
 /** The demo's result (PRD-UI §7b): grid, per-level breakdown, next step, under the hood, Retake. */
 export default function DemoResult({ bank, placement, graded, prefs, onRetake }: DemoResultProps) {
   const { stage, verified, reason, confidence, promoted, levels } = placement;
+  const nextSteps = bank.nextSteps?.[stage];
   const item = (id: string) => bank.items.find((i) => i.id === id);
 
   return (
@@ -51,6 +53,7 @@ export default function DemoResult({ bank, placement, graded, prefs, onRetake }:
         <p className="text-sk-text-muted">
           This is a demo placement from a fixed set of 18 items. In Eduujoy, the diagnostic runs on your own topic.
         </p>
+        {bank.origin === 'catalog' && <p className="text-sk-text-muted">Questions from Eduujoy’s reviewed item bank.</p>}
       </section>
 
       <section aria-labelledby="demo-grid" className="space-y-3">
@@ -82,13 +85,16 @@ export default function DemoResult({ bank, placement, graded, prefs, onRetake }:
                 {asked.map((g) => {
                   const it = item(g.itemId);
                   if (!it) return null;
-                  const source = bank.sources[it.source];
+                  const source = it.source === undefined ? undefined : bank.sources[it.source];
                   return (
                     <details key={g.itemId} className="quiz-field p-3">
                       <summary className="cursor-pointer">
                         <span className="font-semibold">{status(g, it.notCorrectFeedback)}:</span> {it.prompt}
                       </summary>
-                      <p className="mt-2">{it.explanation}</p>
+                      <p className="mt-2">
+                        {bank.origin === 'catalog' && <span className="font-semibold">Why this answer: </span>}
+                        {it.explanation}
+                      </p>
                       {source && (
                         <p className="mt-2 text-sk-text-muted">
                           Source:{' '}
@@ -110,15 +116,16 @@ export default function DemoResult({ bank, placement, graded, prefs, onRetake }:
         </ul>
       </section>
 
+      {nextSteps ? (
       <section aria-labelledby="demo-next" className="space-y-3">
         <h2 id="demo-next" className="sk-display-lg">
           Your next step
         </h2>
         <p>{goalLine(prefs)}</p>
-        <p>{timeFitLine(prefs, bank.nextSteps[stage].length)}</p>
+        <p>{timeFitLine(prefs, nextSteps.length)}</p>
         <p>The first three steps of a path at the next stage would be:</p>
         <ol className="space-y-3">
-          {bank.nextSteps[stage].map((step, n) => (
+          {nextSteps.map((step, n) => (
             <li key={step.title} className="sk-card space-y-2">
               <span className="sk-title block">{step.title}</span>
               <span className="flex flex-wrap items-center gap-2">
@@ -131,6 +138,18 @@ export default function DemoResult({ bank, placement, graded, prefs, onRetake }:
           ))}
         </ol>
       </section>
+      ) : (
+        // Catalog topics have no hand-written next steps (no new unreviewed content, UD2).
+        <section aria-labelledby="demo-next" className="space-y-3">
+          <h2 id="demo-next" className="sk-display-lg">
+            Your next step
+          </h2>
+          <p>{goalLine(prefs)}</p>
+          <Link to="/signup" className="font-semibold text-sk-primary underline">
+            Build your real path on Eduujoy
+          </Link>
+        </section>
+      )}
 
       <details className="sk-card">
         <summary className="sk-title cursor-pointer">Under the hood</summary>

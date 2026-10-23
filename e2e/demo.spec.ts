@@ -6,7 +6,7 @@ import { mockAuth } from './api';
 // keyboard-only run passes, axe is clean in both themes, and /demo makes no request to the API or a
 // third party.
 
-const H1 = 'Find your starting point in learning science';
+const H1 = 'Find your starting point';
 
 /** Every request the page makes, to prove /demo stays on its own static files. */
 function watchRequests(page: Page) {
@@ -28,14 +28,19 @@ async function expectNoAxeViolations(page: Page) {
 }
 
 /**
- * The setup by keyboard: goal, weekly time and format (one screen each), then the self-report.
- * Each step: focus the first radio card, arrow to a choice, Enter on the step's button.
+ * The setup by keyboard: the topic (UD2), goal, weekly time and format (one screen each), then the
+ * self-report. Each step: focus a radio card, pick with Space or an arrow, Enter on the step's button.
  */
-async function selfReportByKeyboard(page: Page) {
+async function selfReportByKeyboard(page: Page, topic = 'Learning science') {
+  await page.getByRole('radio', { name: new RegExp(`^${topic}`) }).focus();
+  await page.keyboard.press('Space');
+  await page.getByRole('button', { name: 'Continue' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { level: 2, name: 'Step 2 of 5: Your goal' })).toBeFocused();
   for (const [first, step] of [
-    ['Pass an exam', 'Step 2 of 4: Weekly time'],
-    ['1–2 h', 'Step 3 of 4: Format'],
-    ['Videos', 'Step 4 of 4: About you'],
+    ['Pass an exam', 'Step 3 of 5: Weekly time'],
+    ['1–2 h', 'Step 4 of 5: Format'],
+    ['Videos', 'Step 5 of 5: About you'],
   ] as const) {
     await page.getByRole('radio', { name: first }).focus();
     await page.keyboard.press('ArrowDown');
@@ -72,9 +77,9 @@ async function answerByKeyboard(page: Page, n: number): Promise<boolean> {
     await page.keyboard.press('Enter');
     return true;
   } else {
-    // Single choice or a linked pair: pick the first option of every group with Space.
+    // Single choice, multi choice or a linked pair: pick the first option of every group with Space.
     for (const group of await page.getByRole('main').locator('fieldset').all()) {
-      await group.getByRole('radio').first().focus();
+      await group.locator('input[type="radio"], input[type="checkbox"]').first().focus();
       await page.keyboard.press('Space');
     }
   }
@@ -162,6 +167,25 @@ test.describe('public demo (UD)', () => {
       await expectNoAxeViolations(page);
     });
   }
+
+  test('a catalog topic (Python) runs by keyboard on its own bank, with no API request, and ends with sign-up', async ({
+    page,
+    baseURL,
+  }) => {
+    const urls = watchRequests(page);
+    await page.goto('/demo');
+    await expect(page.getByRole('heading', { level: 1, name: H1 })).toBeVisible();
+    await selfReportByKeyboard(page, 'Python');
+    await expect(page.getByRole('heading', { level: 1, name: 'Python' })).toBeVisible();
+    let answered = 0;
+    while (await answerByKeyboard(page, answered)) answered += 1;
+    expect(answered).toBeGreaterThanOrEqual(8);
+    await expect(page.getByText('Questions from Eduujoy’s reviewed item bank.')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Build your real path on Eduujoy' })).toHaveAttribute('href', '/signup');
+    await expectNoAxeViolations(page);
+    const origin = new URL(baseURL ?? '').origin;
+    expect(urls.filter((url) => new URL(url).origin !== origin || new URL(url).pathname.startsWith('/v1/'))).toEqual([]);
+  });
 
   test('/signin does not fetch the sketch fonts', async ({ page }) => {
     await mockAuth(page, { signedIn: false });

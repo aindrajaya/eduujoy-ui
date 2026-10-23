@@ -1,0 +1,644 @@
+{
+  "topic": {
+    "id": "algebra",
+    "name": "Algebra"
+  },
+  "origin": "catalog",
+  "export": {
+    "rule": "resolved",
+    "seed": 2026,
+    "from": "api/seed/items/algebra.json",
+    "ids": [
+      "algebra--nov-c1-mc1",
+      "algebra--nov-c1-sc2",
+      "algebra--nov-c1-sn1",
+      "algebra--nov-c2-sc2",
+      "algebra--nov-c2-sn1",
+      "algebra--adb-c2-sc2",
+      "algebra--adb-c3-sc3",
+      "algebra--cmp-c3-sc2",
+      "algebra--cmp-c3-sn1",
+      "algebra--cmp-c4-sc1",
+      "algebra--prf-c4-sc2",
+      "algebra--prf-c4-sn1",
+      "algebra--prf-c5-sc3",
+      "algebra--exp-c5-sc3",
+      "algebra--exp-c5-sc5",
+      "algebra--exp-c6-mc1",
+      "algebra--exp-c6-sc2",
+      "algebra--exp-c6-sc5"
+    ]
+  },
+  "sources": {},
+  "items": [
+    {
+      "id": "algebra--nov-c1-mc1",
+      "bloom": "C1",
+      "prompt": "Which of the following are linear equations in one variable x? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "`x/2 = 7`"
+        },
+        {
+          "id": "b",
+          "label": "`x^2 = 9`"
+        },
+        {
+          "id": "c",
+          "label": "`1/x = 4`"
+        },
+        {
+          "id": "d",
+          "label": "`2x + 5 = 11`"
+        },
+        {
+          "id": "e",
+          "label": "`3(x - 1) = 12`"
+        }
+      ],
+      "explanation": "Linear equations have x only to the first power, not in a denominator.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "a",
+        "d",
+        "e"
+      ]
+    },
+    {
+      "id": "algebra--nov-c1-sc2",
+      "bloom": "C1",
+      "prompt": "Which term names the number multiplied by the variable in `7y`?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Exponent"
+        },
+        {
+          "id": "b",
+          "label": "Base"
+        },
+        {
+          "id": "c",
+          "label": "Coefficient"
+        },
+        {
+          "id": "d",
+          "label": "Constant"
+        }
+      ],
+      "explanation": "The coefficient is the number multiplying a variable.",
+      "reviewed": true,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "algebra--nov-c1-sn1",
+      "bloom": "C1",
+      "prompt": "A student is solving `x + 7 = 15`. The teacher says to use the inverse operation of the one applied to x on both sides of the equation. Which step should the student take?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Add 7 to both sides"
+        },
+        {
+          "id": "b",
+          "label": "Subtract 7 from the right side only"
+        },
+        {
+          "id": "c",
+          "label": "Divide both sides by 7"
+        },
+        {
+          "id": "d",
+          "label": "Subtract 7 from both sides"
+        }
+      ],
+      "explanation": "The inverse of adding 7 is subtracting 7 from both sides.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "scenario",
+      "answer": "d"
+    },
+    {
+      "id": "algebra--nov-c2-sc2",
+      "bloom": "C2",
+      "prompt": "Which expression is equivalent to `2(x + 5)`?",
+      "options": [
+        {
+          "id": "a",
+          "label": "2x + 5"
+        },
+        {
+          "id": "b",
+          "label": "2x + 10"
+        },
+        {
+          "id": "c",
+          "label": "x + 10"
+        },
+        {
+          "id": "d",
+          "label": "2x + 7"
+        }
+      ],
+      "explanation": "Distributive property multiplies 2 by both terms.",
+      "reviewed": true,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "algebra--nov-c2-sn1",
+      "bloom": "C2",
+      "prompt": "A taxi charges a flat fee of 3 dollars plus 2 dollars per mile. A student writes `C = 2m + 3` to model the cost C of a ride of m miles. What does the 3 in this equation represent?",
+      "options": [
+        {
+          "id": "a",
+          "label": "The fixed charge paid at the start"
+        },
+        {
+          "id": "b",
+          "label": "The extra cost added for each mile driven"
+        },
+        {
+          "id": "c",
+          "label": "The number of miles in a typical ride"
+        },
+        {
+          "id": "d",
+          "label": "The total cost of a ride of 2 miles"
+        }
+      ],
+      "explanation": "The constant term is the fixed amount at m = 0.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "scenario",
+      "answer": "a"
+    },
+    {
+      "id": "algebra--adb-c2-sc2",
+      "bloom": "C2",
+      "prompt": "Which of these equations is a quadratic equation?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`3x + 2 = 0`"
+        },
+        {
+          "id": "b",
+          "label": "`x^3 - x = 0`"
+        },
+        {
+          "id": "c",
+          "label": "`2^x = 8`"
+        },
+        {
+          "id": "d",
+          "label": "`x^2 - 5x + 6 = 0`"
+        }
+      ],
+      "explanation": "A quadratic has x to the highest power 2.",
+      "reviewed": true,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "advanced_beginner"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "algebra--adb-c3-sc3",
+      "bloom": "C3",
+      "prompt": "Solve the system `y = 2x` and `x + y = 9`. What is `(x, y)`?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`(2, 4)`"
+        },
+        {
+          "id": "b",
+          "label": "`(6, 3)`"
+        },
+        {
+          "id": "c",
+          "label": "`(3, 6)`"
+        },
+        {
+          "id": "d",
+          "label": "`(4, 5)`"
+        }
+      ],
+      "explanation": "Substitute y = 2x to get 3x = 9, so x = 3 and y = 6.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "advanced_beginner"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "algebra--cmp-c3-sc2",
+      "bloom": "C3",
+      "prompt": "Solve by factoring: x^2 - 5x - 14 = 0",
+      "options": [
+        {
+          "id": "a",
+          "label": "x = 7 or x = -2"
+        },
+        {
+          "id": "b",
+          "label": "x = 7 or x = 2"
+        },
+        {
+          "id": "c",
+          "label": "x = 14 or x = -1"
+        },
+        {
+          "id": "d",
+          "label": "x = -7 or x = 2"
+        }
+      ],
+      "explanation": "x^2 - 5x - 14 = (x - 7)(x + 2), so x = 7 or x = -2.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "algebra--cmp-c3-sn1",
+      "bloom": "C3",
+      "prompt": "A truck rental company A charges $40 plus $0.25 per mile. Company B charges $25 plus $0.40 per mile. A customer wants to know the distance at which both companies charge the same total. At how many miles are the costs equal?",
+      "options": [
+        {
+          "id": "a",
+          "label": "60 miles"
+        },
+        {
+          "id": "b",
+          "label": "150 miles"
+        },
+        {
+          "id": "c",
+          "label": "23 miles"
+        },
+        {
+          "id": "d",
+          "label": "100 miles"
+        }
+      ],
+      "explanation": "Set 40 + 0.25m = 25 + 0.40m, so 15 = 0.15m and m = 100.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "scenario",
+      "answer": "d"
+    },
+    {
+      "id": "algebra--cmp-c4-sc1",
+      "bloom": "C4",
+      "prompt": "A student solves x^2 = 3x by dividing both sides by x and gets x = 3. What is the flaw in this work?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Dividing by x discards the solution x = 0; both x = 0 and x = 3 solve it"
+        },
+        {
+          "id": "b",
+          "label": "Dividing by x is valid here, so x = 3 is the complete solution set, since the equation has one nonzero root"
+        },
+        {
+          "id": "c",
+          "label": "The student should have taken square roots of both sides, which gives x = sqrt(3) as the solution of it"
+        },
+        {
+          "id": "d",
+          "label": "Division is valid, but the student must also list x = -3 because a squared variable gives opposite roots"
+        }
+      ],
+      "explanation": "Dividing by a variable expression that can be zero loses the root x = 0; factoring x(x - 3) = 0 keeps both.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "algebra--prf-c4-sc2",
+      "bloom": "C4",
+      "prompt": "A student solves (x-1)/(x+2) >= 0 by multiplying both sides by x+2 to get x-1 >= 0, so x >= 1. Which diagnosis of the error is correct?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Multiplying by x+2 is not valid here because it changes the solution set, so a sign chart or graph must be used instead of algebra"
+        },
+        {
+          "id": "b",
+          "label": "The multiplier x+2 is negative for x < -2, which flips the inequality there, so a second solution interval was missed"
+        },
+        {
+          "id": "c",
+          "label": "The inequality should be strict because the denominator cannot be zero, which changes the answer to x > 1 instead"
+        },
+        {
+          "id": "d",
+          "label": "The student should add 2 to both sides first, since a denominator must be cleared by addition rather than multiplying"
+        }
+      ],
+      "explanation": "The sign of the multiplier is unknown, so both cases must be handled; x < -2 also works.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": true,
+        "stage": "proficient"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "algebra--prf-c4-sn1",
+      "bloom": "C4",
+      "prompt": "A farmer encloses a rectangle with 40 m of fencing, so with width x the area is A = x(20 - x). She sets A = 120 to get x^2 - 20x + 120 = 0 and finds that the discriminant is -80. What does this result tell her?",
+      "options": [
+        {
+          "id": "a",
+          "label": "She made an arithmetic error, since a real fence must always allow some width that gives any desired area"
+        },
+        {
+          "id": "b",
+          "label": "A rectangle of area 120 exists but needs a negative width, so she must buy more fencing to use it"
+        },
+        {
+          "id": "c",
+          "label": "No rectangle with this perimeter has area 120, because the largest possible area is 100 at x = 10"
+        },
+        {
+          "id": "d",
+          "label": "Area 120 is reachable only at x = 10, where the two roots coincide and the discriminant would be zero"
+        }
+      ],
+      "explanation": "A negative discriminant means no real x gives 120; the vertex at x = 10 gives the maximum area of 100.",
+      "reviewed": true,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "proficient"
+      },
+      "type": "scenario",
+      "answer": "c"
+    },
+    {
+      "id": "algebra--prf-c5-sc3",
+      "bloom": "C5",
+      "prompt": "Solve y = 2x - 1 and 3x + 2y = 12. Judged on fewest steps and lowest risk of arithmetic slips, which approach is best?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Solving the second equation for x first, since that gives a single expression to substitute into the first equation"
+        },
+        {
+          "id": "b",
+          "label": "Substitution, putting 2x - 1 in for y in the second equation, since y is already isolated"
+        },
+        {
+          "id": "c",
+          "label": "Elimination, multiplying the first equation by 2 and adding, since the y-coefficients then cancel quickly"
+        },
+        {
+          "id": "d",
+          "label": "Graphing both lines by hand, since the intersection can be read off the plot with little algebra"
+        }
+      ],
+      "explanation": "With y already isolated, substitution gives 7x - 2 = 12 directly, so x = 2, y = 3.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "proficient"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "algebra--exp-c5-sc3",
+      "bloom": "C5",
+      "prompt": "To solve `(x + 1)/(x - 2) >= 3`, a student multiplies both sides by `x - 2`, gets `x + 1 >= 3x - 6`, and answers `x <= 3.5`. Which critique is best?",
+      "options": [
+        {
+          "id": "a",
+          "label": "The step is invalid because an inequality can never be multiplied by an expression containing x, so only a graph works."
+        },
+        {
+          "id": "b",
+          "label": "The multiplication assumes x - 2 > 0; for x < 2 the sign flips, and the true solution set is 2 < x <= 3.5."
+        },
+        {
+          "id": "c",
+          "label": "The multiplication assumes x - 2 > 0; for x < 2 the sign flips, and the true solution set is x < 2 or x >= 3.5."
+        },
+        {
+          "id": "d",
+          "label": "The multiplication is fine, but x = 2 must be excluded, so the answer is x <= 3.5 with x ≠ 2 as the only correction."
+        }
+      ],
+      "explanation": "Moving everything to one side gives (7 - 2x)/(x - 2) >= 0, which holds for 2 < x <= 3.5.",
+      "reviewed": true,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "algebra--exp-c5-sc5",
+      "bloom": "C5",
+      "prompt": "Which claim about real numbers is true for every pair a, b satisfying its stated condition?",
+      "options": [
+        {
+          "id": "a",
+          "label": "If 0 < a < b, then 1/b < 1/a."
+        },
+        {
+          "id": "b",
+          "label": "If a < b and b ≠ 0, then 1/a > 1/b."
+        },
+        {
+          "id": "c",
+          "label": "If a < b, then a^2 < b^2 whenever a ≠ 0."
+        },
+        {
+          "id": "d",
+          "label": "If a^2 < b^2, then a < b when b ≠ 0."
+        }
+      ],
+      "explanation": "For positive numbers, taking reciprocals reverses the order.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "algebra--exp-c6-mc1",
+      "bloom": "C6",
+      "prompt": "A complete plan for finding all real solutions of `|x - 2| = 3x - 1` must include which of the following? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "Split into cases x >= 2 and x < 2, keeping only roots that lie in their own case"
+        },
+        {
+          "id": "b",
+          "label": "Solve only x - 2 = 3x - 1, since the other case duplicates it"
+        },
+        {
+          "id": "c",
+          "label": "Split the cases at x = 0, since that is where the absolute value changes sign"
+        },
+        {
+          "id": "d",
+          "label": "Square both sides and accept every root, since squaring preserves equality"
+        },
+        {
+          "id": "e",
+          "label": "Require 3x - 1 >= 0 since an absolute value cannot be negative, and check roots against it"
+        }
+      ],
+      "explanation": "Case analysis at x = 2 with validity checks, or equivalently requiring a nonnegative right side, gives the sole solution x = 3/4.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "a",
+        "e"
+      ]
+    },
+    {
+      "id": "algebra--exp-c6-sc2",
+      "bloom": "C6",
+      "prompt": "Which pair of equations has (3, -1) as its only solution?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`2x + y = 5` and `x - y = 2`"
+        },
+        {
+          "id": "b",
+          "label": "`2x + y = 5` and `6x + 3y = 14`"
+        },
+        {
+          "id": "c",
+          "label": "`2x + y = 5` and `4x + 2y = 10`"
+        },
+        {
+          "id": "d",
+          "label": "`2x + y = 5` and `x - y = 4`"
+        }
+      ],
+      "explanation": "Both equations hold at (3, -1) and their slopes differ, so the solution is unique.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "algebra--exp-c6-sc5",
+      "bloom": "C6",
+      "prompt": "The roots r and s of `x^2 - 5x + 2 = 0` are real. Which quadratic has roots r^2 and s^2?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`x^2 - 25x + 4`"
+        },
+        {
+          "id": "b",
+          "label": "`x^2 - 5x + 4`"
+        },
+        {
+          "id": "c",
+          "label": "`x^2 - 21x + 4`"
+        },
+        {
+          "id": "d",
+          "label": "`x^2 - 21x + 2`"
+        }
+      ],
+      "explanation": "r^2 + s^2 = 25 - 4 = 21 and r^2 s^2 = 4.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    }
+  ]
+}
