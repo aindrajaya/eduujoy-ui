@@ -61,4 +61,20 @@ test.describe('sign-out', () => {
     expect(auth.refreshCalls).toBe(refreshesBefore);
     expect(auth.signedIn).toBe(false);
   });
+
+  // Prod report (23 Oct 2026): refresh answered 403. The API's CSRF check needs this header on every
+  // state-changing request; this proves the browser client sends it on the refresh and on a POST.
+  test('the refresh after an expired access cookie, and sign-out, carry X-Requested-With', async ({ page }) => {
+    const auth = await mockAuth(page, { signedIn: true });
+    auth.accessExpired = true;
+    const refresh = page.waitForRequest((r) => r.url().endsWith('/v1/auth/refresh') && r.method() === 'POST');
+    await page.goto('/account');
+    expect((await refresh).headers()['x-requested-with']).toBe('eduujoy');
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+    expect(auth.refreshCalls).toBe(1);
+
+    const logout = page.waitForRequest((r) => r.url().endsWith('/v1/auth/logout') && r.method() === 'POST');
+    await page.getByRole('button', { name: 'Sign out' }).click();
+    expect((await logout).headers()['x-requested-with']).toBe('eduujoy');
+  });
 });

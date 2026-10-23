@@ -5,8 +5,11 @@ import { BLOOM_LABEL, formatConfidence, STAGE_LABEL } from '@/lib/levels';
 import AsyncView from '@/ui/AsyncView';
 import { Skeleton, SkeletonText } from '@/ui/Skeleton';
 import StateMessage from '@/ui/StateMessage';
+import BloomChip from '@/ui/sketch/BloomChip';
+import StageBadge from '@/ui/sketch/StageBadge';
 import StickyActionBar from '@/ui/StickyActionBar';
 import ProgressGrid from './components/ProgressGrid';
+import { isProgressClosed } from './progressClosed';
 import { useProgress, useProgressHistory } from './queries';
 
 type HistoryItem = ProgressHistoryResponse['items'][number];
@@ -23,7 +26,7 @@ function ProgressSkeleton() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <Skeleton className="h-8 w-40" />
-      <div className="space-y-3 rounded-card border border-border p-4">
+      <div className="space-y-3 rounded-card border-2 border-ink p-4">
         <Skeleton className="h-6 w-48" />
         <SkeletonText lines={2} />
       </div>
@@ -39,12 +42,19 @@ function TopicProgress({ item }: { item: TopicPosition }) {
 
   return (
     <>
-      <section aria-labelledby="topic-title" className="space-y-2 rounded-card border border-border p-4">
-        <h2 id="topic-title" className="text-lg font-bold text-text">
+      <section aria-labelledby="topic-title" className="sk-card space-y-2">
+        <h2 id="topic-title" className="sk-display-md text-text">
           {item.topic.canonicalName}
         </h2>
-        <p className="font-semibold text-primary">
-          {STAGE_LABEL[stage]} · {bloom} {BLOOM_LABEL[bloom]}
+        {/* One phrase for screen readers; the badge pair shows the same, with the stage colour. */}
+        <p className="flex flex-wrap items-center gap-2">
+          <span className="sr-only">
+            {STAGE_LABEL[stage]} · {bloom} {BLOOM_LABEL[bloom]}
+          </span>
+          <span aria-hidden="true" className="contents">
+            <StageBadge stage={stage} />
+            <BloomChip bloom={bloom} />
+          </span>
         </p>
         <p className="text-sm text-text-muted">
           Confidence {formatConfidence(item.confidence)} · from {SOURCE_LABEL[item.source]} · updated{' '}
@@ -53,7 +63,7 @@ function TopicProgress({ item }: { item: TopicPosition }) {
       </section>
 
       <section aria-labelledby="grid-title" className="space-y-3">
-        <h2 id="grid-title" className="font-semibold text-text">
+        <h2 id="grid-title" className="sk-display-lg text-text">
           Where you are
         </h2>
         <ProgressGrid
@@ -65,12 +75,12 @@ function TopicProgress({ item }: { item: TopicPosition }) {
 
       {items.length > 0 && (
         <section aria-labelledby="history-title" className="space-y-2">
-          <h2 id="history-title" className="font-semibold text-text">
+          <h2 id="history-title" className="sk-display-lg text-text">
             How you moved
           </h2>
           <ol className="space-y-2">
             {[...items].reverse().map((h) => (
-              <li key={h.createdAt} className="flex justify-between gap-3 rounded-card border border-border p-3 text-sm">
+              <li key={h.createdAt} className="sk-card flex justify-between gap-3 p-3 text-sm">
                 <span className="text-text">
                   {STAGE_LABEL[h.position.stage]} · {h.position.bloom} {BLOOM_LABEL[h.position.bloom]}
                   <span className="text-text-muted"> · from {SOURCE_LABEL[h.source]}</span>
@@ -96,7 +106,14 @@ export default function ProgressPage() {
   return (
     <>
       {/* The screen's h1 in every state, as on /paths. */}
-      <h1 className="px-4 pt-4 text-2xl font-bold text-text md:px-6 md:pt-6 md:text-3xl">Progress</h1>
+      <h1 className="px-4 pt-4 text-text md:px-6 md:pt-6 md:text-3xl">Progress</h1>
+      {isProgressClosed(progress.error) ? (
+        <div className="p-6">
+          <StateMessage title="Your progress grid appears after your first path" icon={ChartColumn}>
+            Your diagnostic result is saved. It shows here once progress tracking opens.
+          </StateMessage>
+        </div>
+      ) : (
       <AsyncView
         query={progress}
         label="your progress"
@@ -135,7 +152,7 @@ export default function ProgressPage() {
                           setParams({ topic: i.topic.id }, { replace: true });
                         }}
                         className={`min-h-11 rounded-chip border-2 px-4 font-semibold ${
-                          i.topic.id === selected.topic.id ? 'border-primary bg-primary-soft text-primary' : 'border-border text-text'
+                          i.topic.id === selected.topic.id ? 'border-primary border-[length:var(--sk-stroke-strong)] bg-surface text-primary' : 'border-ink bg-surface text-text'
                         }`}
                       >
                         {i.topic.canonicalName}
@@ -152,6 +169,7 @@ export default function ProgressPage() {
           );
         }}
       </AsyncView>
+      )}
     </>
   );
 }

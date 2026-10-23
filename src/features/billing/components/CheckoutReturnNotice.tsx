@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import type { Me } from '@/api/types';
 import { sessionKeys } from '@/auth/session';
+import Notice from '@/ui/Notice';
 import { clearCheckoutBaseline, readCheckoutBaseline } from '../checkoutBaseline';
 import { purchaseConfirmation } from '../planSummary';
 
@@ -55,15 +56,15 @@ export default function CheckoutReturnNotice({ me, onActivated }: CheckoutReturn
 
   if (confirmation) {
     return (
-      <p role="status" className="rounded-card bg-success-soft p-3 text-sm text-text">
+      <Notice tone="success" role="status">
         {confirmation}
-      </p>
+      </Notice>
     );
   }
 
   if (polls >= ACTIVATION_POLLS) {
     return (
-      <div role="status" className="space-y-2 rounded-card bg-primary-soft p-3 text-sm text-text">
+      <Notice tone="info" role="status" className="space-y-2">
         <p>Still processing. Refresh in a minute or check your email receipt.</p>
         <button
           type="button"
@@ -74,13 +75,13 @@ export default function CheckoutReturnNotice({ me, onActivated }: CheckoutReturn
         >
           Check again
         </button>
-      </div>
+      </Notice>
     );
   }
 
   return (
-    <p role="status" className="rounded-card bg-primary-soft p-3 text-sm text-text">
+    <Notice tone="info" role="status">
       Payment received, activating…
-    </p>
+    </Notice>
   );
 }

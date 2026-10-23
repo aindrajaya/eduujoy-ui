@@ -5,7 +5,7 @@ import { SCREENS, waitForSketchFonts } from './screens';
 // U12a: every restyled screen passes axe, colour contrast included, in the light and the dark theme
 // (WCAG 2.2 AA). jsdom cannot compute contrast, so this runs in the browser.
 
-const RESTYLED_PARTS = [1];
+const RESTYLED_PARTS = [1, 2, 3, 4];
 
 for (const screen of SCREENS.filter((s) => s.parts.some((p) => RESTYLED_PARTS.includes(p)))) {
   for (const colorScheme of ['light', 'dark'] as const) {

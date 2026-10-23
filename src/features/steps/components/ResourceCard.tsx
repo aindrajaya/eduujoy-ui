@@ -1,6 +1,7 @@
 import { ArrowUpRight, BookOpen, FileText, GraduationCap, Link2, RefreshCw, ThumbsDown, ThumbsUp, Video, type LucideIcon } from 'lucide-react';
 import type { Resource, ResourceType } from '@/api/types';
-import { BLOOM_LABEL, STAGE_LABEL } from '@/lib/levels';
+import { BLOOM_LABEL } from '@/lib/levels';
+import StageBadge from '@/ui/sketch/StageBadge';
 import { safeExternalUrl } from '@/lib/url';
 import YouTubeEmbed from '@/ui/YouTubeEmbed';
 
@@ -37,20 +38,22 @@ export default function ResourceCard({ resource, thumb, onThumb, onSwap, swappin
   const meta = [resource.source, length(resource)].filter(Boolean).join(' · ');
 
   return (
-    <article aria-labelledby={`res-${resource.id}`} className="space-y-4 rounded-card border border-border bg-surface p-4 shadow-sm">
+    <article aria-labelledby={`res-${resource.id}`} className="sk-card space-y-4">
       <header className="space-y-1">
         <p className="flex items-center gap-2 text-sm font-semibold text-text-muted">
           <Icon className="h-4 w-4" aria-hidden="true" />
           {label}
         </p>
-        <h3 id={`res-${resource.id}`} className="text-lg font-semibold text-text">
+        <h3 id={`res-${resource.id}`} className="sk-title text-text">
           {resource.title}
         </h3>
         {meta && <p className="text-sm text-text-muted">{meta}</p>}
         <ul className="flex flex-wrap gap-2 pt-1" aria-label="Level tags">
-          <li className="rounded-chip bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{STAGE_LABEL[resource.stage]}</li>
+          <li>
+            <StageBadge stage={resource.stage} />
+          </li>
           {resource.bloomLevels.map((b) => (
-            <li key={b} className="rounded-chip bg-surface-muted px-3 py-1 text-xs font-semibold text-text-muted">
+            <li key={b} className="sk-bloom-chip py-1 text-xs font-semibold text-text-muted">
               {b} · {BLOOM_LABEL[b]}
             </li>
           ))}
@@ -97,7 +100,7 @@ export default function ResourceCard({ resource, thumb, onThumb, onSwap, swappin
         </div>
       )}
 
-      <footer className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+      <footer className="flex flex-wrap items-center gap-2 border-t-2 border-dashed border-border pt-3">
         <span className="mr-auto text-sm text-text-muted">Useful?</span>
         <button
           type="button"
@@ -106,7 +109,7 @@ export default function ResourceCard({ resource, thumb, onThumb, onSwap, swappin
           onClick={() => {
             onThumb('up');
           }}
-          className={`flex h-11 w-11 items-center justify-center rounded-control ${thumb === 'up' ? 'bg-success-soft text-success' : 'text-text-muted hover:text-text'}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-control ${thumb === 'up' ? 'border-2 border-primary text-primary' : 'text-text-muted hover:text-text'}`}
         >
           <ThumbsUp className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -117,7 +120,7 @@ export default function ResourceCard({ resource, thumb, onThumb, onSwap, swappin
           onClick={() => {
             onThumb('down');
           }}
-          className={`flex h-11 w-11 items-center justify-center rounded-control ${thumb === 'down' ? 'bg-danger-soft text-danger' : 'text-text-muted hover:text-text'}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-control ${thumb === 'down' ? 'border-2 border-primary text-primary' : 'text-text-muted hover:text-text'}`}
         >
           <ThumbsDown className="h-5 w-5" aria-hidden="true" />
         </button>

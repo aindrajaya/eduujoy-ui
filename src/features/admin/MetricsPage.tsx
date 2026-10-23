@@ -32,8 +32,8 @@ function CostTable({ range }: { range: MetricsRange }) {
       empty={<StateMessage title="No AI calls in this range" />}
     >
       {(data) => (
-        <div className="overflow-x-auto rounded-card border border-border">
-          <table className="w-full min-w-[36rem] text-sm">
+        <div tabIndex={0} role="region" aria-labelledby="cost-title" className="overflow-x-auto rounded-card border-2 border-ink">
+          <table className="w-full min-w-144 text-sm">
             <caption className="sr-only">
               AI cost per pipeline stage and model, {data.from} to {data.to}
             </caption>
@@ -105,8 +105,8 @@ function LatencyTable({ range }: { range: MetricsRange }) {
       empty={<StateMessage title="No calls in this range" />}
     >
       {(data) => (
-        <div className="overflow-x-auto rounded-card border border-border">
-          <table className="w-full min-w-[32rem] text-sm">
+        <div tabIndex={0} role="region" aria-labelledby="latency-title" className="overflow-x-auto rounded-card border-2 border-ink">
+          <table className="w-full min-w-128 text-sm">
             <caption className="sr-only">
               Latency per pipeline stage and model, {data.from} to {data.to}
             </caption>
@@ -173,7 +173,7 @@ export default function MetricsPage() {
     <main>
       <AdminNav />
       <div className="space-y-6 p-4 md:p-6">
-        <h1 className="text-2xl font-bold text-text">Costs and latency</h1>
+        <h1 className="text-text">Costs and latency</h1>
         <form onSubmit={apply} className="flex flex-wrap items-end gap-3" aria-label="Date range">
           <div>
             <label htmlFor={fromId} className="text-sm font-semibold text-text">
@@ -219,13 +219,13 @@ export default function MetricsPage() {
         </form>
 
         <section aria-labelledby="cost-title" className="space-y-3">
-          <h2 id="cost-title" className="text-lg font-bold text-text">
+          <h2 id="cost-title" className="sk-display-md text-text">
             AI cost
           </h2>
           <CostTable range={range} />
         </section>
         <section aria-labelledby="latency-title" className="space-y-3">
-          <h2 id="latency-title" className="text-lg font-bold text-text">
+          <h2 id="latency-title" className="sk-display-md text-text">
             Latency
           </h2>
           <LatencyTable range={range} />

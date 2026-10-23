@@ -41,8 +41,8 @@ export function PathOverview({ path }: { path: Path }) {
           All paths
         </Link>
         <header className="space-y-2">
-          <p className="font-semibold text-success">Your learning path</p>
-          <h1 className="text-2xl font-bold text-text md:text-3xl">{path.topic.canonicalName}</h1>
+          <p className="font-semibold text-text-muted">Your learning path</p>
+          <h1 className="text-text md:text-3xl">{path.topic.canonicalName}</h1>
           <p className="text-text-muted">
             From {STAGE_LABEL[path.from.stage]} to {STAGE_LABEL[path.to.stage]}
             {path.totalHours ? ` · about ${path.totalHours} h in total` : ''}
@@ -60,9 +60,9 @@ export function PathOverview({ path }: { path: Path }) {
               aria-valuemin={0}
               aria-valuemax={total}
               aria-valuenow={done}
-              className="h-2 overflow-hidden rounded-chip bg-surface-muted"
+              className="sk-meter"
             >
-              <div className="h-full bg-success" style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
+              <div style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
             </div>
           </div>
         </header>
@@ -73,7 +73,7 @@ export function PathOverview({ path }: { path: Path }) {
           </StateMessage>
         ) : (
           <section aria-labelledby="steps-title" className="space-y-3">
-            <h2 id="steps-title" className="text-lg font-bold text-text">
+            <h2 id="steps-title" className="sk-display-lg text-text">
               Steps
             </h2>
             <StepList pathId={path.id} steps={path.steps} />

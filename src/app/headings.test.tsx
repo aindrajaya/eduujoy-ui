@@ -52,6 +52,6 @@ describe('one h1 per screen', () => {
     }
     renderRoute('/paths');
     await screen.findByRole('link', { name: /Product Design/ });
-    await expectOneH1('Your Paths');
+    await expectOneH1('Your paths');
   });
 });

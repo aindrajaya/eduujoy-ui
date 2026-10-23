@@ -79,7 +79,7 @@ export default function GenerationPage() {
   return (
     <main className="mx-auto max-w-xl space-y-8 p-6 pt-12">
       <header>
-        <h1 className="text-2xl font-bold text-text">Building your path…</h1>
+        <h1 className="text-text">Building your path…</h1>
         <p className="mt-2 text-text-muted">
           We are finding and checking the best free resources for your level. This takes about a minute, and you can
           leave this page.
@@ -99,7 +99,7 @@ export default function GenerationPage() {
               <span
                 aria-hidden="true"
                 className={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-                  done ? 'border-success bg-success text-white' : active ? 'border-primary text-primary' : 'border-border text-text-muted'
+                  done ? 'border-success bg-surface text-success' : active ? 'border-primary bg-surface text-primary' : 'border-border text-text-muted'
                 }`}
               >
                 {done ? <Check className="h-4 w-4" /> : active ? <Loader2 className="h-4 w-4 animate-spin" /> : i + 1}
@@ -120,12 +120,12 @@ export default function GenerationPage() {
 
       {view.partialSteps.length > 0 && (
         <section aria-labelledby="first-steps" className="space-y-2">
-          <h2 id="first-steps" className="font-semibold text-text">
+          <h2 id="first-steps" className="sk-display-md text-text">
             Your first steps
           </h2>
           <ul className="space-y-2">
             {view.partialSteps.map((step) => (
-              <li key={step.id} className="animate-fade-in rounded-card border border-border p-3 text-sm text-text">
+              <li key={step.id} className="sk-card animate-fade-in p-3 text-sm text-text">
                 <span className="font-semibold">Step {step.n}:</span> {step.objective}
               </li>
             ))}
