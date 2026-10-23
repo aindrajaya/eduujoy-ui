@@ -38,6 +38,9 @@ const applied = new Set(json(`${SEED_DIR}/_review/applied.json`));
 const flagged = new Set(json(`${SEED_DIR}/_review/flags.json`).flagged.map((f) => f.id));
 const catalog = json(`${SEED_DIR}/topics.json`).topics;
 const approved = json(`${OUT}/approved.json`);
+// Learner-facing "why" lines where the first rubric line reads as grader notes (lead/user, 23 Oct
+// 2026), keyed by item id. The item itself is unchanged.
+const explanations = json(`${OUT}/explanations.json`);
 
 const verdictOf = (id) => verdicts[id]?.verdict?.verdict ?? null;
 
@@ -105,10 +108,17 @@ const toBankItem = ({ item, id }) => {
     bloom: item.bloom,
     prompt: item.prompt,
     options: item.options,
-    // The first rubric line explains the key; the rest are grader notes on distractors.
-    explanation: item.rubric[0] ?? '',
+    // The first rubric line explains the key (the rest are grader notes on distractors), unless an
+    // override in explanations.json replaces it.
+    explanation: explanations[id] ?? item.rubric[0] ?? '',
     reviewed: (approved[id.split('--')[0]] ?? []).includes(id),
-    review: { verdict: verdictOf(id), applied: applied.has(id), flagged: flagged.has(id), stage: item.stage },
+    review: {
+      verdict: verdictOf(id),
+      applied: applied.has(id),
+      flagged: flagged.has(id),
+      stage: item.stage,
+      ...(id in explanations ? { explanationOverride: true } : {}),
+    },
   };
   return item.kind === 'multi_choice'
     ? { ...base, type: 'multi_choice', answer }
@@ -152,7 +162,7 @@ for (const slug of TOPICS) {
       const key = Array.isArray(i.answer) ? i.answer.includes(o.id) : i.answer === o.id;
       review.push(`   - ${key ? '**✓**' : '  '} ${o.id}) ${o.label}`);
     }
-    review.push(`   Why this answer: ${i.explanation}`, '');
+    review.push(`   Why this answer${i.review.explanationOverride ? ' (rewritten for learners)' : ''}: ${i.explanation}`, '');
   });
 }
 

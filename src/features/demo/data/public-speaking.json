@@ -482,13 +482,14 @@
           "label": "Stop and ask the organiser for extra time, since the ask needs the full five minutes to be understood"
         }
       ],
-      "explanation": "Prioritising the ask, trimming the least critical points and closing clearly meets all three criteria.",
+      "explanation": "When time runs short, cutting the least important points lets you still make your ask and close clearly, so the audience leaves knowing what you need.",
       "reviewed": false,
       "review": {
         "verdict": null,
         "applied": false,
         "flagged": false,
-        "stage": "proficient"
+        "stage": "proficient",
+        "explanationOverride": true
       },
       "type": "scenario",
       "answer": "b"
