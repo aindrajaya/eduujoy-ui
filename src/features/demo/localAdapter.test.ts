@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Answer } from '@/features/quiz/types';
-import { isCorrect, learningScience as bank } from './bank';
-import { createLocalDiagnosticAdapter, DemoAttemptNotFound, type DemoState } from './localAdapter';
+import { ALL_BANKS, learningScience as bank } from '@/test/demoBanks';
+import { isCorrect, type Bank } from './bank';
+import { createLocalDiagnosticAdapter, DemoAttemptNotFound, storedAttemptBankId, type DemoState } from './localAdapter';
 import type { DemoSelfReport } from './placement';
 import type { DemoPrefs } from './prefs';
 
@@ -23,14 +24,18 @@ function adapter(seed = 1) {
 }
 
 /** Answers a batch: right with probability `skill`, else "I don't know yet" or a wrong option. */
-function answer(state: DemoState, choose: (itemId: string) => boolean): Record<string, Answer> {
+function answer(state: DemoState, choose: (itemId: string) => boolean, from: Bank = bank): Record<string, Answer> {
   return Object.fromEntries(
     state.items.map((q): [string, Answer] => {
-      const item = bank.items.find((i) => i.id === q.id);
+      const item = from.items.find((i) => i.id === q.id);
       if (!item) throw new Error(q.id);
       if (!choose(q.id)) return [q.id, { skipped: true }];
       const right: string[] =
-        item.type === 'linked_choice' ? item.answer : item.type === 'order' ? solveOrder(item.id) : [item.answer];
+        item.type === 'linked_choice' || item.type === 'multi_choice'
+          ? item.answer
+          : item.type === 'order'
+            ? solveOrder(item.id)
+            : [item.answer];
       expect(isCorrect(item, { optionIds: right })).toBe(true);
       return [q.id, { optionIds: right }];
     }),
@@ -129,5 +134,32 @@ describe('LocalDiagnosticAdapter (PRD-UI §7b)', () => {
     const state = await port.start(selfReport, prefs);
     const next = await port.submitAnswers(state.id, state.items, {}, 'k1');
     expect(next.graded.every((g) => g.skipped && !g.correct)).toBe(true);
+  });
+
+  it.each(ALL_BANKS.map((b) => [b.topic.id, b] as const))('%s: all right reaches C6 Expert, nothing known starts at C1', async (_id, topicBank) => {
+    for (const [choose, verified, stage] of [
+      [() => true, 'C6', 'expert'],
+      [() => false, null, 'novice'],
+    ] as const) {
+      const port = createLocalDiagnosticAdapter({ bank: topicBank, rng: seeded(3), latencyMs: [0, 0], newId: () => 'a' });
+      let state = await port.start(selfReport, prefs);
+      for (let k = 0; state.status === 'in_progress'; k += 1) {
+        state = await port.submitAnswers(state.id, state.items, answer(state, choose, topicBank), `k${String(k)}`);
+      }
+      expect(state.graded.length).toBeGreaterThanOrEqual(8);
+      expect(state.graded.length).toBeLessThanOrEqual(12);
+      expect(state.placement).toMatchObject({ verified, stage });
+      port.reset();
+    }
+  });
+
+  it('an attempt belongs to its bank: another bank’s adapter does not resume it', async () => {
+    const [first, second] = ALL_BANKS;
+    if (!first || !second) throw new Error('banks missing');
+    const started = await createLocalDiagnosticAdapter({ bank: first, latencyMs: [0, 0] }).start(selfReport, prefs);
+    expect(storedAttemptBankId()).toBe(first.topic.id);
+    await expect(createLocalDiagnosticAdapter({ bank: second, latencyMs: [0, 0] }).load(started.id)).rejects.toBeInstanceOf(
+      DemoAttemptNotFound,
+    );
   });
 });
