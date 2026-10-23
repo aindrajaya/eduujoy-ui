@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router';
 import Notice from '@/ui/Notice';
-import { useSignOut, type SignInLocationState } from './queries';
+import type { SignInLocationState } from './queries';
+import { useSignOut } from './signOut';
 
 /**
  * Shown on /signin when logout never reached the server (after its retries). The local cache is
