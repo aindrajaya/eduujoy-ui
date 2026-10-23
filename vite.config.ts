@@ -83,7 +83,8 @@ export default defineConfig({
         experimentalMinChunkSize: 8_000,
         // The merge above folded TanStack's useMutation and MutationObserver into a shared chunk that
         // /signin loads, though sign-in never uses them (it uses useSubmitAction): +1.1 KB gzip.
-        // Their own chunk keeps them on the screens that mutate (perf/signin-cleanup).
+        // Their own chunk keeps them on the screens that mutate (perf/signin-cleanup). The regex matches
+        // TanStack's internal build paths, so an upgrade may stop it matching: size-limit on /signin catches it.
         manualChunks: (id: string) =>
           /@tanstack\/(react-query|query-core)\/build\/modern\/(useMutation|mutationObserver)\.js$/.test(id)
             ? 'mutation'
