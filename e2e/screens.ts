@@ -14,6 +14,7 @@ import {
   mockProblem,
   mockProgress,
   mockProgressHistory,
+  mockResolveCreatedWithRelated,
   mockTopic,
 } from '../src/api/mocks/data';
 import { toEventStreamText, type MockSseEvent } from '../src/api/mocks/sse';
@@ -264,6 +265,24 @@ export const SCREENS: readonly Screen[] = [
     ready: h1('Welcome to Eduujoy'),
   },
   { name: 'start-intake', parts: [3, 4], url: '/start', setup: intake, ready: openIntake },
+  {
+    name: 'start-no-bank',
+    parts: [3],
+    url: '/start',
+    // Contract 0.9.0: a created topic with no item bank, and nearby topics that have one.
+    setup: async (page) => {
+      await mockAuth(page, { signedIn: true });
+      await page.route('**/v1/topics/resolve', (route) => json(route, 200, mockResolveCreatedWithRelated));
+    },
+    ready: async (page) => {
+      await openIntake(page);
+      await page.getByLabel('What do you want to learn?').fill('creative coding');
+      await page.getByLabel("What's your goal?").fill('Make generative art');
+      await page.getByRole('radio', { name: 'I’m new to this' }).check();
+      await page.getByRole('button', { name: 'Continue' }).click();
+      await expect(page.getByRole('heading', { level: 1, name: /We don’t have questions for Creative coding yet/ })).toBeVisible();
+    },
+  },
   {
     name: 'start-intake-errors',
     parts: [3],
