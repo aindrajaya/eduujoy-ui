@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { BloomLevel } from '@/api/types';
-import { learningScience as bank, type BankItem } from './bank';
+import { learningScience as bank } from '@/test/demoBanks';
+import type { BankItem } from './bank';
 import type { Graded } from './placement';
 import { firstBatch, MAX_ITEMS, secondBatch, thirdBatch } from './selector';
 

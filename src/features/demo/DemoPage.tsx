@@ -1,63 +1,88 @@
 import { useEffect, useState } from 'react';
 import { loadSketchFonts } from '@/ui/sketch/loadFonts';
-import { demoAdapter } from './adapter';
-import { learningScience } from './bank';
+import { createDemoAdapter } from './adapter';
+import type { Bank } from './bank';
+import { demoTopics, loadBank as loadDemoBank, type BankEntry } from './banks';
 import DemoQuiz from './components/DemoQuiz';
 import DemoResult from './components/DemoResult';
 import DemoSetup from './components/DemoSetup';
-import type { DemoState, LocalDiagnosticAdapter } from './localAdapter';
+import { storedAttemptBankId, type DemoState, type LocalDiagnosticAdapter } from './localAdapter';
 import type { DemoSelfReport } from './placement';
 import type { DemoPrefs } from './prefs';
 
-type View = { kind: 'intro'; starting: boolean } | { kind: 'resuming' } | { kind: 'attempt'; state: DemoState };
+/** An attempt in progress or done: the bank it runs on, its adapter, and its state. */
+interface Attempt {
+  bank: Bank;
+  adapter: LocalDiagnosticAdapter;
+  state: DemoState;
+}
 
-const TITLE = 'Learning science for exam prep';
+type View = { kind: 'intro'; starting: boolean } | { kind: 'resuming' } | ({ kind: 'attempt' } & Attempt);
+
+export interface DemoPageProps {
+  /** Tests inject these; the route uses the reviewed topics, lazy banks and the 300–600 ms adapter. */
+  topics?: readonly BankEntry[];
+  loadBank?: (id: string) => Promise<Bank>;
+  createAdapter?: (bank: Bank) => LocalDiagnosticAdapter;
+}
 
 /**
  * /demo (PRD-UI §7b, FR-26): a public, 5-minute diagnostic that runs entirely in the browser on the
  * real quiz engine. No API calls, no cookies, no third-party scripts; it sits outside the root
- * route, so auth/me, refresh and the realtime socket never start.
+ * route, so auth/me, refresh and the realtime socket never start. UD2: the visitor picks a topic;
+ * each topic's bank is a lazy chunk.
  */
-export default function DemoPage({ adapter = demoAdapter }: { adapter?: LocalDiagnosticAdapter }) {
+export default function DemoPage({
+  topics = demoTopics,
+  loadBank = loadDemoBank,
+  createAdapter = createDemoAdapter,
+}: DemoPageProps) {
   const [view, setView] = useState<View>(() =>
-    adapter.currentId() ? { kind: 'resuming' } : { kind: 'intro', starting: false },
+    storedAttemptBankId() ? { kind: 'resuming' } : { kind: 'intro', starting: false },
   );
 
   useEffect(() => loadSketchFonts(), []);
 
-  // A reload resumes this browser's attempt; one that cannot be read starts over.
+  // A reload resumes this browser's attempt on its own bank; one that cannot be read starts over.
   useEffect(() => {
     if (view.kind !== 'resuming') return;
     let live = true;
-    adapter.load(adapter.currentId() ?? '').then(
-      (state) => {
-        if (live) setView({ kind: 'attempt', state });
-      },
-      () => {
-        adapter.reset();
+    const bankId = storedAttemptBankId() ?? '';
+    loadBank(bankId)
+      .then(async (bank) => {
+        const adapter = createAdapter(bank);
+        try {
+          const state = await adapter.load(adapter.currentId() ?? '');
+          if (live) setView({ kind: 'attempt', bank, adapter, state });
+        } catch {
+          adapter.reset();
+          if (live) setView({ kind: 'intro', starting: false });
+        }
+      })
+      .catch(() => {
         if (live) setView({ kind: 'intro', starting: false });
-      },
-    );
+      });
     return () => {
       live = false;
     };
-  }, [adapter, view.kind]);
+  }, [createAdapter, loadBank, view.kind]);
 
-  const start = (selfReport: DemoSelfReport, prefs: DemoPrefs) => {
+  const start = (topicId: string, selfReport: DemoSelfReport, prefs: DemoPrefs) => {
     setView({ kind: 'intro', starting: true });
-    void adapter.start(selfReport, prefs).then((state) => {
-      setView({ kind: 'attempt', state });
+    void loadBank(topicId).then(async (bank) => {
+      const adapter = createAdapter(bank);
+      const state = await adapter.start(selfReport, prefs);
+      setView({ kind: 'attempt', bank, adapter, state });
     });
   };
 
-  const retake = () => {
+  const retake = (adapter: LocalDiagnosticAdapter) => {
     adapter.reset();
     setView({ kind: 'intro', starting: false });
     window.scrollTo({ top: 0 });
   };
 
-  const state = view.kind === 'attempt' ? view.state : null;
-  const placement = state?.placement;
+  const single = topics.length === 1 ? topics[0] : undefined;
 
   return (
     <div className="sketch">
@@ -68,41 +93,49 @@ export default function DemoPage({ adapter = demoAdapter }: { adapter?: LocalDia
       <main className="mx-auto max-w-2xl space-y-6 px-4 pt-6 pb-12">
         {view.kind === 'intro' && (
           <>
-            <h1>Find your starting point in learning science</h1>
+            {/* Three display lines reserved on phones: the title wraps to three once Excalifont swaps in
+                (after first paint), and the reserve keeps the form below from shifting (CLS). */}
+            <h1 className="min-h-[calc(var(--sk-display-xl-line-height)*3em)] sm:min-h-0">
+              {single ? `Find your starting point in ${single.shortName ?? single.name}` : 'Find your starting point'}
+            </h1>
             <p className="sk-prose">
-              A 5-minute diagnostic on studying for exams: retrieval practice, spacing, interleaving and knowing what you
-              know. It runs entirely in your browser. This sets your starting point; it is not a test.
+              {single?.id === 'learning-science'
+                ? 'A 5-minute diagnostic on studying for exams: retrieval practice, spacing, interleaving and knowing what you know.'
+                : 'A 5-minute diagnostic on a topic you choose.'}{' '}
+              It runs entirely in your browser. This sets your starting point; it is not a test.
             </p>
-            <DemoSetup starting={view.starting} onStart={start} />
+            <DemoSetup topics={topics} starting={view.starting} onStart={start} />
           </>
         )}
         {view.kind === 'resuming' && (
           <>
-            <h1>{TITLE}</h1>
+            <h1>Your demo diagnostic</h1>
             <p role="status">Picking up where you left off…</p>
           </>
         )}
-        {state && placement && (
+        {view.kind === 'attempt' && view.state.placement && (
           <>
             <h1>Your starting point</h1>
             <DemoResult
-              bank={learningScience}
-              placement={placement}
-              graded={state.graded}
-              prefs={state.prefs}
-              onRetake={retake}
+              bank={view.bank}
+              placement={view.state.placement}
+              graded={view.state.graded}
+              prefs={view.state.prefs}
+              onRetake={() => {
+                retake(view.adapter);
+              }}
             />
           </>
         )}
-        {state && !placement && (
+        {view.kind === 'attempt' && !view.state.placement && (
           <>
-            <h1>{TITLE}</h1>
+            <h1>{view.bank.topic.name}</h1>
             <p className="text-sk-text-muted">This sets your starting point; it is not a test.</p>
             <DemoQuiz
-              state={state}
-              adapter={adapter}
+              state={view.state}
+              adapter={view.adapter}
               onNext={(next) => {
-                setView({ kind: 'attempt', state: next });
+                setView({ ...view, state: next });
               }}
             />
           </>
