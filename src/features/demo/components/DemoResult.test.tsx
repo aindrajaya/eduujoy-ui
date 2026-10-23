@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { expectNoAxeViolations } from '@/test/axe';
-import { learningScience as bank } from '../bank';
+import { learningScience as bank } from '@/test/demoBanks';
 import { place, type Graded } from '../placement';
 import { FORMATS, GOALS, HOURS, type DemoPrefs } from '../prefs';
 import DemoResult from './DemoResult';

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { BLOOMS, isCorrect, learningScience as bank, toQuestion, type BankItem } from './bank';
+import { learningScience as bank } from '@/test/demoBanks';
+import { BLOOMS, isCorrect, toQuestion, type BankItem } from './bank';
 
 const item = (id: string): BankItem => {
   const found = bank.items.find((i) => i.id === id);
@@ -13,7 +14,7 @@ describe('item bank (PRD-UI §7b)', () => {
     for (const bloom of BLOOMS) expect(bank.items.filter((i) => i.bloom === bloom)).toHaveLength(3);
     for (const i of bank.items) {
       expect(i.explanation.length, i.id).toBeGreaterThan(20);
-      expect(bank.sources[i.source], i.id).toBeDefined();
+      expect(bank.sources[i.source ?? ''], i.id).toBeDefined();
     }
     expect(new Set(bank.items.map((i) => i.id)).size).toBe(18);
   });
@@ -46,7 +47,7 @@ describe('item bank (PRD-UI §7b)', () => {
   it('every item is reviewed and cites a source in the reference list, with a DOI except the one book chapter', () => {
     for (const i of bank.items) {
       expect(i.reviewed, i.id).toBe(true);
-      const source = bank.sources[i.source];
+      const source = bank.sources[i.source ?? ''];
       expect(source, i.id).toBeDefined();
       // Bjork (1994) is a chapter in an MIT Press book and has no DOI.
       if (i.source !== 'bjork1994') expect(source?.url, i.id).toMatch(/^https:\/\/doi\.org\/10\.\d+\//);
