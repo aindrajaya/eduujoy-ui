@@ -5,7 +5,8 @@ import { http, problemResponse } from '@/api/mocks/handlers';
 import { server } from '@/api/mocks/server';
 import { createTestQueryClient, withQueryClient } from '@/test/providers';
 import { ApiError } from '@/api/errors';
-import { shouldRetrySignOut, useSignIn, useSignOut, useSignUp } from './queries';
+import { useSignIn, useSignUp } from './queries';
+import { shouldRetrySignOut, useSignOut } from './signOut';
 import { sessionKeys } from './session';
 
 describe('auth mutations', () => {
