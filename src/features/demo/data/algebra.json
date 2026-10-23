@@ -58,7 +58,7 @@
         }
       ],
       "explanation": "Linear equations have x only to the first power, not in a denominator.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -95,7 +95,7 @@
         }
       ],
       "explanation": "The coefficient is the number multiplying a variable.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -128,7 +128,7 @@
         }
       ],
       "explanation": "The inverse of adding 7 is subtracting 7 from both sides.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -161,7 +161,7 @@
         }
       ],
       "explanation": "Distributive property multiplies 2 by both terms.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -194,7 +194,7 @@
         }
       ],
       "explanation": "The constant term is the fixed amount at m = 0.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -227,7 +227,7 @@
         }
       ],
       "explanation": "A quadratic has x to the highest power 2.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -260,7 +260,7 @@
         }
       ],
       "explanation": "Substitute y = 2x to get 3x = 9, so x = 3 and y = 6.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -293,7 +293,7 @@
         }
       ],
       "explanation": "x^2 - 5x - 14 = (x - 7)(x + 2), so x = 7 or x = -2.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -326,7 +326,7 @@
         }
       ],
       "explanation": "Set 40 + 0.25m = 25 + 0.40m, so 15 = 0.15m and m = 100.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -359,7 +359,7 @@
         }
       ],
       "explanation": "Dividing by a variable expression that can be zero loses the root x = 0; factoring x(x - 3) = 0 keeps both.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -392,7 +392,7 @@
         }
       ],
       "explanation": "The sign of the multiplier is unknown, so both cases must be handled; x < -2 also works.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -425,7 +425,7 @@
         }
       ],
       "explanation": "A negative discriminant means no real x gives 120; the vertex at x = 10 gives the maximum area of 100.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -458,7 +458,7 @@
         }
       ],
       "explanation": "With y already isolated, substitution gives 7x - 2 = 12 directly, so x = 2, y = 3.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -491,7 +491,7 @@
         }
       ],
       "explanation": "Moving everything to one side gives (7 - 2x)/(x - 2) >= 0, which holds for 2 < x <= 3.5.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -524,7 +524,7 @@
         }
       ],
       "explanation": "For positive numbers, taking reciprocals reverses the order.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -561,7 +561,7 @@
         }
       ],
       "explanation": "Case analysis at x = 2 with validity checks, or equivalently requiring a nonnegative right side, gives the sole solution x = 3/4.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -597,7 +597,7 @@
         }
       ],
       "explanation": "Both equations hold at (3, -1) and their slopes differ, so the solution is unique.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -630,7 +630,7 @@
         }
       ],
       "explanation": "r^2 + s^2 = 25 - 4 = 21 and r^2 s^2 = 4.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,

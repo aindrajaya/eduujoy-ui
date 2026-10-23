@@ -54,7 +54,7 @@
         }
       ],
       "explanation": "Introductions capture attention and preview the topic.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -87,7 +87,7 @@
         }
       ],
       "explanation": "Eye contact means looking at various listeners to connect.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -120,7 +120,7 @@
         }
       ],
       "explanation": "A pause is a deliberate silence used for emphasis or clarity.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -153,7 +153,7 @@
         }
       ],
       "explanation": "Adapting language helps the audience understand.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -186,7 +186,7 @@
         }
       ],
       "explanation": "Shaking is a common stress response and manageable.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -219,7 +219,7 @@
         }
       ],
       "explanation": "When the speaker only repeats on-screen text, listeners read ahead and have no reason to listen.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -252,7 +252,7 @@
         }
       ],
       "explanation": "30s + 3 x 80s + 30s = 5 minutes.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -285,7 +285,7 @@
         }
       ],
       "explanation": "A headline and one visual with spoken detail lets the slide support the talk.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -318,7 +318,7 @@
         }
       ],
       "explanation": "Slow exhale breathing lowers arousal and a rehearsed opening gives a stable start.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -351,7 +351,7 @@
         }
       ],
       "explanation": "Monotone, steady pacing with no pauses typically signals recitation of memorised text.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -384,7 +384,7 @@
         }
       ],
       "explanation": "Virtual settings reduce feedback cues, so the speaker must adapt pacing and add interaction.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -417,7 +417,7 @@
         }
       ],
       "explanation": "Listeners could hear the words but had no time or cues to process the data; pacing and signposting address this.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -450,7 +450,7 @@
         }
       ],
       "explanation": "A brief factual correction plus answering the real concern protects credibility and avoids escalation.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -483,7 +483,7 @@
         }
       ],
       "explanation": "When time runs short, cutting the least important points lets you still make your ask and close clearly, so the audience leaves knowing what you need.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -517,7 +517,7 @@
         }
       ],
       "explanation": "Fabrication and evasion both damage trust; a bounded honest answer with follow-up is stronger.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -553,7 +553,7 @@
         }
       ],
       "explanation": "Plain structure, pacing and consistent terms with visuals aid comprehension.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -589,7 +589,7 @@
         }
       ],
       "explanation": "A sceptical board's likely objection must be handled openly or the case stays vulnerable.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -622,7 +622,7 @@
         }
       ],
       "explanation": "Scale changes the delivery: intimacy and interaction in a small room, projection and simplicity in a large one.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
