@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ALL_BANKS } from '@/test/demoBanks';
 import { BLOOMS, isCorrect, toQuestion } from './bank';
 import { demoTopics, loadBank } from './banks';
+import explanations from './data/explanations.json';
 import index from './data/index.json';
 
 describe('/demo topics (UD2)', () => {
@@ -38,6 +39,14 @@ describe('/demo topics (UD2)', () => {
         expect(toQuestion(i).kind).toBe('multi_choice');
       }
     }
+  });
+
+  it('explanation overrides replace the rubric line, keyed by id (user decision, 23 Oct 2026)', () => {
+    for (const [id, text] of Object.entries(explanations)) {
+      const item = ALL_BANKS.flatMap((b) => b.items).find((i) => i.id === id);
+      expect(item?.explanation, id).toBe(text);
+    }
+    expect(Object.keys(explanations)).toContain('public-speaking--prf-c5-sn1');
   });
 
   it('catalog banks carry their export rule, seed and chosen ids, and no sources or next steps', () => {
