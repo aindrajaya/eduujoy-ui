@@ -462,7 +462,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Read one path with steps and resources. */
+        /**
+         * Read one path with steps and resources.
+         * @description 404 also while the path is still being generated: a generating path is not a Path yet.
+         *     Follow the `jobId` from POST /v1/paths over GET /v1/jobs/{id}/events until it completes.
+         */
         get: operations["pathsGet"];
         put?: never;
         post?: never;
@@ -995,6 +999,8 @@ export interface components {
             aliases?: string[];
             canonicalName: string;
             description?: string;
+            /** @description True when the topic has a diagnostic item bank; false for new or learner-created topics until one is generated. */
+            hasDiagnostic?: boolean;
             id: string;
             parentId?: string | null;
         };
@@ -1021,6 +1027,8 @@ export interface components {
             choices?: (components["schemas"]["Topic"] & {
                 similarity?: number;
             })[];
+            /** @description Only with status `created`. Up to 3 catalog topics nearest to the text in the same domain (similarity at least 0.60), banked topics first, so the UI can offer them before a diagnostic without questions. May include topics the learner just declined as choices; may be empty. */
+            related?: components["schemas"]["Topic"][];
             /** @enum {string} */
             status: "matched" | "choices" | "created";
             topic?: components["schemas"]["Topic"];
@@ -1894,6 +1902,15 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             402: components["responses"]["QuotaExceeded"];
             403: components["responses"]["Forbidden"];
+            /** @description Unknown placement, or a placement that is not the caller's (code NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             409: components["responses"]["Conflict"];
             429: components["responses"]["TooManyRequests"];
             503: components["responses"]["BudgetExceeded"];
