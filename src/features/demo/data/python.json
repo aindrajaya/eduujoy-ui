@@ -1,0 +1,649 @@
+{
+  "topic": {
+    "id": "python",
+    "name": "Python"
+  },
+  "origin": "catalog",
+  "export": {
+    "rule": "resolved",
+    "seed": 2026,
+    "from": "api/seed/items/python.json",
+    "ids": [
+      "python--nov-c1-sc1",
+      "python--nov-c1-sc3",
+      "python--nov-c1-sn1",
+      "python--nov-c2-mc1",
+      "python--nov-c2-sc4",
+      "python--adb-c2-sc1",
+      "python--adb-c3-sc5",
+      "python--cmp-c3-sc3",
+      "python--cmp-c3-sc4",
+      "python--cmp-c4-sc3",
+      "python--prf-c4-mc1",
+      "python--prf-c4-sc2",
+      "python--prf-c5-sc3",
+      "python--exp-c5-sc4",
+      "python--exp-c5-sc5",
+      "python--exp-c6-mc1",
+      "python--exp-c6-sc1",
+      "python--exp-c6-sc4"
+    ]
+  },
+  "sources": {},
+  "items": [
+    {
+      "id": "python--nov-c1-sc1",
+      "bloom": "C1",
+      "prompt": "Which built-in function returns the number of items in a list?",
+      "options": [
+        {
+          "id": "a",
+          "label": "count()"
+        },
+        {
+          "id": "b",
+          "label": "length()"
+        },
+        {
+          "id": "c",
+          "label": "len()"
+        },
+        {
+          "id": "d",
+          "label": "size()"
+        }
+      ],
+      "explanation": "`len()` is the built-in for the number of items in a sequence.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "python--nov-c1-sc3",
+      "bloom": "C1",
+      "prompt": "Which symbol starts a single-line comment in Python?",
+      "options": [
+        {
+          "id": "a",
+          "label": "//"
+        },
+        {
+          "id": "b",
+          "label": "#"
+        },
+        {
+          "id": "c",
+          "label": "--"
+        },
+        {
+          "id": "d",
+          "label": "/*"
+        }
+      ],
+      "explanation": "`#` begins a comment in Python.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "python--nov-c1-sn1",
+      "bloom": "C1",
+      "prompt": "Sam is writing a script that asks a user for their name. He needs a built-in function that shows a message and reads a line of text typed by the user. Which function should he use?",
+      "options": [
+        {
+          "id": "a",
+          "label": "read()"
+        },
+        {
+          "id": "b",
+          "label": "input()"
+        },
+        {
+          "id": "c",
+          "label": "get()"
+        },
+        {
+          "id": "d",
+          "label": "scan()"
+        }
+      ],
+      "explanation": "`input()` prompts the user and returns the typed text as a string.",
+      "reviewed": false,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "novice"
+      },
+      "type": "scenario",
+      "answer": "b"
+    },
+    {
+      "id": "python--nov-c2-mc1",
+      "bloom": "C2",
+      "prompt": "Which of these statements about Python strings are true? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "They can be written with single or double quotes"
+        },
+        {
+          "id": "b",
+          "label": "They can be indexed starting at 0"
+        },
+        {
+          "id": "c",
+          "label": "They are immutable once created"
+        },
+        {
+          "id": "d",
+          "label": "Individual characters can be reassigned with `s[0] = 'x'`"
+        }
+      ],
+      "explanation": "Strings accept either quote style, are immutable, and are zero-indexed.",
+      "reviewed": false,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "novice"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    {
+      "id": "python--nov-c2-sc4",
+      "bloom": "C2",
+      "prompt": "What does `5 // 2` evaluate to in Python 3?",
+      "options": [
+        {
+          "id": "a",
+          "label": "2.5, because `//` divides normally"
+        },
+        {
+          "id": "b",
+          "label": "2, because `//` divides and rounds down"
+        },
+        {
+          "id": "c",
+          "label": "1, because `//` gives the remainder"
+        },
+        {
+          "id": "d",
+          "label": "3, because `//` rounds up"
+        }
+      ],
+      "explanation": "`//` is floor division, so 5 // 2 is 2.",
+      "reviewed": false,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "python--adb-c2-sc1",
+      "bloom": "C2",
+      "prompt": "Why does `t = (1, 2, 3)` followed by `t[0] = 9` raise a `TypeError`?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Tuple indexes start at 1, so index 0 is not a valid position"
+        },
+        {
+          "id": "b",
+          "label": "Tuples are immutable, so their items cannot be reassigned"
+        },
+        {
+          "id": "c",
+          "label": "Integers in a tuple are constants, though strings in one could change"
+        },
+        {
+          "id": "d",
+          "label": "Tuples allow assignment only to their last element, not the first"
+        }
+      ],
+      "explanation": "Tuples are immutable, so item assignment is unsupported.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "advanced_beginner"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "python--adb-c3-sc5",
+      "bloom": "C3",
+      "prompt": "You are counting word frequencies into an initially empty dict `counts`. Which loop body correctly handles a word `w` seen for the first time?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`counts[w] = counts[w] + 1`"
+        },
+        {
+          "id": "b",
+          "label": "`counts[w] += 1`"
+        },
+        {
+          "id": "c",
+          "label": "`counts[w] = counts.get(w, 0) + 1`"
+        },
+        {
+          "id": "d",
+          "label": "`counts.update({w: counts[w] + 1})`"
+        }
+      ],
+      "explanation": "`get(w, 0)` supplies a default so unseen words start at 0.",
+      "reviewed": false,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "advanced_beginner"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "python--cmp-c3-sc3",
+      "bloom": "C3",
+      "prompt": "Given `def f(x, acc=[]): acc.append(x); return acc`, what does the last line print?\n\n`f(1)`\n`print(f(2))`",
+      "options": [
+        {
+          "id": "a",
+          "label": "[1]"
+        },
+        {
+          "id": "b",
+          "label": "[1, 2]"
+        },
+        {
+          "id": "c",
+          "label": "[2, 1]"
+        },
+        {
+          "id": "d",
+          "label": "[2]"
+        }
+      ],
+      "explanation": "The default list is created once at definition time and shared between calls, so it holds 1 and then 2.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "python--cmp-c3-sc4",
+      "bloom": "C3",
+      "prompt": "With `s = 'competent'`, what does `s[1:7:2]` return?",
+      "options": [
+        {
+          "id": "a",
+          "label": "'cmeet'"
+        },
+        {
+          "id": "b",
+          "label": "'ompe'"
+        },
+        {
+          "id": "c",
+          "label": "'opt'"
+        },
+        {
+          "id": "d",
+          "label": "'omen'"
+        }
+      ],
+      "explanation": "Indices 1, 3 and 5 give 'o', 'p' and 't'.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "python--cmp-c4-sc3",
+      "bloom": "C4",
+      "prompt": "`counter = 0`, then `def inc(): counter += 1`, and calling `inc()` raises `UnboundLocalError`. What is the cause?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Functions can't read module-level names unless they are passed in as arguments or declared nonlocal"
+        },
+        {
+          "id": "b",
+          "label": "`counter` is read before `inc` is defined, so the name does not exist yet when the call runs"
+        },
+        {
+          "id": "c",
+          "label": "Integers are immutable, so `+=` can never rebind a module-level name from inside a function"
+        },
+        {
+          "id": "d",
+          "label": "The assignment in `+=` makes `counter` local, and it is read before being set"
+        }
+      ],
+      "explanation": "Any assignment in a function body makes the name local for the whole function, so the read in `+=` fails.",
+      "reviewed": false,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "python--prf-c4-mc1",
+      "bloom": "C4",
+      "prompt": "Given `class Cart: items = []` and `def add(self, x): self.items.append(x)`, two separate Cart objects show each other's items. Which statements are true? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "Each instance receives its own copy of `items` the first time it is created"
+        },
+        {
+          "id": "b",
+          "label": "Declaring `items` as a tuple would still allow `append` to work on it"
+        },
+        {
+          "id": "c",
+          "label": "Setting `self.items = []` inside `__init__` would give each instance its own list"
+        },
+        {
+          "id": "d",
+          "label": "Writing `self.items = self.items + [x]` would create an instance attribute and stop the sharing"
+        },
+        {
+          "id": "e",
+          "label": "`append` mutates the single list stored on the class, so both instances see the change"
+        }
+      ],
+      "explanation": "The list lives on the class; mutation is shared, while assignment through self creates per-instance attributes.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "proficient"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "c",
+        "d",
+        "e"
+      ]
+    },
+    {
+      "id": "python--prf-c4-sc2",
+      "bloom": "C4",
+      "prompt": "A loop registers callbacks: `for name in names: handlers.append(lambda: print(name))`. After the loop, every handler prints the last name. Which explanation is correct?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Each lambda stores the value of `name` at creation, but the loop reuses one string object and mutates it in place each pass"
+        },
+        {
+          "id": "b",
+          "label": "Each lambda copies `name` when created, but `print` later overwrites the copies when the handlers are called in order"
+        },
+        {
+          "id": "c",
+          "label": "Appending to a list rebinds earlier stored functions to the newest lambda, so all list entries become the same function"
+        },
+        {
+          "id": "d",
+          "label": "The closure looks up `name` when it is called, and by then the shared variable holds the last value"
+        }
+      ],
+      "explanation": "Closures capture variables, not values, so lookup happens at call time (late binding).",
+      "reviewed": false,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "proficient"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "python--prf-c5-sc3",
+      "bloom": "C5",
+      "prompt": "You store 1 million immutable (x, y) points and use them as dict keys. Criteria: hashable by value, modest memory, readable field names. Which representation is best?",
+      "options": [
+        {
+          "id": "a",
+          "label": "A plain `@dataclass`, which has named fields and a generated `__eq__` and `__hash__`, so equal instances work as dict keys"
+        },
+        {
+          "id": "b",
+          "label": "`typing.NamedTuple`, which is immutable, hashes by value, is compact, and has named fields"
+        },
+        {
+          "id": "c",
+          "label": "A plain class with `__slots__`, since slots save memory and the default `__hash__` uses the field values"
+        },
+        {
+          "id": "d",
+          "label": "A dict like `{'x': 1, 'y': 2}` per point, since named keys are clear and dicts hash by their contents"
+        }
+      ],
+      "explanation": "NamedTuple is a tuple subclass: hashable by value, compact, with named access.",
+      "reviewed": false,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "proficient"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "python--exp-c5-sc4",
+      "bloom": "C5",
+      "prompt": "A library function parses a port number from config text. Criteria: callers must be able to catch a library-specific error, and the original cause must remain visible in the traceback. Which handler is best?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`except ValueError as e: print(e); sys.exit(1)`"
+        },
+        {
+          "id": "b",
+          "label": "`except ValueError as e: raise ConfigError(f\"bad port: {e}\") from None`"
+        },
+        {
+          "id": "c",
+          "label": "`except ValueError as e: raise ConfigError(\"bad port\") from e`"
+        },
+        {
+          "id": "d",
+          "label": "`except ValueError as e: log.error(e); return 80  # default port`"
+        }
+      ],
+      "explanation": "Raising a custom exception `from e` gives a catchable type and preserves the cause chain.",
+      "reviewed": false,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "python--exp-c5-sc5",
+      "bloom": "C5",
+      "prompt": "Profiling shows 5 million small `Point` objects with fixed attributes `x` and `y` dominate memory use. Which judgement about adding `__slots__ = ('x', 'y')` is best supported?",
+      "options": [
+        {
+          "id": "a",
+          "label": "It stores attributes in a compact C-level layout, so it saves memory only when the module is also compiled with Cython."
+        },
+        {
+          "id": "b",
+          "label": "It makes attribute reads faster and the instances thread-safe, because slot storage is updated atomically without any locking."
+        },
+        {
+          "id": "c",
+          "label": "It removes the per-instance `__dict__` to save memory, but blocks undeclared attributes and complicates multiple inheritance."
+        },
+        {
+          "id": "d",
+          "label": "It changes how attributes are documented and type-checked, but instance memory stays the same unless the class is also made frozen."
+        }
+      ],
+      "explanation": "Slots drop the per-instance dict, saving memory at the cost of flexibility.",
+      "reviewed": false,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "python--exp-c6-mc1",
+      "bloom": "C6",
+      "prompt": "Design a helper that runs `grep` on a user-supplied filename. Constraints: no shell injection through the filename, a nonzero exit must raise, and stdout must come back as `str`. Which elements belong in the design? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "Call `os.system(cmd)` and treat its return value as the text printed by the command."
+        },
+        {
+          "id": "b",
+          "label": "Pass `check=True` so a nonzero exit status raises `CalledProcessError`."
+        },
+        {
+          "id": "c",
+          "label": "Build one command string with an f-string and pass `shell=True`, wrapping the filename in single quotes."
+        },
+        {
+          "id": "d",
+          "label": "Pass `capture_output=True, text=True` so stdout is returned as a `str`."
+        },
+        {
+          "id": "e",
+          "label": "Pass the command as a list like `[\"grep\", \"-n\", pattern, path]` with the default `shell=False`."
+        }
+      ],
+      "explanation": "List arguments avoid the shell, `check=True` raises on failure, and `capture_output` with `text` returns a string.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "b",
+        "d",
+        "e"
+      ]
+    },
+    {
+      "id": "python--exp-c6-sc1",
+      "bloom": "C6",
+      "prompt": "Design a context manager `timed` that times a block. Constraints: it must record elapsed time even if the block raises, and it must not hide the exception. Which `__exit__` design meets both?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Record the time only when `exc_type` is `None`, and return `False` in every other case"
+        },
+        {
+          "id": "b",
+          "label": "Record the time, then `return True` so the block's code can finish cleanly after the error"
+        },
+        {
+          "id": "c",
+          "label": "Record the time, then return `None` so any exception from the block keeps propagating"
+        },
+        {
+          "id": "d",
+          "label": "Record the time in `__enter__` only, because `__exit__` is skipped when the block raises"
+        }
+      ],
+      "explanation": "`__exit__` always runs; returning a falsy value lets the exception propagate.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    },
+    {
+      "id": "python--exp-c6-sc4",
+      "bloom": "C6",
+      "prompt": "Design `collect(item, bucket=...)` that appends `item` and returns the list. Constraints: a call without `bucket` gets a fresh list each time, and a caller-passed empty list must be the very list that gets mutated. Which design meets both?",
+      "options": [
+        {
+          "id": "a",
+          "label": "`bucket=None`, then `bucket = bucket or []` at the start"
+        },
+        {
+          "id": "b",
+          "label": "`bucket=[]`, then `bucket.clear()` at the start"
+        },
+        {
+          "id": "c",
+          "label": "`bucket=None`, then `if bucket is None: bucket = []`"
+        },
+        {
+          "id": "d",
+          "label": "`bucket=[]`, then `bucket = list(bucket)` at the start"
+        }
+      ],
+      "explanation": "An `is None` check creates a fresh list only when none was passed and keeps the caller's list.",
+      "reviewed": false,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "c"
+    }
+  ]
+}

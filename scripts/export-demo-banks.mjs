@@ -1,0 +1,158 @@
+// UD2: exports /demo banks for catalog topics, read-only, from the API's seed banks
+// (../api/seed/items/<slug>.json and ../api/seed/_review). Deterministic: the same inputs, rule and
+// seed always choose the same items. Writes src/features/demo/data/<slug>.json, updates index.json,
+// and writes docs/demo-banks-review.md for the user's spot check.
+//
+// Usage: node scripts/export-demo-banks.mjs [--rule resolved|strict] [--seed 2026]
+//
+// Rules (which seed items may be chosen):
+// - strict: not flagged, and verdict keep or revise-with-revision-applied (the lead's first
+//   proposal; too few items: python has no C1 or C6).
+// - resolved (default): verdict keep; or revise with the revision applied; or no verdict and no
+//   automated flag. A flagged item without keep, or a revise not applied, never qualifies.
+// Selection: 3 per Bloom level, spread across Dreyfus stages, preferring keep, then applied, then
+// unreviewed-but-unflagged; ties broken by a seeded shuffle.
+//
+// Exported items carry reviewed: false until the user's spot check; banks.ts lists a topic only
+// when every item is reviewed, so nothing unreviewed reaches the picker.
+import { readFileSync, writeFileSync } from 'node:fs';
+
+const TOPICS = ['python', 'public-speaking', 'algebra'];
+const SEED_DIR = '../api/seed';
+const OUT = 'src/features/demo/data';
+const BLOOMS = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'];
+const STAGES = ['novice', 'advanced_beginner', 'competent', 'proficient', 'expert'];
+
+const arg = (name, fallback) => {
+  const i = process.argv.indexOf(`--${name}`);
+  return i === -1 ? fallback : process.argv[i + 1];
+};
+const RULE = arg('rule', 'resolved');
+const SEED = Number(arg('seed', '2026'));
+
+const json = (path) => JSON.parse(readFileSync(path, 'utf8'));
+const verdicts = json(`${SEED_DIR}/_review/verdicts.json`);
+const applied = new Set(json(`${SEED_DIR}/_review/applied.json`));
+const flagged = new Set(json(`${SEED_DIR}/_review/flags.json`).flagged.map((f) => f.id));
+const catalog = json(`${SEED_DIR}/topics.json`).topics;
+
+const verdictOf = (id) => verdicts[id]?.verdict?.verdict ?? null;
+
+/** Review standing: lower is better; null when the rule excludes the item. */
+function standing(id) {
+  const v = verdictOf(id);
+  const isApplied = applied.has(id);
+  const isFlagged = flagged.has(id);
+  if (RULE === 'strict') {
+    if (isFlagged) return null;
+    if (v === 'keep') return 0;
+    if (v === 'revise' && isApplied) return 1;
+    return null;
+  }
+  if (v === 'keep') return 0;
+  if (v === 'revise') return isApplied ? 1 : null;
+  return isFlagged ? null : 2;
+}
+
+// mulberry32: a small seeded generator, so ties break the same way every run.
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function choose(slug, items) {
+  const random = rng(SEED + slug.length);
+  const chosen = [];
+  for (const bloom of BLOOMS) {
+    const pool = items
+      .filter((i) => i.bloom === bloom)
+      .map((i) => ({ item: i, id: `${slug}--${i.key}`, tie: random() }))
+      .map((c) => ({ ...c, standing: standing(c.id) }))
+      .filter((c) => c.standing !== null)
+      .sort((a, b) => a.standing - b.standing || a.tie - b.tie);
+    // Spread across stages: take the best item of each stage in turn until 3 are chosen.
+    const picked = [];
+    const usedStages = new Set();
+    for (const pass of [0, 1]) {
+      for (const c of pool) {
+        if (picked.length === 3) break;
+        if (picked.includes(c)) continue;
+        if (pass === 0 && usedStages.has(c.item.stage)) continue;
+        picked.push(c);
+        usedStages.add(c.item.stage);
+      }
+    }
+    if (picked.length < 3) throw new Error(`${slug}: only ${String(picked.length)} qualifying ${bloom} items (rule ${RULE})`);
+    picked.sort((a, b) => STAGES.indexOf(a.item.stage) - STAGES.indexOf(b.item.stage) || a.id.localeCompare(b.id));
+    chosen.push(...picked);
+  }
+  return chosen;
+}
+
+const toBankItem = ({ item, id }) => {
+  const answer = item.answerKey.optionIds;
+  const base = {
+    id,
+    bloom: item.bloom,
+    prompt: item.prompt,
+    options: item.options,
+    // The first rubric line explains the key; the rest are grader notes on distractors.
+    explanation: item.rubric[0] ?? '',
+    reviewed: false,
+    review: { verdict: verdictOf(id), applied: applied.has(id), flagged: flagged.has(id), stage: item.stage },
+  };
+  return item.kind === 'multi_choice'
+    ? { ...base, type: 'multi_choice', answer }
+    : { ...base, type: item.kind === 'scenario' ? 'scenario' : 'single_choice', answer: answer[0] };
+};
+
+const indexPath = `${OUT}/index.json`;
+const index = json(indexPath);
+const review = [
+  '# /demo catalog banks: items for the user’s spot check',
+  '',
+  `Generated by \`node scripts/export-demo-banks.mjs --rule ${RULE} --seed ${String(SEED)}\` from \`../api/seed\` (read-only). Each topic shows in /demo only once every item below is marked reviewed.`,
+  '',
+];
+
+for (const slug of TOPICS) {
+  const seed = json(`${SEED_DIR}/items/${slug}.json`);
+  const topic = catalog.find((t) => t.slug === slug);
+  if (!topic) throw new Error(`${slug} is not in topics.json`);
+  const chosen = choose(slug, seed.items);
+  const bank = {
+    topic: { id: slug, name: topic.canonicalName },
+    origin: 'catalog',
+    export: { rule: RULE, seed: SEED, from: `api/seed/items/${slug}.json`, ids: chosen.map((c) => c.id) },
+    sources: {},
+    items: chosen.map(toBankItem),
+  };
+  writeFileSync(`${OUT}/${slug}.json`, `${JSON.stringify(bank, null, 2)}\n`);
+  // The clause before the colon: "The Python language itself", not the whole syllabus.
+  const summary = `${topic.description.split(':')[0].split('. ')[0].trim()}.`;
+  const entry = { id: slug, name: topic.canonicalName, summary, reviewed: bank.items.every((i) => i.reviewed) };
+  const at = index.findIndex((e) => e.id === slug);
+  if (at === -1) index.push(entry);
+  else index[at] = entry;
+
+  review.push(`## ${topic.canonicalName} (\`${slug}\`)`, '');
+  bank.items.forEach((i, n) => {
+    review.push(`${String(n + 1)}. **${i.bloom}, ${i.review.stage}, ${i.type}** (\`${i.id}\`; verdict ${i.review.verdict ?? 'none'}${i.review.applied ? ', revision applied' : ''})`);
+    review.push(`   ${i.prompt.replace(/\n/g, ' ')}`);
+    for (const o of i.options) {
+      const key = Array.isArray(i.answer) ? i.answer.includes(o.id) : i.answer === o.id;
+      review.push(`   - ${key ? '**✓**' : '  '} ${o.id}) ${o.label}`);
+    }
+    review.push(`   Why this answer: ${i.explanation}`, '');
+  });
+}
+
+writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`);
+writeFileSync('docs/demo-banks-review.md', `${review.join('\n')}\n`);
+console.log(`export-demo-banks: ${TOPICS.join(', ')} with rule ${RULE}, seed ${String(SEED)}`);
