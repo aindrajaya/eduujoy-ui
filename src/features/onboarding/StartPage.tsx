@@ -4,6 +4,7 @@ import { ApiError } from '@/api/errors';
 import type { Topic } from '@/api/types';
 import { useSession } from '@/auth/session';
 import IntakeForm from './components/IntakeForm';
+import NoQuestionBank from './components/NoQuestionBank';
 import TopicChoices from './components/TopicChoices';
 import WelcomeSplash from './components/WelcomeSplash';
 import { intakeErrorMessage, type IntakeStep } from './errors';
@@ -14,7 +15,9 @@ import type { IntakeValues } from './schema';
 type Step =
   | { name: 'splash' }
   | { name: 'form' }
-  | { name: 'choices'; values: IntakeValues; choices: Topic[] };
+  | { name: 'choices'; values: IntakeValues; choices: Topic[] }
+  // Contract 0.9.0: the topic has no diagnostic item bank yet; say so before starting.
+  | { name: 'noBank'; values: IntakeValues; topic: Topic; related: Topic[] };
 
 /**
  * US-01 (FR-01, FR-02): intake → resolve the topic → disambiguate if needed → start the
@@ -46,6 +49,19 @@ export default function StartPage() {
     await navigate(`/diagnostic/${encodeURIComponent(batch.diagnosticId)}`);
   };
 
+  /**
+   * Starts the diagnostic, unless the topic has no questions yet (hasDiagnostic false): then the
+   * learner first sees what happens instead, and the nearby topics we can test them on. An API
+   * without the field (before 0.9.0) starts as before.
+   */
+  const proceed = async (intake: IntakeValues, topic: Topic, related: Topic[] = []) => {
+    if (topic.hasDiagnostic === false) {
+      setStep({ name: 'noBank', values: intake, topic, related });
+      return;
+    }
+    await startDiagnostic(intake, topic);
+  };
+
   const handleIntake = async (intake: IntakeValues) => {
     setValues(intake);
     setError(null);
@@ -58,7 +74,7 @@ export default function StartPage() {
         return;
       }
       if (!result.topic) throw new ApiError({ status: 0, code: 'UNKNOWN', title: 'No topic returned' });
-      await startDiagnostic(intake, result.topic);
+      await proceed(intake, result.topic, result.related);
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error' }));
     }
@@ -68,7 +84,7 @@ export default function StartPage() {
     setError(null);
     setFailedStep('start');
     try {
-      await startDiagnostic(intake, topic);
+      await proceed(intake, topic);
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error' }));
     }
@@ -81,13 +97,40 @@ export default function StartPage() {
       const result = await resolve.mutateAsync({ text: intake.topic, createNew: true });
       setFailedStep('start');
       if (!result.topic) throw new ApiError({ status: 0, code: 'UNKNOWN', title: 'No topic returned' });
-      await startDiagnostic(intake, result.topic);
+      await proceed(intake, result.topic, result.related);
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error' }));
+    }
+  };
+
+  /** From the no-bank step: a diagnostic on this topic (no questions) or on a nearby one. */
+  const handleNoBankStart = async (intake: IntakeValues, topic: Topic) => {
+    setError(null);
+    setFailedStep('start');
+    try {
+      await startDiagnostic(intake, topic);
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: 'UNKNOWN', title: 'Unexpected error' }));
     }
   };
 
   if (step.name === 'splash') return <WelcomeSplash onDone={showForm} />;
+
+  if (step.name === 'noBank') {
+    return (
+      <NoQuestionBank
+        topic={step.topic}
+        related={step.related}
+        submitting={start.isPending}
+        errorMessage={error ? intakeErrorMessage(error, failedStep) : undefined}
+        onStart={(topic) => void handleNoBankStart(step.values, topic)}
+        onEditTopic={() => {
+          setError(null);
+          setStep({ name: 'form' });
+        }}
+      />
+    );
+  }
 
   if (step.name === 'choices') {
     return (
