@@ -1,0 +1,27 @@
+[
+  {
+    "id": "learning-science",
+    "name": "Learning science for exam prep",
+    "summary": "Retrieval practice, spacing, interleaving and knowing what you know.",
+    "reviewed": true,
+    "shortName": "learning science"
+  },
+  {
+    "id": "python",
+    "name": "Python",
+    "summary": "The Python language itself.",
+    "reviewed": false
+  },
+  {
+    "id": "public-speaking",
+    "name": "Public speaking",
+    "summary": "Preparing and delivering speeches and talks to a live room or webinar.",
+    "reviewed": false
+  },
+  {
+    "id": "algebra",
+    "name": "Algebra",
+    "summary": "Manipulating variables and algebraic expressions.",
+    "reviewed": false
+  }
+]
