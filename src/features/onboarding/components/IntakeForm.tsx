@@ -1,4 +1,4 @@
-import { ArrowRight, Clock, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, CircleAlert, Clock, Sparkles, Target } from 'lucide-react';
 import { useEffect, useId } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import type { ApiError } from '@/api/errors';
@@ -69,25 +69,25 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
   return (
     <main
       aria-labelledby="intake-title"
-      className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 dark:from-bg dark:via-bg dark:to-bg"
+      className="flex min-h-dvh items-center justify-center bg-bg p-4"
     >
       <div className="w-full max-w-2xl">
         <header className="mb-8 animate-fade-in text-center">
-          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
-            <Sparkles className="h-8 w-8 text-white" aria-hidden="true" />
+          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full border-2 border-ink bg-surface shadow-lg">
+            <Sparkles className="h-8 w-8 text-primary" aria-hidden="true" />
           </div>
           <h1
             id="intake-title"
-            className="mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent dark:from-indigo-300 dark:to-purple-300"
+            className="mb-4 text-4xl text-text"
           >
-            Let&apos;s Get Started!
+            Let’s get started
           </h1>
           <p className="mx-auto max-w-md text-lg leading-relaxed text-text-muted">
             Tell us what you want to learn and we&apos;ll build a path that fits your week.
           </p>
         </header>
 
-        <div className="animate-slide-up overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+        <div className="sk-card animate-slide-up overflow-hidden p-0">
           <form
             onSubmit={(e) => void handleSubmit(onSubmit)(e)}
             onFocus={resolver.preload}
@@ -123,12 +123,12 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
             />
 
             <fieldset>
-              <legend className="mb-2 text-sm font-semibold text-text">Preferred formats (optional)</legend>
+              <legend className="mb-2 sk-label text-text">Preferred formats (optional)</legend>
               <div className="flex flex-wrap gap-2">
                 {FORMATS.map(({ value, label }) => (
                   <label
                     key={value}
-                    className="flex min-h-11 cursor-pointer items-center gap-2 rounded-chip border-2 border-border px-4 has-checked:border-primary has-checked:bg-primary-soft"
+                    className="sk-chip-option min-h-11 cursor-pointer gap-2 px-4"
                   >
                     <input type="checkbox" value={value} className="h-4 w-4 accent-primary" {...register('formats')} />
                     <span className="text-base text-text">{label}</span>
@@ -142,7 +142,7 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
               aria-invalid={errors.experience ? true : undefined}
               className="space-y-2"
             >
-              <legend className="mb-1 text-sm font-semibold text-text">
+              <legend className="mb-1 sk-label text-text">
                 How much have you worked with {topicName.trim() || 'this topic'}?
               </legend>
               <p id={experienceHelpId} className="text-sm text-text-muted">
@@ -152,7 +152,7 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
                 {EXPERIENCE.map(({ value, label }) => (
                   <label
                     key={value}
-                    className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-border px-4 py-2 has-checked:border-primary has-checked:bg-primary-soft"
+                    className="quiz-option flex min-h-11 cursor-pointer items-center gap-3 px-4 py-2"
                   >
                     <input type="radio" value={value} className="h-4 w-4 shrink-0 accent-primary" {...register('experience')} />
                     <span className="text-base text-text">{label}</span>
@@ -160,14 +160,16 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
                 ))}
               </div>
               {errors.experience && (
-                <p id={experienceErrorId} className="text-sm text-danger">
+                <p id={experienceErrorId} className="flex items-center gap-2 text-sm text-danger">
+                  <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
                   {errors.experience.message}
                 </p>
               )}
             </fieldset>
 
             {errorMessage && (
-              <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+              <p role="alert" className="flex items-start gap-2 rounded-lg border-2 border-danger bg-surface p-3 text-sm text-danger">
+                <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 {errorMessage}
               </p>
             )}
@@ -175,7 +177,7 @@ export default function IntakeForm({ defaultValues, onSubmit, submitting = false
             <button
               type="submit"
               disabled={submitting}
-              className="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-75"
+              className="sk-btn sk-btn-primary min-h-12 w-full"
             >
               {submitting ? 'Checking your topic…' : 'Continue'}
               {!submitting && <ArrowRight className="h-5 w-5" aria-hidden="true" />}

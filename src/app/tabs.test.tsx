@@ -4,7 +4,7 @@ import { expectNoAxeViolations } from '@/test/axe';
 import { renderRoute } from '@/test/render';
 
 describe.each([
-  ['/paths', 'Your Paths'],
+  ['/paths', 'Your paths'],
   ['/progress', 'Progress'],
 ])('%s', (path, heading) => {
   it('renders in the tabs layout', async () => {

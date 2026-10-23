@@ -1,7 +1,9 @@
-import { ArrowRight, Gauge } from 'lucide-react';
+import { ArrowRight, CircleCheck, Gauge } from 'lucide-react';
 import { Link } from 'react-router';
 import type { Placement } from '@/api/types';
 import { BLOOM_LABEL, formatConfidence, STAGE_LABEL } from '@/lib/levels';
+import ErrorNote from '@/ui/ErrorNote';
+import StageBadge from '@/ui/sketch/StageBadge';
 
 export interface PlacementResultProps {
   placement: Placement;
@@ -26,25 +28,30 @@ export default function PlacementResult({
   return (
     <section aria-labelledby="placement-title" className="space-y-6">
       <div>
-        <p className="font-semibold text-success">Diagnostic complete</p>
-        <h1 id="placement-title" className="mt-1 text-3xl font-bold text-text">
+        <p className="flex items-center gap-2 font-semibold text-success">
+          <CircleCheck className="h-5 w-5" aria-hidden="true" />
+          Diagnostic complete
+        </p>
+        <h1 id="placement-title" className="mt-1 text-3xl text-text">
           You’re at {STAGE_LABEL[stage]}
           {topicName ? ` in ${topicName}` : ''}
         </h1>
       </div>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-card bg-surface-muted p-4">
+        <div className="rounded-card border-2 border-ink bg-surface p-4">
           <dt className="text-sm text-text-muted">Stage</dt>
-          <dd className="text-lg font-semibold text-text">{STAGE_LABEL[stage]}</dd>
+          <dd className="mt-1">
+            <StageBadge stage={stage} />
+          </dd>
         </div>
-        <div className="rounded-card bg-surface-muted p-4">
+        <div className="rounded-card border-2 border-ink bg-surface p-4">
           <dt className="text-sm text-text-muted">Thinking level</dt>
           <dd className="text-lg font-semibold text-text">
             {BLOOM_LABEL[bloom]} <span className="text-sm font-normal text-text-muted">({bloom})</span>
           </dd>
         </div>
-        <div className="rounded-card bg-surface-muted p-4">
+        <div className="rounded-card border-2 border-ink bg-surface p-4">
           <dt className="text-sm text-text-muted">Confidence</dt>
           <dd className="flex items-center gap-2 text-lg font-semibold text-text">
             <Gauge className="h-5 w-5 text-primary" aria-hidden="true" />
@@ -53,18 +60,16 @@ export default function PlacementResult({
         </div>
       </dl>
 
-      <p className="rounded-card border border-border p-4 text-text">
+      <p className="rounded-card border-2 border-ink bg-surface p-4 text-text">
         <span className="font-semibold">Why: </span>
         {placement.reason}
       </p>
 
       {buildingUnavailable ? (
-        <div role="status" className="space-y-3 rounded-card bg-primary-soft p-4 text-text">
+        <div role="status" className="space-y-3 rounded-card border-2 border-primary bg-surface p-4 text-text">
           <p className="font-semibold">Path building is coming soon. Your placement is saved.</p>
           <div className="flex flex-wrap gap-4">
-            <Link to="/progress" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
-              See your progress
-            </Link>
+            {/* "See your progress" (to /progress) returns with A11: until then /progress is empty. */}
             <Link to="/today" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
               Go to Today
             </Link>
@@ -73,16 +78,16 @@ export default function PlacementResult({
       ) : (
         <>
           {errorMessage && (
-            <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+            <ErrorNote>
               {errorMessage}
-            </p>
+            </ErrorNote>
           )}
 
           <button
             type="button"
             onClick={onBuildPath}
             disabled={building}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
+            className="sk-btn sk-btn-primary min-h-12 w-full"
           >
             {building ? 'Starting your path…' : 'Build my path'}
             {!building && <ArrowRight className="h-5 w-5" aria-hidden="true" />}

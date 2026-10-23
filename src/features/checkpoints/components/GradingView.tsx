@@ -38,7 +38,7 @@ export default function GradingView({ jobId, items, stepHref, onGraded, onRetry 
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 font-semibold text-on-primary"
+                className="sk-btn sk-btn-primary"
               >
                 Try again
               </button>
@@ -78,7 +78,7 @@ export default function GradingView({ jobId, items, stepHref, onGraded, onRetry 
   const graded = view.partialItems;
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <h1 className="text-2xl font-bold text-text">Grading your answers</h1>
+      <h1 className="text-text">Grading your answers</h1>
       <div className="flex items-center gap-3">
         <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
         <p role="status" aria-live="polite" className="font-semibold text-primary">
@@ -90,12 +90,12 @@ export default function GradingView({ jobId, items, stepHref, onGraded, onRetry 
       <p className="text-text-muted">Open answers are checked against the rubric. This usually takes a few seconds.</p>
       {graded.length > 0 && (
         <section aria-labelledby="graded-title" className="space-y-2">
-          <h2 id="graded-title" className="font-semibold text-text">
+          <h2 id="graded-title" className="sk-title text-text">
             Graded so far
           </h2>
           <ul className="space-y-2">
             {graded.map((item) => (
-              <li key={item.itemId} className="animate-fade-in rounded-card border border-border p-3 text-sm text-text">
+              <li key={item.itemId} className="sk-card animate-fade-in p-3 text-sm text-text">
                 <span className="font-semibold">Question {position.get(item.itemId) ?? '?'}:</span> {item.score}%
                 {item.feedback ? ` · ${item.feedback}` : ''}
               </li>

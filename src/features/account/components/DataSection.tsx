@@ -1,4 +1,4 @@
-import { Download, Trash2 } from 'lucide-react';
+import { CircleCheck, Download, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { ApiError } from '@/api/errors';
@@ -6,6 +6,7 @@ import type { SignInLocationState } from '@/auth/queries';
 import { formatRetryWait } from '@/lib/time';
 import { useDeleteAccount, useExportData } from '../queries';
 import DeleteAccountDialog from './DeleteAccountDialog';
+import ErrorNote from '@/ui/ErrorNote';
 
 /** Where the learner returns after signing in again to confirm the delete. */
 export const DELETE_RETURN = '/account?delete=1';
@@ -62,8 +63,8 @@ export default function DataSection({ onSave, confirmDelete = false, onDeleteClo
   };
 
   return (
-    <section aria-labelledby="data-title" className="space-y-3 rounded-card border border-border p-4">
-      <h2 id="data-title" className="text-lg font-bold text-text">
+    <section aria-labelledby="data-title" className="sk-card space-y-3">
+      <h2 id="data-title" className="sk-display-md text-text">
         Your data
       </h2>
       <p className="text-sm text-text-muted">Download everything Eduujoy holds about you as a JSON file.</p>
@@ -73,27 +74,32 @@ export default function DataSection({ onSave, confirmDelete = false, onDeleteClo
           exportData.mutate();
         }}
         disabled={exportData.isPending}
-        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-primary px-4 font-semibold text-primary disabled:opacity-60"
+        className="sk-btn w-full"
       >
         <Download className="h-5 w-5" aria-hidden="true" />
         {exportData.isPending ? 'Preparing your data…' : 'Download my data'}
       </button>
       <div aria-live="polite" className="text-sm">
-        {exportData.isSuccess && <p className="text-success">Downloaded {exportData.data}.</p>}
+        {exportData.isSuccess && (
+          <p className="flex items-center gap-2 font-semibold text-success">
+            <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Downloaded {exportData.data}.
+          </p>
+        )}
       </div>
       {exportData.error && (
-        <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+        <ErrorNote>
           {exportErrorCopy(exportData.error)}
-        </p>
+        </ErrorNote>
       )}
 
-      <div className="border-t border-border pt-3">
+      <div className="border-t-2 border-dashed border-border pt-3">
         <button
           type="button"
           onClick={() => {
             setDialogOpen(true);
           }}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 font-semibold text-danger"
+          className="sk-btn sk-btn-ghost w-full text-text"
         >
           <Trash2 className="h-5 w-5" aria-hidden="true" />
           Delete my account
