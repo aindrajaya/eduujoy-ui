@@ -38,10 +38,10 @@ export const mockTopicNoBank: Topic = {
   hasDiagnostic: false,
 };
 
-/** Nearby catalog topics with a bank (TopicResolveResponse.related, contract 0.9.1). */
+/** Nearby catalog topics with a bank, same domain as the typed text (TopicResolveResponse.related, 0.9.1). */
 export const mockRelatedTopics: Topic[] = [
   { id: 'topic-js', canonicalName: 'JavaScript', description: 'The language of the web.', aliases: [], parentId: null, hasDiagnostic: true },
-  { id: 'topic-gd', canonicalName: 'Graphic design', description: 'Layout, type and colour.', aliases: [], parentId: null, hasDiagnostic: true },
+  { id: 'topic-python', canonicalName: 'Python', description: 'A general-purpose language for scripts and data.', aliases: [], parentId: null, hasDiagnostic: true },
 ];
 
 export const mockResolveCreatedWithRelated: TopicResolveResponse = {
