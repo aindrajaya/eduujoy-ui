@@ -7,16 +7,24 @@ import { expectNoAxeViolations } from '@/test/axe';
 import { renderRoute } from '@/test/render';
 import DemoPage from './DemoPage';
 import type { Bank } from './bank';
-import type { BankEntry } from './banks';
+import { demoTopics, type BankEntry } from './banks';
 import { createLocalDiagnosticAdapter } from './localAdapter';
 
 const fast = (bank: Bank) => createLocalDiagnosticAdapter({ bank, rng: () => 0, latencyMs: [0, 0] });
+// The single-topic flow (no topic step), as /demo was before the catalog topics were signed off.
+const LEARNING_SCIENCE_ONLY = demoTopics.filter((t) => t.id === 'learning-science');
 
 afterEach(() => {
   window.localStorage.clear();
 });
 
 async function startDemo(user: UserEvent) {
+  // With several reviewed topics (the route's own list), pick learning science first.
+  const topic = screen.queryByRole('radio', { name: /^Learning science/ });
+  if (topic) {
+    await user.click(topic);
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+  }
   await user.click(screen.getByRole('radio', { name: 'Pass an exam' }));
   await user.click(screen.getByRole('button', { name: 'Continue' }));
   await user.click(screen.getByRole('radio', { name: '3–5 h' }));
@@ -39,7 +47,7 @@ async function dontKnowAll(user: UserEvent) {
 describe('/demo (PRD-UI §7b)', () => {
   it('asks goal, time and format, one screen each; every step needs a choice and Back keeps it', async () => {
     const user = userEvent.setup();
-    const { container } = render(<DemoPage createAdapter={fast} />);
+    const { container } = render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     expect(screen.getByRole('heading', { level: 1, name: 'Find your starting point in learning science' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Step 1 of 4: Your goal' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -58,7 +66,7 @@ describe('/demo (PRD-UI §7b)', () => {
 
   it('the steps are keyboard-complete and survive a reload', async () => {
     const user = userEvent.setup();
-    const first = render(<DemoPage createAdapter={fast} />);
+    const first = render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     screen.getByRole('radio', { name: 'Pass an exam' }).focus();
     await user.keyboard('{ArrowDown}');
     expect(screen.getByRole('radio', { name: 'Use it at work' })).toBeChecked();
@@ -70,7 +78,7 @@ describe('/demo (PRD-UI §7b)', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Step 3 of 4: Format' })).toHaveFocus();
     first.unmount();
 
-    render(<DemoPage createAdapter={fast} />);
+    render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     expect(screen.getByRole('heading', { level: 2, name: 'Step 3 of 4: Format' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByRole('radio', { name: '3–5 h' })).toBeChecked();
@@ -78,7 +86,7 @@ describe('/demo (PRD-UI §7b)', () => {
 
   it('asks the self-report last; both questions are required and errors are tied to them', async () => {
     const user = userEvent.setup();
-    const { container } = render(<DemoPage createAdapter={fast} />);
+    const { container } = render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     for (const choice of ['Just curious', '6+ h', 'Videos']) {
       await user.click(screen.getByRole('radio', { name: choice }));
       await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -96,7 +104,7 @@ describe('/demo (PRD-UI §7b)', () => {
 
   it('runs 8–12 items on the quiz engine and lands on the result; "I don’t know yet" is never called wrong', async () => {
     const user = userEvent.setup();
-    const { container } = render(<DemoPage createAdapter={fast} />);
+    const { container } = render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     await startDemo(user);
     expect(screen.getByText('Set 1 of about 2')).toBeInTheDocument();
     await expectNoAxeViolations(container);
@@ -121,13 +129,13 @@ describe('/demo (PRD-UI §7b)', () => {
 
   it('a reload resumes the open set from this browser', async () => {
     const user = userEvent.setup();
-    const first = render(<DemoPage createAdapter={fast} />);
+    const first = render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     await startDemo(user);
     for (let i = 0; i < 4; i += 1) await user.click(screen.getByRole('button', { name: 'I don’t know yet' }));
     await screen.findByText('Set 2 of about 2');
     first.unmount();
 
-    render(<DemoPage createAdapter={fast} />);
+    render(<DemoPage topics={LEARNING_SCIENCE_ONLY} createAdapter={fast} />);
     expect(screen.getByRole('status')).toHaveTextContent('Picking up where you left off');
     expect(await screen.findByText('Set 2 of about 2')).toBeInTheDocument();
     expect(screen.getByText(/4 of about 8 answered/)).toBeInTheDocument();
@@ -142,7 +150,7 @@ describe('/demo (PRD-UI §7b)', () => {
     try {
       const user = userEvent.setup();
       renderRoute('/demo');
-      await screen.findByRole('heading', { level: 1, name: 'Find your starting point in learning science' });
+      await screen.findByRole('heading', { level: 1, name: 'Find your starting point' });
       await startDemo(user);
       await user.click(screen.getByRole('button', { name: 'I don’t know yet' }));
       expect(await screen.findByText(/Question 2 of 4/)).toBeInTheDocument();

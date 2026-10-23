@@ -54,7 +54,7 @@
         }
       ],
       "explanation": "`len()` is the built-in for the number of items in a sequence.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -87,7 +87,7 @@
         }
       ],
       "explanation": "`#` begins a comment in Python.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -120,7 +120,7 @@
         }
       ],
       "explanation": "`input()` prompts the user and returns the typed text as a string.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -153,7 +153,7 @@
         }
       ],
       "explanation": "Strings accept either quote style, are immutable, and are zero-indexed.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -190,7 +190,7 @@
         }
       ],
       "explanation": "`//` is floor division, so 5 // 2 is 2.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "keep",
         "applied": true,
@@ -223,7 +223,7 @@
         }
       ],
       "explanation": "Tuples are immutable, so item assignment is unsupported.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -256,7 +256,7 @@
         }
       ],
       "explanation": "`get(w, 0)` supplies a default so unseen words start at 0.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -289,7 +289,7 @@
         }
       ],
       "explanation": "The default list is created once at definition time and shared between calls, so it holds 1 and then 2.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -322,7 +322,7 @@
         }
       ],
       "explanation": "Indices 1, 3 and 5 give 'o', 'p' and 't'.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -355,7 +355,7 @@
         }
       ],
       "explanation": "Any assignment in a function body makes the name local for the whole function, so the read in `+=` fails.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -392,7 +392,7 @@
         }
       ],
       "explanation": "The list lives on the class; mutation is shared, while assignment through self creates per-instance attributes.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -429,7 +429,7 @@
         }
       ],
       "explanation": "Closures capture variables, not values, so lookup happens at call time (late binding).",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -462,7 +462,7 @@
         }
       ],
       "explanation": "NamedTuple is a tuple subclass: hashable by value, compact, with named access.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -495,7 +495,7 @@
         }
       ],
       "explanation": "Raising a custom exception `from e` gives a catchable type and preserves the cause chain.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -528,7 +528,7 @@
         }
       ],
       "explanation": "Slots drop the per-instance dict, saving memory at the cost of flexibility.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": "revise",
         "applied": true,
@@ -565,7 +565,7 @@
         }
       ],
       "explanation": "List arguments avoid the shell, `check=True` raises on failure, and `capture_output` with `text` returns a string.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -602,7 +602,7 @@
         }
       ],
       "explanation": "`__exit__` always runs; returning a falsy value lets the exception propagate.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,
@@ -635,7 +635,7 @@
         }
       ],
       "explanation": "An `is None` check creates a fresh list only when none was passed and keeps the caller's list.",
-      "reviewed": false,
+      "reviewed": true,
       "review": {
         "verdict": null,
         "applied": false,

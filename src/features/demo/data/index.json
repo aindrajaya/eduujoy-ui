@@ -10,18 +10,18 @@
     "id": "python",
     "name": "Python",
     "summary": "The Python language itself.",
-    "reviewed": false
+    "reviewed": true
   },
   {
     "id": "public-speaking",
     "name": "Public speaking",
     "summary": "Preparing and delivering speeches and talks to a live room or webinar.",
-    "reviewed": false
+    "reviewed": true
   },
   {
     "id": "algebra",
     "name": "Algebra",
     "summary": "Manipulating variables and algebraic expressions.",
-    "reviewed": false
+    "reviewed": true
   }
 ]
