@@ -35,8 +35,11 @@ export function useSubmitAction<TData, TError, TVariables>(
       setState({ status: 'pending', error: null });
       try {
         const data = await fn(variables);
-        onSuccess?.(data);
-        if (call === latest.current) setState({ status: 'success', data, error: null });
+        // A stale call neither updates the state nor runs the side effect (seeding the session).
+        if (call === latest.current) {
+          onSuccess?.(data);
+          setState({ status: 'success', data, error: null });
+        }
         return data;
       } catch (e) {
         if (call === latest.current) setState({ status: 'error', error: e as TError });

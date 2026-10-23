@@ -39,11 +39,12 @@ describe('useSubmitAction', () => {
     expect(result.current).toMatchObject({ isError: true, error: boom });
   });
 
-  it('the latest call wins: a stale answer never overwrites a newer one', async () => {
+  it('the latest call wins: a stale answer never overwrites a newer one or runs onSuccess', async () => {
     const first = deferred<string>();
     const second = deferred<string>();
     const calls = [first, second];
-    const { result } = renderHook(() => useSubmitAction<string, Error, number>(() => calls.shift()!.promise));
+    const onSuccess = vi.fn();
+    const { result } = renderHook(() => useSubmitAction<string, Error, number>(() => calls.shift()!.promise, onSuccess));
     act(() => {
       result.current.mutate(1);
       result.current.mutate(2);
@@ -59,5 +60,8 @@ describe('useSubmitAction', () => {
     await waitFor(() => {
       expect(result.current.data).toBe('new');
     });
+    // The stale first call resolved last: its success side effect never runs.
+    expect(onSuccess).toHaveBeenCalledOnce();
+    expect(onSuccess).toHaveBeenCalledWith('new');
   });
 });
