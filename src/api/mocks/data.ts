@@ -26,6 +26,34 @@ export const mockTopic: Topic = {
   description: 'Designing usable, useful digital products.',
   aliases: ['UX design', 'UI/UX'],
   parentId: null,
+  hasDiagnostic: true,
+};
+
+/** Contract 0.9.0: a topic created from what the learner typed, with no item bank yet. */
+export const mockTopicNoBank: Topic = {
+  id: 'topic-creative-coding',
+  canonicalName: 'Creative coding',
+  aliases: [],
+  parentId: null,
+  hasDiagnostic: false,
+};
+
+/** Nearby catalog topics with a bank (TopicResolveResponse.related, contract 0.9.1). */
+export const mockRelatedTopics: Topic[] = [
+  { id: 'topic-js', canonicalName: 'JavaScript', description: 'The language of the web.', aliases: [], parentId: null, hasDiagnostic: true },
+  { id: 'topic-gd', canonicalName: 'Graphic design', description: 'Layout, type and colour.', aliases: [], parentId: null, hasDiagnostic: true },
+];
+
+export const mockResolveCreatedWithRelated: TopicResolveResponse = {
+  status: 'created',
+  topic: mockTopicNoBank,
+  related: mockRelatedTopics,
+};
+
+export const mockResolveCreatedNoRelated: TopicResolveResponse = {
+  status: 'created',
+  topic: { ...mockTopicNoBank, id: 'topic-basket', canonicalName: 'Underwater basket weaving' },
+  related: [],
 };
 
 export const mockMe: Me = {

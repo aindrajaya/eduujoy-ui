@@ -22,6 +22,8 @@ import {
   mockPathSummary,
   mockPath,
   mockProblem,
+  mockResolveCreatedNoRelated,
+  mockResolveCreatedWithRelated,
   mockProgress,
   mockProgressHistory,
   mockResolveMatched,
@@ -53,6 +55,9 @@ export const handlers = [
   // Contract 0.4.0: the topic "embedding outage" simulates an outage with no name-fallback match.
   http.post('/v1/topics/resolve', async ({ request, response }) => {
     const { text } = await request.json();
+    // Contract 0.9.0: topics with no item bank, with and without nearby banked topics.
+    if (text.trim().toLowerCase() === 'creative coding') return response(200).json(mockResolveCreatedWithRelated);
+    if (text.trim().toLowerCase() === 'underwater basket weaving') return response(200).json(mockResolveCreatedNoRelated);
     if (text.trim().toLowerCase() === 'embedding outage') {
       return response.untyped(
         problemResponse(mockProblem(503, 'SERVICE_UNAVAILABLE', 'Topic search is unavailable'), { 'Retry-After': '30' }),
