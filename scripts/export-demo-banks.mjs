@@ -13,8 +13,10 @@
 // Selection: 3 per Bloom level, spread across Dreyfus stages, preferring keep, then applied, then
 // unreviewed-but-unflagged; ties broken by a seeded shuffle.
 //
-// Exported items carry reviewed: false until the user's spot check; banks.ts lists a topic only
-// when every item is reviewed, so nothing unreviewed reaches the picker.
+// Exported items carry reviewed: false until the user's spot check. The user signs off by listing
+// item ids in src/features/demo/data/approved.json ({ "python": ["python--nov-c1-sc1", ...] }) and
+// re-running this script. banks.ts lists a topic only when every item is reviewed, so nothing
+// unreviewed reaches the picker.
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const TOPICS = ['python', 'public-speaking', 'algebra'];
@@ -35,6 +37,7 @@ const verdicts = json(`${SEED_DIR}/_review/verdicts.json`);
 const applied = new Set(json(`${SEED_DIR}/_review/applied.json`));
 const flagged = new Set(json(`${SEED_DIR}/_review/flags.json`).flagged.map((f) => f.id));
 const catalog = json(`${SEED_DIR}/topics.json`).topics;
+const approved = json(`${OUT}/approved.json`);
 
 const verdictOf = (id) => verdicts[id]?.verdict?.verdict ?? null;
 
@@ -104,7 +107,7 @@ const toBankItem = ({ item, id }) => {
     options: item.options,
     // The first rubric line explains the key; the rest are grader notes on distractors.
     explanation: item.rubric[0] ?? '',
-    reviewed: false,
+    reviewed: (approved[id.split('--')[0]] ?? []).includes(id),
     review: { verdict: verdictOf(id), applied: applied.has(id), flagged: flagged.has(id), stage: item.stage },
   };
   return item.kind === 'multi_choice'
