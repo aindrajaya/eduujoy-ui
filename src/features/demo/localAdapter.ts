@@ -22,6 +22,8 @@ export interface DemoState {
 /** The "server side" of a demo attempt, kept in this browser only. */
 interface StoredAttempt {
   id: string;
+  /** The bank's topic id (UD2), so a reload resumes on the same topic. */
+  bankId: string;
   selfReport: DemoSelfReport;
   prefs: DemoPrefs;
   graded: Graded[];
@@ -41,6 +43,7 @@ const isAttempt = (value: unknown): value is StoredAttempt => {
   const a = value as Partial<StoredAttempt>;
   return (
     typeof a.id === 'string' &&
+    typeof a.bankId === 'string' &&
     typeof a.selfReport === 'object' &&
     isPrefs(a.prefs) &&
     Array.isArray(a.graded) &&
@@ -49,6 +52,9 @@ const isAttempt = (value: unknown): value is StoredAttempt => {
     typeof a.replies === 'object'
   );
 };
+
+/** The bank of the attempt this browser is on, read before any bank loads (UD2: resume). */
+export const storedAttemptBankId = (): string | null => readJson(DEMO_ATTEMPT_KEY, isAttempt)?.bankId ?? null;
 
 export class DemoAttemptNotFound extends Error {
   constructor() {
@@ -122,6 +128,7 @@ export function createLocalDiagnosticAdapter({
       const items = firstBatch(bank, rng);
       const attempt: StoredAttempt = {
         id: newId(),
+        bankId: bank.topic.id,
         selfReport,
         prefs,
         graded: [],
@@ -136,7 +143,7 @@ export function createLocalDiagnosticAdapter({
 
     load(id) {
       const attempt = read();
-      if (attempt?.id !== id) return Promise.reject(new DemoAttemptNotFound());
+      if (attempt?.id !== id || attempt.bankId !== bank.topic.id) return Promise.reject(new DemoAttemptNotFound());
       return wait(stateOf(attempt));
     },
 

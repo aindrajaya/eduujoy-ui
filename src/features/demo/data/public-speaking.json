@@ -1,0 +1,636 @@
+{
+  "topic": {
+    "id": "public-speaking",
+    "name": "Public speaking"
+  },
+  "origin": "catalog",
+  "export": {
+    "rule": "resolved",
+    "seed": 2026,
+    "from": "api/seed/items/public-speaking.json",
+    "ids": [
+      "public-speaking--nov-c1-sc3",
+      "public-speaking--nov-c1-sc4",
+      "public-speaking--nov-c1-sc5",
+      "public-speaking--nov-c2-sc2",
+      "public-speaking--nov-c2-sc3",
+      "public-speaking--adb-c2-sn1",
+      "public-speaking--adb-c3-sc1",
+      "public-speaking--adb-c3-sc2",
+      "public-speaking--cmp-c3-sc3",
+      "public-speaking--cmp-c4-sc2",
+      "public-speaking--cmp-c4-sc4",
+      "public-speaking--prf-c4-sc2",
+      "public-speaking--prf-c5-sc5",
+      "public-speaking--prf-c5-sn1",
+      "public-speaking--exp-c5-mc1",
+      "public-speaking--exp-c6-mc1",
+      "public-speaking--exp-c6-sc4",
+      "public-speaking--exp-c6-sn1"
+    ]
+  },
+  "sources": {},
+  "items": [
+    {
+      "id": "public-speaking--nov-c1-sc3",
+      "bloom": "C1",
+      "prompt": "What is the main purpose of a speech introduction?",
+      "options": [
+        {
+          "id": "a",
+          "label": "To gain attention and preview the topic"
+        },
+        {
+          "id": "b",
+          "label": "To thank everyone who helped you prepare the talk"
+        },
+        {
+          "id": "c",
+          "label": "To answer all questions before they are asked"
+        },
+        {
+          "id": "d",
+          "label": "To list every detail the audience should remember"
+        }
+      ],
+      "explanation": "Introductions capture attention and preview the topic.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "public-speaking--nov-c1-sc4",
+      "bloom": "C1",
+      "prompt": "What does the term 'eye contact' mean in public speaking?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Staring steadily at one friendly person for the whole talk"
+        },
+        {
+          "id": "b",
+          "label": "Reading your notes without looking up at the room"
+        },
+        {
+          "id": "c",
+          "label": "Looking at the back wall above everyone's heads"
+        },
+        {
+          "id": "d",
+          "label": "Looking at different audience members while speaking"
+        }
+      ],
+      "explanation": "Eye contact means looking at various listeners to connect.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "public-speaking--nov-c1-sc5",
+      "bloom": "C1",
+      "prompt": "What is a 'pause' in speaking?",
+      "options": [
+        {
+          "id": "a",
+          "label": "A deliberate short silence between ideas"
+        },
+        {
+          "id": "b",
+          "label": "A slower speaking speed kept up throughout a talk"
+        },
+        {
+          "id": "c",
+          "label": "A mistake where you lose your place and forget words"
+        },
+        {
+          "id": "d",
+          "label": "A filler sound such as 'um' used to fill silence"
+        }
+      ],
+      "explanation": "A pause is a deliberate silence used for emphasis or clarity.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "public-speaking--nov-c2-sc2",
+      "bloom": "C2",
+      "prompt": "Why should a speaker adapt the language to the audience?",
+      "options": [
+        {
+          "id": "a",
+          "label": "So the speaker can get away with using fewer examples"
+        },
+        {
+          "id": "b",
+          "label": "So listeners can follow and relate to the message"
+        },
+        {
+          "id": "c",
+          "label": "So the talk can be made as short as possible"
+        },
+        {
+          "id": "d",
+          "label": "So the speaker can show off specialist words"
+        }
+      ],
+      "explanation": "Adapting language helps the audience understand.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "public-speaking--nov-c2-sc3",
+      "bloom": "C2",
+      "prompt": "A speaker's hands shake before a talk. Which explanation of this is most accurate?",
+      "options": [
+        {
+          "id": "a",
+          "label": "It will get worse if the speaker breathes slowly and deeply beforehand"
+        },
+        {
+          "id": "b",
+          "label": "It shows the speaker has not prepared enough and will likely struggle"
+        },
+        {
+          "id": "c",
+          "label": "It means the speaker is too anxious to deliver the talk well"
+        },
+        {
+          "id": "d",
+          "label": "It is a normal body response to nerves that can be managed"
+        }
+      ],
+      "explanation": "Shaking is a common stress response and manageable.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "novice"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "public-speaking--adb-c2-sn1",
+      "bloom": "C2",
+      "prompt": "A new employee fills each slide with full paragraphs and reads them aloud word for word. After a few minutes, most of the audience is looking at their phones. Which explanation best accounts for the loss of attention?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Text-heavy slides compete with the speaker's voice for attention, so the audience gives up on the visuals"
+        },
+        {
+          "id": "b",
+          "label": "Listeners read faster than the speaker talks, so the speaker adds little and attention drifts"
+        },
+        {
+          "id": "c",
+          "label": "Reading from the slides makes the speaker's voice quieter and flatter, so listeners struggle to hear the points"
+        },
+        {
+          "id": "d",
+          "label": "Long paragraphs are too hard to understand when presented aloud, so the audience cannot follow the content"
+        }
+      ],
+      "explanation": "When the speaker only repeats on-screen text, listeners read ahead and have no reason to listen.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "advanced_beginner"
+      },
+      "type": "scenario",
+      "answer": "b"
+    },
+    {
+      "id": "public-speaking--adb-c3-sc1",
+      "bloom": "C3",
+      "prompt": "You have exactly 5 minutes for a talk with an opening, three main points and a close. Which plan uses the full five minutes?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Opening 30 seconds, three points of 1 min 20 seconds each, close 30 seconds"
+        },
+        {
+          "id": "b",
+          "label": "Opening 15 seconds, three points of 2 minutes each, close 15 seconds"
+        },
+        {
+          "id": "c",
+          "label": "Opening 1 min, three points of 2 minutes each, close 1 min"
+        },
+        {
+          "id": "d",
+          "label": "Opening 1 min, three points of 1 min each, close 30 seconds"
+        }
+      ],
+      "explanation": "30s + 3 x 80s + 30s = 5 minutes.",
+      "reviewed": true,
+      "review": {
+        "verdict": "keep",
+        "applied": true,
+        "flagged": true,
+        "stage": "advanced_beginner"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "public-speaking--adb-c3-sc2",
+      "bloom": "C3",
+      "prompt": "A slide holds a 60-word paragraph about Q3 sales growth. Which revision best applies the rule that slides support rather than repeat the speaker?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Keep the full paragraph on the slide and read it slowly, so that the audience gets every detail"
+        },
+        {
+          "id": "b",
+          "label": "Show \"Sales grew 12% in Q3\" with one simple chart, and say the detail aloud"
+        },
+        {
+          "id": "c",
+          "label": "Keep the paragraph but bold the main numbers, so the audience can spot the key figures in it"
+        },
+        {
+          "id": "d",
+          "label": "Shrink the font so the paragraph fits, then turn each sentence of it into a bullet point"
+        }
+      ],
+      "explanation": "A headline and one visual with spoken detail lets the slide support the talk.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "advanced_beginner"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "public-speaking--cmp-c3-sc3",
+      "bloom": "C3",
+      "prompt": "Your hands shake before a talk begins and your breathing is shallow. You have two minutes. Which action best applies a nerve-management technique?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Drink a large coffee so you feel more alert and energetic when you begin speaking"
+        },
+        {
+          "id": "b",
+          "label": "Breathe slowly with a longer exhale, then plant your feet and open with your first line"
+        },
+        {
+          "id": "c",
+          "label": "Tell yourself firmly to stop being nervous, since suppressing the feeling makes the shaking fade"
+        },
+        {
+          "id": "d",
+          "label": "Reread all your notes quickly to make sure you have not forgotten anything in the talk"
+        }
+      ],
+      "explanation": "Slow exhale breathing lowers arousal and a rehearsed opening gives a stable start.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "b"
+    },
+    {
+      "id": "public-speaking--cmp-c4-sc2",
+      "bloom": "C4",
+      "prompt": "A speaker's delivery of a rehearsed talk sounds flat. Recording shows steady pace, same pitch, and no pauses, while the content is strong. Which is the most likely cause?",
+      "options": [
+        {
+          "id": "a",
+          "label": "The speaker is reciting memorised wording instead of thinking through the ideas"
+        },
+        {
+          "id": "b",
+          "label": "The speaker is gesturing so much that attention is split and the voice stays level"
+        },
+        {
+          "id": "c",
+          "label": "The content is too complex, so the speaker has no spare attention for vocal variety"
+        },
+        {
+          "id": "d",
+          "label": "The speaker has chosen the wrong topic for the audience's interests and feels disengaged"
+        }
+      ],
+      "explanation": "Monotone, steady pacing with no pauses typically signals recitation of memorised text.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "public-speaking--cmp-c4-sc4",
+      "bloom": "C4",
+      "prompt": "The same 10-minute talk got strong engagement with a local team in person but weak engagement on a video call with the same people. Which comparison best explains the difference?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Online, the talk ran shorter than planned, so people had too little time to engage with it"
+        },
+        {
+          "id": "b",
+          "label": "Online listeners process spoken content less well, so the talk needed simpler wording and less detail"
+        },
+        {
+          "id": "c",
+          "label": "In person, the room's energy carries the talk, so the online version only needed more slides"
+        },
+        {
+          "id": "d",
+          "label": "Online, the speaker lost audience cues and visual variety, so pacing and interaction did not adapt"
+        }
+      ],
+      "explanation": "Virtual settings reduce feedback cues, so the speaker must adapt pacing and add interaction.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "competent"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "public-speaking--prf-c4-sc2",
+      "bloom": "C4",
+      "prompt": "A presenter walks through a dense results table at a fast, even pace with no pauses. Listeners later say they 'followed the words but lost the numbers.' Which diagnosis fits best?",
+      "options": [
+        {
+          "id": "a",
+          "label": "The table font was too small to read from the back, so the audience could not take in the figures and enlarging it would have fixed the problem"
+        },
+        {
+          "id": "b",
+          "label": "Her pronunciation of the figures was unclear, so listeners misheard several digits and could not hold on to the values she read aloud to them"
+        },
+        {
+          "id": "c",
+          "label": "Her hand gestures competed with the figures for attention, so listeners watched her hands instead of listening to the values she was reading"
+        },
+        {
+          "id": "d",
+          "label": "Dense new data needs processing time, and without pauses or signposting listeners could not link the figures to their meaning"
+        }
+      ],
+      "explanation": "Listeners could hear the words but had no time or cues to process the data; pacing and signposting address this.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": true,
+        "stage": "proficient"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "public-speaking--prf-c5-sc5",
+      "bloom": "C5",
+      "prompt": "In Q&A a hostile attendee asks a question built on a false premise. Criteria: keep your credibility, avoid escalation, serve the rest of the audience. Which response is best?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Correct the premise with one fact, address the underlying concern, and offer to continue afterwards"
+        },
+        {
+          "id": "b",
+          "label": "Ignore the premise and answer a different, easier question so the exchange ends without any conflict"
+        },
+        {
+          "id": "c",
+          "label": "Tell the questioner they are wrong and ask them to move on, so the remaining audience stays on schedule"
+        },
+        {
+          "id": "d",
+          "label": "Accept the premise as stated to keep the peace, then adjust the rest of your talk to fit that premise"
+        }
+      ],
+      "explanation": "A brief factual correction plus answering the real concern protects credibility and avoids escalation.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "proficient"
+      },
+      "type": "single_choice",
+      "answer": "a"
+    },
+    {
+      "id": "public-speaking--prf-c5-sn1",
+      "bloom": "C5",
+      "prompt": "Midway through a 10-minute pitch, the organiser signals that you have 3 minutes left, but 5 minutes of content remain, including your ask. Criteria: the ask must land, the audience keeps clarity, your credibility stays intact. What is the best move?",
+      "options": [
+        {
+          "id": "a",
+          "label": "Drop the ask and finish the details, since the audience can request the recommendation later in writing"
+        },
+        {
+          "id": "b",
+          "label": "Skip the least critical points, mention the cut briefly, and give the ask and a clear close in time"
+        },
+        {
+          "id": "c",
+          "label": "Speed up and cover everything, since skipping any content would make you look unprepared to the audience"
+        },
+        {
+          "id": "d",
+          "label": "Stop and ask the organiser for extra time, since the ask needs the full five minutes to be understood"
+        }
+      ],
+      "explanation": "When time runs short, cutting the least important points lets you still make your ask and close clearly, so the audience leaves knowing what you need.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "proficient",
+        "explanationOverride": true
+      },
+      "type": "scenario",
+      "answer": "b"
+    },
+    {
+      "id": "public-speaking--exp-c5-mc1",
+      "bloom": "C5",
+      "prompt": "A speaker plans to answer every Q&A question with total confidence and never say 'I don't know'. Which are well-founded critiques of this plan? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "Bridging away from questions to prepared points can read as evasive and erode trust with the questioner."
+        },
+        {
+          "id": "b",
+          "label": "Confidence comes entirely from vocal volume, so the real weakness is that the speaker has not practised speaking louder."
+        },
+        {
+          "id": "c",
+          "label": "An invented answer that is later checked costs more credibility than a brief honest limit would have."
+        },
+        {
+          "id": "d",
+          "label": "Audiences always punish any admission of ignorance, so the plan is correct but should be applied more forcefully."
+        }
+      ],
+      "explanation": "Fabrication and evasion both damage trust; a bounded honest answer with follow-up is stronger.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "a",
+        "c"
+      ]
+    },
+    {
+      "id": "public-speaking--exp-c6-mc1",
+      "bloom": "C6",
+      "prompt": "You will give a 15-minute talk, with no interpreter, to an audience where half are non-native English speakers. Which design elements meet this constraint? Select all that apply.",
+      "options": [
+        {
+          "id": "a",
+          "label": "Read the slide text aloud quickly so listeners hear and see the same words, which saves explanation time."
+        },
+        {
+          "id": "b",
+          "label": "Pack the slides with jargon, so every listener recognises the field's vocabulary and sees your expertise."
+        },
+        {
+          "id": "c",
+          "label": "Pair each key term with a simple visual and repeat it consistently rather than using synonyms."
+        },
+        {
+          "id": "d",
+          "label": "Use short sentences at a slightly slower pace and avoid idioms."
+        }
+      ],
+      "explanation": "Plain structure, pacing and consistent terms with visuals aid comprehension.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "multi_choice",
+      "answer": [
+        "c",
+        "d"
+      ]
+    },
+    {
+      "id": "public-speaking--exp-c6-sc4",
+      "bloom": "C6",
+      "prompt": "A proposed design for a persuasive talk to a sceptical board has a hook, three claims with evidence, a story and a closing ask. The goal is board approval. What is the design most clearly missing?",
+      "options": [
+        {
+          "id": "a",
+          "label": "A second story, because boards approve on emotion, so more narrative would make up for any weakness in the evidence."
+        },
+        {
+          "id": "b",
+          "label": "A longer agenda slide, because a detailed roadmap is what makes a board trust the speaker's preparation."
+        },
+        {
+          "id": "c",
+          "label": "A bigger opening statistic, since the shock value of the first thirty seconds is what decides board approval."
+        },
+        {
+          "id": "d",
+          "label": "A plan to address the board's most likely objection, so the case does not end up depending on silence about it."
+        }
+      ],
+      "explanation": "A sceptical board's likely objection must be handled openly or the case stays vulnerable.",
+      "reviewed": true,
+      "review": {
+        "verdict": null,
+        "applied": false,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "single_choice",
+      "answer": "d"
+    },
+    {
+      "id": "public-speaking--exp-c6-sn1",
+      "bloom": "C6",
+      "prompt": "You will give the same talk twice: once to 12 people in a meeting room, then to 400 in an auditorium with a stage and a screen. Design the adaptation that best fits both settings.",
+      "options": [
+        {
+          "id": "a",
+          "label": "Keep the room version conversational and interactive; in the auditorium use larger gestures, slower pacing, fewer bolder slides and rehearsed questions."
+        },
+        {
+          "id": "b",
+          "label": "Keep the room version formal and scripted; in the auditorium move quickly among the audience with a handheld microphone and hold open discussion throughout."
+        },
+        {
+          "id": "c",
+          "label": "Use identical slides, gestures and pacing for both settings, because a single well-practised version keeps the delivery consistent and reliable anywhere."
+        },
+        {
+          "id": "d",
+          "label": "Keep the room version brief; in the auditorium put detailed text on dense slides and read them aloud, because large audiences retain written information better."
+        }
+      ],
+      "explanation": "Scale changes the delivery: intimacy and interaction in a small room, projection and simplicity in a large one.",
+      "reviewed": true,
+      "review": {
+        "verdict": "revise",
+        "applied": true,
+        "flagged": false,
+        "stage": "expert"
+      },
+      "type": "scenario",
+      "answer": "a"
+    }
+  ]
+}
