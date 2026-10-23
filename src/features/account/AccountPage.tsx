@@ -1,7 +1,8 @@
 import { LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { useSignOut, type SignInLocationState } from '@/auth/queries';
+import type { SignInLocationState } from '@/auth/queries';
+import { useSignOut } from '@/auth/signOut';
 import { hasRole, useSession } from '@/auth/session';
 import CheckoutReturnNotice from '@/features/billing/components/CheckoutReturnNotice';
 import PlanCard from '@/features/billing/components/PlanCard';
