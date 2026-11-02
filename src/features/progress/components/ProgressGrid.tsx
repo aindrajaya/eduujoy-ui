@@ -1,5 +1,6 @@
 import type { BloomLevel, DreyfusStage, Position } from '@/api/types';
 import { BLOOM_LABEL, STAGE_LABEL } from '@/lib/levels';
+import SketchGridCell from '@/ui/sketch/SketchGridCell';
 
 // Highest stage on top, so moving up the grid reads as progress.
 const STAGES: DreyfusStage[] = ['expert', 'proficient', 'competent', 'advanced_beginner', 'novice'];
@@ -59,18 +60,19 @@ export default function ProgressGrid({ topicName, current, history }: ProgressGr
                 return (
                   // Now: hatched in the stage colour (no glyph: hatching never sits under text). Earlier:
                   // a dashed outline. Each says what it marks to screen readers (README "Accessibility").
-                  <td
+                  <SketchGridCell
                     key={bloom}
-                    data-stage={stage}
-                    data-here={here || undefined}
-                    className={`sk-grid-cell text-center align-middle ${earlier.length ? 'border-dashed border-ink' : ''}`}
+                    stage={stage}
+                    bloom={bloom}
+                    here={here}
+                    className={`text-center align-middle ${earlier.length ? 'border-dashed border-ink' : ''}`}
                   >
                     {here ? (
                       <span className="sr-only">You are here</span>
                     ) : earlier.length ? (
                       <span className="sr-only">Earlier: {earlier.map((e) => e.label).join(', ')}</span>
                     ) : null}
-                  </td>
+                  </SketchGridCell>
                 );
               })}
             </tr>
