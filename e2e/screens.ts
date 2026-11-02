@@ -25,7 +25,7 @@ import { json, mockAuth, problem } from './api';
 
 export interface Screen {
   name: string;
-  /** U12a parts whose review includes this screen. */
+  /** U12a parts whose review includes this screen; 5 is U12b (rough.js: the grid and empty states). */
   parts: readonly number[];
   url: string;
   setup: (page: Page) => Promise<void>;
@@ -154,7 +154,7 @@ export const SCREENS: readonly Screen[] = [
   },
   {
     name: 'today-error',
-    parts: [1, 2],
+    parts: [1, 2, 5],
     url: '/today',
     setup: async (page) => {
       await mockAuth(page, { signedIn: true });
@@ -175,7 +175,7 @@ export const SCREENS: readonly Screen[] = [
   },
   {
     name: 'paths-empty',
-    parts: [2],
+    parts: [2, 5],
     url: '/paths',
     setup: async (page) => {
       await mockAuth(page, { signedIn: true });
@@ -197,7 +197,7 @@ export const SCREENS: readonly Screen[] = [
   },
   {
     name: 'today-empty',
-    parts: [2],
+    parts: [2, 5],
     url: '/today',
     setup: async (page) => {
       await mockAuth(page, { signedIn: true });
@@ -371,10 +371,10 @@ export const SCREENS: readonly Screen[] = [
       ] as unknown as MockSseEvent[]),
     ready: h1('Not passed yet'),
   },
-  { name: 'progress', parts: [1, 4], url: '/progress', setup: signedInWithPath, ready: h1(/progress/i) },
+  { name: 'progress', parts: [1, 4, 5], url: '/progress', setup: signedInWithPath, ready: h1(/progress/i) },
   {
     name: 'progress-empty',
-    parts: [4],
+    parts: [4, 5],
     url: '/progress',
     // Until A11: the API has no progress endpoints and answers 404.
     setup: async (page) => {
