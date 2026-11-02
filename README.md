@@ -76,10 +76,10 @@ How dependencies and CI are kept from running code we did not review:
   scripts stay off (`esbuild`, `msw`); pnpm runs no dependency lifecycle scripts unless allowed.
 - **Pinned package manager.** `packageManager: pnpm@12.11.2` in `package.json`; CI's
   `pnpm/action-setup` reads the version from there.
-- **Release age (pending).** `minimumReleaseAge: 10080` (7 days) refuses package versions newer
-  than a week; pnpm 12.11.2 supports it. It is not switched on yet: `vitest` and
-  `@vitest/coverage-v8` 4.1.12 and `typescript-eslint` 8.72.0 are pinned at versions younger than
-  7 days, so the frozen install would fail. See `../docs/status/ui.md`.
+- **Release age.** `minimumReleaseAge: 10080` in `pnpm-workspace.yaml` refuses package versions
+  published less than 7 days ago, on install and on every lockfile change (pnpm 12.11.2). A
+  version you need sooner fails with `ERR_PNPM_NO_MATURE_MATCHING_VERSION`: wait, or pin an older
+  one. There are no excludes.
 - **`pnpm audit`.** Runs in the security-scan workflow (`--audit-level high`) against the
   lockfile; nothing is installed.
 - **security-scan.** `scripts/security-scan.mjs` statically scans tracked files for hidden or
