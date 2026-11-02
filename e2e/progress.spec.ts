@@ -86,3 +86,44 @@ test.describe('progress, realtime and checkout (U10)', () => {
     expect(product).toBe('credit_pack');
   });
 });
+
+test.describe('rough.js (U12b)', () => {
+  /** The "now" cell's SVG markup once rough.js has drawn it. */
+  async function drawnCell(page: Page) {
+    const cell = page.locator('td[data-here]');
+    await expect(cell).toHaveAttribute('data-rough', 'true');
+    await expect(cell.locator('svg.sk-rough path').first()).toBeAttached();
+    return cell.locator('svg.sk-rough').innerHTML();
+  }
+
+  test('the "now" cell is hatched by rough.js after the first paint, the same on every load', async ({ page }) => {
+    const roughChunks: string[] = [];
+    page.on('request', (request) => {
+      if (/\/assets\/draw-[\w-]+\.js$/.test(request.url())) roughChunks.push(request.url());
+    });
+    await mockProgressApi(page, { advanced: false });
+    await mockRealtime(page);
+    await page.goto('/progress');
+    const first = await drawnCell(page);
+    expect(roughChunks).toHaveLength(1);
+    // The SVG is decoration only: hidden from assistive tech, under the cell's own label.
+    await expect(page.locator('td[data-here] svg.sk-rough')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('td[data-here]').getByText('You are here')).toHaveCount(1);
+
+    await page.reload();
+    expect(await drawnCell(page)).toBe(first);
+  });
+
+  test('/signin never loads rough.js', async ({ page }) => {
+    const roughChunks: string[] = [];
+    page.on('request', (request) => {
+      if (/\/assets\/(draw|SketchGridCell)-[\w-]+\.js$/.test(request.url())) roughChunks.push(request.url());
+    });
+    await mockAuth(page, { signedIn: false });
+    await page.goto('/signin');
+    await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+    // Past the first-paint delay, when a rough layer on the page would have loaded its chunk.
+    await page.waitForTimeout(2_000);
+    expect(roughChunks).toEqual([]);
+  });
+});

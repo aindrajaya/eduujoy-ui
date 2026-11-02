@@ -1,5 +1,6 @@
 import type { BloomLevel, DreyfusStage } from '@/api/types';
 import { BLOOM_LABEL, STAGE_LABEL } from '@/lib/levels';
+import SketchGridCell from '@/ui/sketch/SketchGridCell';
 import { BLOOMS } from '../bank';
 
 // Highest stage on top, so moving up the grid reads as progress.
@@ -7,7 +8,8 @@ const STAGES: DreyfusStage[] = ['expert', 'proficient', 'competent', 'advanced_b
 
 /**
  * The Dreyfus × Bloom grid with the visitor's cell hatched and labelled (PRD-UI §7b). A real table,
- * so screen readers move by stage (row) and level (column). CSS hatching until rough.js (U12b).
+ * so screen readers move by stage (row) and level (column). The cell is hatched with rough.js
+ * after the first paint (U12b), on top of CSS hatching until then.
  */
 export default function DemoGrid({ stage, bloom }: { stage: DreyfusStage; bloom: BloomLevel }) {
   return (
@@ -38,9 +40,9 @@ export default function DemoGrid({ stage, bloom }: { stage: DreyfusStage; bloom:
               {BLOOMS.map((b) => {
                 const here = s === stage && b === bloom;
                 return (
-                  <td key={b} className="sk-grid-cell" data-stage={s} data-here={here || undefined}>
+                  <SketchGridCell key={b} stage={s} bloom={b} here={here}>
                     {here && <span className="sr-only">You are here</span>}
-                  </td>
+                  </SketchGridCell>
                 );
               })}
             </tr>
