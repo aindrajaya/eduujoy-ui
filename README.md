@@ -1,19 +1,23 @@
 # Eduujoy UI
 
+[![CI](https://github.com/aindrajaya/eduujoy-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/aindrajaya/eduujoy-ui/actions/workflows/ci.yml)
+
 React single-page app for Eduujoy, built with Vite and deployed to Vercel at
 `https://eduujoy.aindrajaya.my.id`. It renders screens and talks only to the Eduujoy API
 (`https://api.eduujoy.aindrajaya.my.id`); it holds no business rules and no secrets.
 
-- Product spec: `../docs/PRD-MASTER.md`
-- UI spec: `docs/PRD-UI.md` (stack, routes, budgets, slice plan)
-- API contract: `docs/openapi.json`
-- Slice status: `../docs/status/ui.md`
+- Public demo, no account needed: <https://eduujoy.aindrajaya.my.id/demo>
+- API repository: [aindrajaya/eduujoy-api](https://github.com/aindrajaya/eduujoy-api)
+- UI spec: [`docs/PRD-UI.md`](docs/PRD-UI.md) (stack, routes, budgets, slice plan)
+- API contract: [`docs/openapi.json`](docs/openapi.json), copied from the API repository; the
+  typed client in `src/api` is generated from it (`pnpm api:types`)
 
 ## Stack
 
-Vite, React 19, TypeScript (strict), React Router data router with lazy routes,
-Tailwind CSS 4, Vitest with Testing Library and axe-core. See PRD-UI §2 for the rest
-(TanStack Query, Axios, MSW and Playwright arrive in later slices).
+Vite, React 19, TypeScript (strict), React Router data router with lazy routes, TanStack Query,
+React Hook Form with Zod, Tailwind CSS 4, and Socket.IO plus SSE for live updates. Tests use
+Vitest with Testing Library and axe-core, MSW mocks typed from the API contract, and Playwright.
+See PRD-UI §2 for the reasoning.
 
 ## Getting started
 
@@ -50,15 +54,21 @@ Design tokens (colour roles, radii, motion; light and dark) live in `src/ui/toke
 ```text
 src/
   main.tsx  router.tsx      # entry and lazy route table
-  app/                      # root and tab layouts, not-found
-  features/<area>/          # components/, page components, types
-  ui/                       # shared presentational components
+  api/                      # typed client, endpoints, error mapping, MSW mocks
+  app/                      # root, protected and tab layouts, not-found, route errors
+  auth/                     # sign-in and sign-up screens
+  features/<area>/          # one folder per product area (paths, diagnostic, progress, billing, ...)
+  realtime/                 # SSE job streams and the Socket.IO bridge
+  ui/                       # shared presentational components and design tokens
   lib/                      # framework-free helpers
-  fixtures/                 # static demo data (until the API module lands)
-  test/                     # test setup, axe helper, route renderer
+  test/                     # test setup, axe helper, providers
+e2e/                        # Playwright specs
 ```
 
 ## Security
+
+See [`SECURITY.md`](SECURITY.md) for how to report a vulnerability and for the October 2026
+supply-chain incident note, including why this repository's commit hashes changed.
 
 - Every `VITE_*` variable is public once bundled. Never add secrets.
 - No tokens or session data in browser storage; auth state comes from `/v1/auth/me`.
@@ -92,3 +102,8 @@ How dependencies and CI are kept from running code we did not review:
   security-scan, but each has rules the other lacks.
 - **SHA-pinned actions.** Every third-party action in `.github/workflows/` is pinned to a full
   commit SHA, with the version in a comment.
+
+## License
+
+All rights reserved. The source is published for viewing and evaluation only; see
+[`LICENSE`](LICENSE). Third-party notices (fonts, rough.js) are in [`licenses/`](licenses).
