@@ -30,3 +30,6 @@ yarn.lock
 *.log
 .vercel
 .claude/settings.local.json
+
+# editor settings (local only; VS Code task files can autorun on folder open)
+.vscode/
